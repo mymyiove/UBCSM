@@ -107,7 +107,7 @@
         // 데이터를 CSV 파일로부터 직접 fetch하고 파싱하는 함수
         async function loadCourseData() {
             return new Promise((resolve, reject) => {
-                const csvFilePath = '/sem-udemy-business-course-list/courses_web.csv';
+                const csvFilePath = '/UBCSM/courses_web.csv';
 
                 Papa.parse(csvFilePath, {
                     download: true,

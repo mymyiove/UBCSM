@@ -1,22 +1,29 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Udemy Business 인터랙티브 강의 목록</title>
-<!-- CSV 파싱 라이브러리 추가 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Udemy Business 인터랙티브 강의 목록</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        /* [개선] Google Noto Sans KR 폰트 직접 임포트 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+        /* [개선] 전체적인 디자인 시스템(색상, 폰트, 그림자 등) 재정의 */
         :root {
-            --bg-color: #1a1a1a;
-            --surface-color: #2c2c2c;
-            --primary-color: #a972ff;
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #0d6efd; /* Udemy의 파란색 계열로 변경하여 브랜드 통일성 확보 */
+            --primary-hover-color: #0b5ed7;
             --text-color: #e0e0e0;
-            --text-muted-color: #8c8c8c;
-            --border-color: #444;
+            --text-muted-color: #a0a0a0;
+            --border-color: #3a3a3a;
+            --border-radius-sm: 6px;
+            --border-radius-md: 10px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
         }
+
         body {
             font-family: 'Noto Sans KR', sans-serif;
             background-color: var(--bg-color);
@@ -24,7 +31,11 @@
             margin: 0;
             padding: 2rem;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+
+        /* [개선] 초기 화면 UI/UX 개선 */
         #initial-screen {
             display: flex;
             flex-direction: column;
@@ -33,307 +44,538 @@
             height: calc(100vh - 4rem);
             text-align: center;
             transition: opacity 0.5s ease-out;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        h1 { font-size: 2.5rem; color: #fff; }
-        .input-group { display: flex; gap: 0.5rem; background-color: var(--surface-color); padding: 0.5rem; border-radius: 8px; }
-        input { background: transparent; border: none; color: var(--text-color); font-size: 1rem; padding: 0.75rem; width: 300px; }
-        button { background-color: var(--primary-color); color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
-        button:hover { background-color: #b98cff; }
-        button:disabled { background-color: #555; cursor: not-allowed; }
-        #app-container { display: none; opacity: 0; transition: opacity 0.5s ease-in; }
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; background-color: var(--surface-color); padding: 1.5rem; border-radius: 12px; }
-        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
-        select, .search-box input { width: 100%; padding: 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color); font-size: 1rem; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        th, td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border-color); }
-        thead { background-color: #333; position: sticky; top: 0; z-index: 10; }
-        th { cursor: pointer; user-select: none; }
-        th .sort-indicator { display: inline-block; margin-left: 0.5rem; opacity: 0.5; }
-        tbody tr:hover { background-color: var(--surface-color); }
-        td a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+        #initial-screen h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        #initial-screen p {
+            font-size: 1.1rem;
+            color: var(--text-muted-color);
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            display: flex;
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius-md);
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            box-shadow: var(--shadow-md);
+        }
+        .input-group input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            padding: 0.75rem;
+            outline: none;
+        }
+        .input-group button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.75rem;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            font-size: 1rem;
+        }
+        .input-group button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .input-group button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* [개선] 메인 앱 컨테이너 레이아웃 및 디자인 개선 */
+        #app-container {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* [개선] 검색, 필터 등 컨트롤 영역 UI 개선 */
+        .controls-header {
+            background-color: var(--surface-color);
+            padding: 1.5rem 2rem;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 0.25rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .search-container:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+        }
+        .search-container input {
+            width: 100%;
+            padding: 0.75rem 0.5rem;
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            outline: none;
+        }
+        .filters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: center;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
+        .filter-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .actions { display: flex; align-items: flex-end; }
+        .actions button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted-color);
+            font-size: 1rem;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .actions button:hover { background-color: #333; color: var(--text-color); }
+        .results-summary {
+            margin-bottom: 1rem;
+            color: var(--text-muted-color);
+        }
+        .results-summary b {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* [개선] 테이블 디자인 및 가독성 향상 */
+        .table-container {
+            overflow-x: auto;
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius-md);
+            border: 1px solid var(--border-color);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+        th, td {
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        thead {
+            background-color: rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        th {
+            cursor: pointer;
+            user-select: none;
+            font-weight: 500;
+            color: var(--text-muted-color);
+        }
+        th .sort-indicator {
+            display: inline-block;
+            margin-left: 0.5rem;
+            opacity: 0.7;
+            font-size: 0.8em;
+        }
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        td a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        td a:hover { color: var(--primary-color); }
         .rating { font-weight: bold; color: #ffd700; }
-        .pagination { display: flex; justify-content: center; align-items:center; margin-top: 2rem; gap: 0.5rem; }
-        .pagination button { background-color: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
-        .pagination button:hover, .pagination button.active { background-color: var(--primary-color); color: #fff; }
-        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* [개선] 페이지네이션 UI 개선 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2.5rem;
+            gap: 0.5rem;
+            user-select: none;
+        }
+        .pagination button, .pagination span {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.6rem 1.1rem;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pagination button:hover, .pagination button.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: transparent;
+        }
+        .pagination span {
+            cursor: default;
+            background-color: transparent;
+        }
     </style>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/><link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet"/><script src="https://code.jquery.com/jquery-3.7.0.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script><script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script><script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script></head>
-<body><button class="btn btn-secondary position-fixed bottom-0 end-0 m-3" id="themeToggle">🌗 테마 전환</button>
+</head>
+<body>
+
 <div id="initial-screen">
-<h1>Udemy Business 강의 목록</h1>
-<p>시작하려면 귀사의 Udemy Business 주소를 입력해주세요.</p>
-<div class="input-group">
-<input id="company-address" placeholder="semacademy" type="text" value="semacademy"/>
-<button id="submit-address">강의 목록 확인</button>
+    <h1>Udemy Business 강의 목록</h1>
+    <p>시작하려면 귀사의 Udemy Business 주소를 입력해주세요.<br>(예: company-name.udemy.com의 경우 company-name 입력)</p>
+    <div class="input-group">
+        <input id="company-address" placeholder="회사 주소 (예: woongjin)" type="text" />
+        <button id="submit-address">강의 목록 확인</button>
+    </div>
 </div>
-</div>
+
 <div id="app-container">
-<!-- App container HTML will be generated by JavaScript -->
-</div>
+    </div>
+
 <script>
-        // --- 전역 변수 및 상태 ---
-        let companyUrl = '';
-        let filteredCourses = [];
-        let currentPage = 1;
-        const rowsPerPage = 15;
-        let sortColumn = 'title';
-        let sortDirection = 'asc';
-        let originalData = []; // 원본 데이터를 저장할 배열
+    // --- 전역 변수 및 상태 (핵심 로직 변경 없음) ---
+    let companyUrl = '';
+    let filteredCourses = [];
+    let currentPage = 1;
+    const rowsPerPage = 15;
+    let sortColumn = 'title';
+    let sortDirection = 'asc';
+    let originalData = [];
 
-        // --- DOM 요소 ---
-        const initialScreen = document.getElementById('initial-screen');
-        const appContainer = document.getElementById('app-container');
-        const submitBtn = document.getElementById('submit-address');
-        const companyAddressInput = document.getElementById('company-address');
-        
-        // --- 이벤트 리스너 ---
-        submitBtn.addEventListener('click', initializeApp);
+    // --- DOM 요소 ---
+    const initialScreen = document.getElementById('initial-screen');
+    const appContainer = document.getElementById('app-container');
+    const submitBtn = document.getElementById('submit-address');
+    const companyAddressInput = document.getElementById('company-address');
+    
+    // --- 이벤트 리스너 ---
+    submitBtn.addEventListener('click', initializeApp);
+    companyAddressInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') initializeApp();
+    });
 
-        // [!!수정!!] 검색할 열을 추가합니다.
-        const columnMapping = {
-            '강의 ID / 코스 ID': 'id',
-            '강의 제목 / 코스 제목': 'title',
-            '강사 이름': 'instructor',
-            '강의 난이도': 'difficulty',
-            '카테고리 목록': 'category',
-            '강의 주제 목록': 'topic',
-            '평점': 'rating',
-            '강의 헤드라인 / 소개 문구': 'headline',
-            '학습 목표 / 배울 내용': 'objectives'
-        };
+    const columnMapping = {
+        '강의 ID / 코스 ID': 'id',
+        '강의 제목 / 코스 제목': 'title',
+        '강사 이름': 'instructor',
+        '강의 난이도': 'difficulty',
+        '카테고리 목록': 'category',
+        '강의 주제 목록': 'topic',
+        '평점': 'rating',
+        '강의 헤드라인 / 소개 문구': 'headline',
+        '학습 목표 / 배울 내용': 'objectives'
+    };
 
-        // 데이터를 CSV 파일로부터 직접 fetch하고 파싱하는 함수
-        async function loadCourseData() {
-            return new Promise((resolve, reject) => {
-                const csvFilePath = '/UBCSM/courses_web.csv';
+    // --- 데이터 로딩 함수 (핵심 로직 변경 없음) ---
+    async function loadCourseData() {
+        return new Promise((resolve, reject) => {
+            const csvFilePath = 'courses_web.csv'; // 상대 경로로 수정
 
-                Papa.parse(csvFilePath, {
-                    download: true,
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: (results) => {
-                        if (results.errors.length > 0) {
-                            console.error("CSV 파싱 에러:", results.errors);
-                            alert("CSV 파일을 분석하는 중 오류가 발생했습니다.");
-                            return reject(new Error("CSV 파싱 오류"));
-                        }
-                        
-                        const processedData = results.data.map(row => {
-                            const newRow = {};
-                            for (const key in columnMapping) {
-                                if (row[key] !== undefined) {
-                                    newRow[columnMapping[key]] = row[key];
-                                }
-                            }
-                            newRow.rating = parseFloat(newRow.rating) || 0;
-                            return newRow;
-                        }).filter(row => row.id && row.title);
-                        
-                        resolve(processedData);
-                    },
-                    error: (error) => {
-                        console.error("CSV 파일 로드 에러:", error);
-                        alert("강의 데이터(CSV)를 불러오는 데 실패했습니다. 파일 이름과 경로를 확인해주세요.");
-                        reject(error);
+            Papa.parse(csvFilePath, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    if (results.errors.length > 0) {
+                        console.error("CSV 파싱 에러:", results.errors);
+                        alert("CSV 파일을 분석하는 중 오류가 발생했습니다.");
+                        return reject(new Error("CSV 파싱 오류"));
                     }
-                });
+                    
+                    const processedData = results.data.map(row => {
+                        const newRow = {};
+                        for (const key in columnMapping) {
+                            if (row[key] !== undefined) {
+                                newRow[columnMapping[key]] = row[key];
+                            }
+                        }
+                        newRow.rating = parseFloat(newRow.rating) || 0;
+                        return newRow;
+                    }).filter(row => row.id && row.title);
+                    
+                    resolve(processedData);
+                },
+                error: (error) => {
+                    console.error("CSV 파일 로드 에러:", error);
+                    alert("강의 데이터(CSV)를 불러오는 데 실패했습니다. 파일 이름과 경로를 확인해주세요.");
+                    reject(error);
+                }
             });
+        });
+    }
+
+    // --- 앱 초기화 함수 (핵심 로직 변경 없음, UI 생성 코드만 수정) ---
+    async function initializeApp() {
+        const address = companyAddressInput.value.trim();
+        if (!address) {
+            alert('회사 주소를 입력해주세요.');
+            return;
+        }
+        companyUrl = `https://${address}.udemy.com/course/`;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '데이터 로딩 중...';
+        
+        try {
+            originalData = await loadCourseData();
+        } catch (error) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '강의 목록 확인';
+            return;
         }
 
-        async function initializeApp() {
-            const address = companyAddressInput.value.trim();
-            if (!address) {
-                alert('회사 주소를 입력해주세요.');
-                return;
-            }
-            companyUrl = `https://${address}.udemy.com/course/`;
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = '데이터 로딩 중...';
-            
-            try {
-                originalData = await loadCourseData();
-            } catch (error) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '강의 목록 확인';
-                return;
-            }
-
-            if (originalData.length === 0) {
-                 alert("로드된 강의 데이터가 없습니다. CSV 파일 내용을 확인해주세요.");
-                 submitBtn.disabled = false;
-                 submitBtn.textContent = '강의 목록 확인';
-                 return;
-            }
-            
-            initialScreen.style.opacity = '0';
-            setTimeout(() => {
-                initialScreen.style.display = 'none';
-                appContainer.innerHTML = `
-                    <div class="controls">
-                        <div class="search-box"><input type="text" id="search" placeholder="🔍 강의명, 강사명, 주제, 내용 등으로 검색..."></div>
-                        <div class="filters">
+        if (originalData.length === 0) {
+             alert("로드된 강의 데이터가 없습니다. CSV 파일 내용을 확인해주세요.");
+             submitBtn.disabled = false;
+             submitBtn.innerHTML = '강의 목록 확인';
+             return;
+        }
+        
+        initialScreen.style.opacity = '0';
+        setTimeout(() => {
+            initialScreen.style.display = 'none';
+            // [개선] 새로운 UI 구조를 생성하는 HTML
+            appContainer.innerHTML = `
+                <div class="controls-header">
+                    <div class="search-container">
+                        <span>🔍</span>
+                        <input type="text" id="search" placeholder="강의명, 강사, 주제, 학습 내용 등 자유롭게 검색하세요...">
+                    </div>
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label for="category-filter">카테고리</label>
                             <select id="category-filter"><option value="">모든 카테고리</option></select>
-                            <select id="difficulty-filter"><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="difficulty-filter">난이도</label>
+                            <select id="difficulty-filter">
+                                <option value="">모든 난이도</option>
+                                <option>Beginner</option>
+                                <option>Intermediate</option>
+                                <option>Expert</option>
+                                <option>All Levels</option>
+                            </select>
+                        </div>
+                        <div class="actions">
+                            <button id="reset-filters">🔄️ 초기화</button>
                         </div>
                     </div>
-                    <div class="table-container">
-                        <table>
-                            <thead><tr>
-                                <th data-sort="title">강의명 <span class="sort-indicator"></span></th><th data-sort="instructor">강사명 <span class="sort-indicator"></span></th>
-                                <th data-sort="category">카테고리 <span class="sort-indicator"></span></th><th data-sort="topic">주제 <span class="sort-indicator"></span></th>
-                                <th data-sort="difficulty">난이도 <span class="sort-indicator"></span></th><th data-sort="rating">평점 <span class="sort-indicator"></span></th>
-                            </tr></thead>
-                            <tbody id="course-table-body"></tbody>
-                        </table>
-                    </div>
-                    <div class="pagination" id="pagination"></div>`;
-                appContainer.style.display = 'block';
-                setTimeout(() => appContainer.style.opacity = '1', 50);
+                </div>
 
-                document.getElementById('search').addEventListener('input', handleFilters);
-                document.getElementById('category-filter').addEventListener('change', handleFilters);
-                document.getElementById('difficulty-filter').addEventListener('change', handleFilters);
-                document.querySelector('thead').addEventListener('click', (e) => {
-                    const header = e.target.closest('th');
-                    if (header && header.dataset.sort) handleSort(header.dataset.sort);
-                });
+                <div class="results-summary" id="results-summary"></div>
 
-                populateCategoryFilter();
-                handleFilters();
-            }, 500);
-        }
-        
-        function populateCategoryFilter() {
-            const categoryFilterEl = document.getElementById('category-filter');
-            const categories = new Set();
-            originalData.forEach(course => {
-                if (course.category) {
-                    course.category.split(',').forEach(cat => categories.add(cat.trim()));
-                }
-            });
+                <div class="table-container">
+                    <table>
+                        <thead><tr>
+                            <th data-sort="title">강의명 <span class="sort-indicator"></span></th>
+                            <th data-sort="instructor">강사명 <span class="sort-indicator"></span></th>
+                            <th data-sort="category">카테고리 <span class="sort-indicator"></span></th>
+                            <th data-sort="topic">주제 <span class="sort-indicator"></span></th>
+                            <th data-sort="difficulty">난이도 <span class="sort-indicator"></span></th>
+                            <th data-sort="rating">평점 <span class="sort-indicator"></span></th>
+                        </tr></thead>
+                        <tbody id="course-table-body"></tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="pagination"></div>`;
             
-            [...categories].sort().forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                option.textContent = cat;
-                categoryFilterEl.appendChild(option);
-            });
-        }
+            appContainer.style.display = 'block';
+            setTimeout(() => appContainer.style.opacity = '1', 50);
 
-        function renderTable() {
-            const tableBody = document.getElementById('course-table-body');
-            const searchTerm = document.getElementById('search').value.toLowerCase();
-            const selectedCategory = document.getElementById('category-filter').value;
-            const selectedDifficulty = document.getElementById('difficulty-filter').value;
-
-            filteredCourses = originalData.filter(course => {
-                // [!!수정!!] 검색 범위를 강의 소개와 배울 내용까지 확장합니다.
-                const searchCorpus = `
-                    ${course.title || ''} 
-                    ${course.instructor || ''} 
-                    ${course.topic || ''} 
-                    ${course.headline || ''} 
-                    ${course.objectives || ''}
-                `.toLowerCase();
-
-                const matchesSearch = searchTerm === '' || searchCorpus.includes(searchTerm);
-                const matchesCategory = selectedCategory === '' || (course.category && course.category.includes(selectedCategory));
-                const matchesDifficulty = selectedDifficulty === '' || course.difficulty === selectedDifficulty;
-                return matchesSearch && matchesCategory && matchesDifficulty;
+            // [개선] 이벤트 리스너에 초기화 버튼 추가
+            document.getElementById('search').addEventListener('input', handleFilters);
+            document.getElementById('category-filter').addEventListener('change', handleFilters);
+            document.getElementById('difficulty-filter').addEventListener('change', handleFilters);
+            document.getElementById('reset-filters').addEventListener('click', resetAllFilters);
+            document.querySelector('thead').addEventListener('click', (e) => {
+                const header = e.target.closest('th');
+                if (header && header.dataset.sort) handleSort(header.dataset.sort);
             });
 
-            filteredCourses.sort((a, b) => {
-                let valA = a[sortColumn] || '';
-                let valB = b[sortColumn] || '';
-                if (typeof valA === 'string') {
-                    valA = valA.toLowerCase();
-                    valB = valB.toLowerCase();
-                }
-                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
-            updateSortIndicators();
-            const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const paginatedCourses = filteredCourses.slice(start, end);
-            tableBody.innerHTML = paginatedCourses.map(course => `
-                <tr>
-                    <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">${course.title}</a></td>
-                    <td>${course.instructor || ''}</td>
-                    <td>${course.category || ''}</td>
-                    <td>${course.topic || ''}</td>
-                    <td>${course.difficulty || ''}</td>
-                    <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
-                </tr>`).join('');
-            renderPagination(totalPages);
-        }
+            populateCategoryFilter();
+            handleFilters();
+        }, 500);
+    }
+    
+    // [개선] 모든 필터를 초기화하는 함수
+    function resetAllFilters() {
+        document.getElementById('search').value = '';
+        document.getElementById('category-filter').value = '';
+        document.getElementById('difficulty-filter').value = '';
+        sortColumn = 'title';
+        sortDirection = 'asc';
+        currentPage = 1;
+        renderTable();
+    }
 
-        function handleFilters() { currentPage = 1; renderTable(); }
-        function handleSort(column) {
-            if (sortColumn === column) {
-                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                sortColumn = column;
-                sortDirection = 'asc';
+    // --- 카테고리 필터 생성 함수 (핵심 로직 변경 없음) ---
+    function populateCategoryFilter() {
+        const categoryFilterEl = document.getElementById('category-filter');
+        const categories = new Set();
+        originalData.forEach(course => {
+            if (course.category) {
+                course.category.split(',').forEach(cat => categories.add(cat.trim()));
             }
-            currentPage = 1;
-            renderTable();
-        }
-        function updateSortIndicators() {
-            document.querySelectorAll('th .sort-indicator').forEach(span => span.textContent = '');
-            const activeIndicator = document.querySelector(`th[data-sort="${sortColumn}"] .sort-indicator`);
-            if (activeIndicator) activeIndicator.textContent = sortDirection === 'asc' ? '▲' : '▼';
-        }
-        function renderPagination(totalPages) {
-            const paginationContainer = document.getElementById('pagination');
-            paginationContainer.innerHTML = '';
-            if (totalPages <= 1) return;
-            const prevButton = document.createElement('button');
-            prevButton.textContent = '이전';
-            prevButton.disabled = currentPage === 1;
-            prevButton.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
-            paginationContainer.appendChild(prevButton);
-            let pageNumbers = [];
-            if (totalPages <= 7) {
-                for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
-            } else {
-                pageNumbers = [1, 2];
-                if (currentPage > 4) pageNumbers.push('...');
-                for (let i = Math.max(3, currentPage - 1); i <= Math.min(totalPages - 2, currentPage + 1); i++) pageNumbers.push(i);
-                if (currentPage < totalPages - 3) pageNumbers.push('...');
-                pageNumbers.push(totalPages - 1, totalPages);
+        });
+        
+        [...categories].sort().forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            categoryFilterEl.appendChild(option);
+        });
+    }
+
+    // --- 테이블 렌더링 함수 (핵심 로직 변경 없음, 결과 요약 기능 추가) ---
+    function renderTable() {
+        const tableBody = document.getElementById('course-table-body');
+        const searchTerm = document.getElementById('search').value.toLowerCase();
+        const selectedCategory = document.getElementById('category-filter').value;
+        const selectedDifficulty = document.getElementById('difficulty-filter').value;
+
+        filteredCourses = originalData.filter(course => {
+            const searchCorpus = `
+                ${course.title || ''} 
+                ${course.instructor || ''} 
+                ${course.topic || ''} 
+                ${course.headline || ''} 
+                ${course.objectives || ''}
+            `.toLowerCase();
+
+            const matchesSearch = searchTerm === '' || searchCorpus.includes(searchTerm);
+            const matchesCategory = selectedCategory === '' || (course.category && course.category.includes(selectedCategory));
+            const matchesDifficulty = selectedDifficulty === '' || course.difficulty === selectedDifficulty;
+            return matchesSearch && matchesCategory && matchesDifficulty;
+        });
+
+        // [개선] 검색 결과 요약 업데이트
+        const summaryEl = document.getElementById('results-summary');
+        summaryEl.innerHTML = `총 <b>${originalData.length}</b>개의 강의 중 <b>${filteredCourses.length}</b>개의 결과를 찾았습니다.`;
+
+        filteredCourses.sort((a, b) => {
+            let valA = a[sortColumn] || '';
+            let valB = b[sortColumn] || '';
+            if (typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
             }
-            pageNumbers.forEach(num => {
-                if(num === '...') {
-                    const span = document.createElement('span');
-                    span.textContent = '...';
-                    span.style.padding = '0.5rem 1rem';
-                    paginationContainer.appendChild(span);
-                } else {
-                    const pageButton = document.createElement('button');
-                    pageButton.textContent = num;
-                    if (num === currentPage) pageButton.classList.add('active');
-                    pageButton.addEventListener('click', () => { currentPage = num; renderTable(); });
-                    paginationContainer.appendChild(pageButton);
-                }
-            });
-            const nextButton = document.createElement('button');
-            nextButton.textContent = '다음';
-            nextButton.disabled = currentPage === totalPages;
-            nextButton.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderTable(); } });
-            paginationContainer.appendChild(nextButton);
+            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+        updateSortIndicators();
+        const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedCourses = filteredCourses.slice(start, end);
+        tableBody.innerHTML = paginatedCourses.map(course => `
+            <tr>
+                <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.headline || course.title}">${course.title}</a></td>
+                <td>${course.instructor || ''}</td>
+                <td>${course.category || ''}</td>
+                <td>${course.topic || ''}</td>
+                <td>${course.difficulty || ''}</td>
+                <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
+            </tr>`).join('');
+        renderPagination(totalPages);
+    }
+
+    // --- 핸들러 및 기타 함수들 (핵심 로직 변경 없음) ---
+    function handleFilters() { currentPage = 1; renderTable(); }
+    function handleSort(column) {
+        if (sortColumn === column) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortColumn = column;
+            sortDirection = 'asc';
         }
-    </script>
-<script>
-    document.getElementById('themeToggle').addEventListener('click', function() {
-        document.body.classList.toggle('bg-dark');
-        document.body.classList.toggle('text-light');
-        const tables = document.querySelectorAll('table');
-        tables.forEach(table => table.classList.toggle('table-dark'));
-    });
-    </script></body>
+        currentPage = 1;
+        renderTable();
+    }
+    function updateSortIndicators() {
+        document.querySelectorAll('th .sort-indicator').forEach(span => span.textContent = '');
+        const activeIndicator = document.querySelector(`th[data-sort="${sortColumn}"] .sort-indicator`);
+        if (activeIndicator) activeIndicator.textContent = sortDirection === 'asc' ? '▲' : '▼';
+    }
+    
+    // --- 페이지네이션 렌더링 함수 (핵심 로직 변경 없음, UI 개선을 위한 소폭 수정) ---
+    function renderPagination(totalPages) {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = '';
+        if (totalPages <= 1) return;
+        const prevButton = document.createElement('button');
+        prevButton.textContent = '이전';
+        prevButton.disabled = currentPage === 1;
+        prevButton.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+        paginationContainer.appendChild(prevButton);
+        let pageNumbers = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+        } else {
+            pageNumbers = [1, 2];
+            if (currentPage > 4) pageNumbers.push('...');
+            for (let i = Math.max(3, currentPage - 1); i <= Math.min(totalPages - 2, currentPage + 1); i++) pageNumbers.push(i);
+            if (currentPage < totalPages - 3) pageNumbers.push('...');
+            pageNumbers.push(totalPages - 1, totalPages);
+        }
+        pageNumbers.forEach(num => {
+            if(num === '...') {
+                const span = document.createElement('span');
+                span.textContent = '...';
+                paginationContainer.appendChild(span);
+            } else {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = num;
+                if (num === currentPage) pageButton.classList.add('active');
+                pageButton.addEventListener('click', () => { currentPage = num; renderTable(); });
+                paginationContainer.appendChild(pageButton);
+            }
+        });
+        const nextButton = document.createElement('button');
+        nextButton.textContent = '다음';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderTable(); } });
+        paginationContainer.appendChild(nextButton);
+    }
+</script>
+</body>
 </html>

@@ -47,6 +47,10 @@
         }
         #initial-screen h1 { font-size: 2.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; white-space: nowrap; }
         #initial-screen p { font-size: 1.1rem; color: var(--text-muted-color); margin-bottom: 2rem; line-height: 1.8; }
+        .gate-info { text-align: left; background-color: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--border-radius-md); margin-bottom: 2rem; border: 1px solid var(--border-color); }
+        .gate-info h3 { margin-top: 0; color: var(--primary-color); }
+        .gate-info ul { padding-left: 20px; margin-bottom: 0; }
+
         .input-group {
             display: flex; background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             border-radius: var(--border-radius-md); padding: 0.5rem; border: 1px solid var(--border-color);
@@ -64,6 +68,52 @@
 
         #app-container { display: none; opacity: 0; transition: opacity 0.5s ease-in; max-width: 1600px; margin: 0 auto; }
 
+        /* [추가] 리스트 페이지 헤더 */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            animation: fadeInDown 0.5s ease;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .app-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .header-meta {
+            text-align: right;
+        }
+        #company-display {
+            background-color: var(--surface-color);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted-color);
+            display: inline-block;
+        }
+        #company-display span {
+            color: var(--text-color);
+            font-weight: bold;
+        }
+        #last-updated {
+            font-size: 0.85rem;
+            color: var(--text-muted-color);
+            display: block;
+            margin-top: 0.5rem;
+        }
+
         .controls-header {
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
@@ -77,12 +127,11 @@
         .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3); }
         .search-container input { width: 100%; padding: 0.75rem 0.5rem; background-color: transparent; border: none; color: var(--text-color); font-size: 1.1rem; outline: none; }
         
-        /* [개선] 필터 레이아웃 Flexbox로 변경 */
         .filters-container { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
         .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1 1 180px; min-width: 180px; }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select { width: 100%; padding: 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
-        .actions { display: flex; gap: 1rem; flex: 2 1 380px; }
+        .actions { display: flex; gap: 1rem; flex: 1 1 200px; min-width: 200px; }
         .actions button {
             width: 100%; padding: 0.75rem; background-color: transparent;
             border: 1px solid var(--border-color); color: var(--text-muted-color); font-size: 1rem;
@@ -95,12 +144,6 @@
         .summary-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 0.5rem; flex-wrap: wrap; gap: 1rem;}
         .results-summary { color: var(--text-muted-color); }
         .results-summary b { color: var(--primary-color); font-weight: 700; }
-        #company-display {
-            background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
-            padding: 0.4rem 1rem; border-radius: 20px; border: 1px solid var(--border-color);
-            font-size: 0.9rem; font-weight: 500; color: var(--text-muted-color);
-        }
-        #company-display span { color: var(--text-color); font-weight: bold; }
 
         .table-container {
             overflow-x: auto; background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
@@ -109,8 +152,8 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 1.25rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
         tbody tr:last-child td { border-bottom: none; }
-        thead { background-color: rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 10; }
-        th { cursor: pointer; user-select: none; font-weight: 500; color: var(--text-muted-color); }
+        thead { background-color: rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 10; border-bottom: 2px solid var(--border-color); }
+        th { cursor: pointer; user-select: none; font-weight: 500; color: var(--text-muted-color); font-size: 0.85rem; letter-spacing: 0.5px; }
         tbody tr { transition: background-color 0.2s; }
         tbody tr:hover { background-color: rgba(88, 166, 255, 0.1); }
         td a { color: var(--text-color); text-decoration: none; font-weight: 500; transition: color 0.2s; }
@@ -164,9 +207,18 @@
 
 <div id="initial-screen">
     <h1>🚀 Udemy Business 강의 목록</h1>
-    <p>회사 Udemy Business 주소를 입력하고 모든 강의를 만나보세요!
-        <br><small>예: `woongjin.udemy.com`의 경우 `woongjin` 입력</small>
-    </p>
+    <p>회사 Udemy Business 주소를 입력하고 모든 강의를 만나보세요!</p>
+    
+    <div class="gate-info">
+        <h3>🤔 이 목록은 왜 필요한가요?</h3>
+        <ul>
+            <li>Udemy 사이트보다 훨씬 빠르고 강력한 검색/필터링이 가능합니다.</li>
+            <li>전체 강의 데이터를 한눈에 파악하고 비교할 수 있습니다.</li>
+            <li>원하는 강의만 필터링하여 목록(CSV)을 만들고 공유할 수 있습니다.</li>
+        </ul>
+    </div>
+
+    <p><small>예: `woongjin.udemy.com`의 경우 `woongjin` 입력</small></p>
     <div class="input-group">
         <input id="company-address" placeholder="회사 주소" type="text" />
         <button id="submit-address">강의 목록 확인</button>
@@ -196,7 +248,6 @@
     let sortDirection = 'asc';
     let originalData = [];
 
-    // --- DOM 요소 ---
     const initialScreen = document.getElementById('initial-screen');
     const appContainer = document.getElementById('app-container');
     const submitBtn = document.getElementById('submit-address');
@@ -204,22 +255,27 @@
     const modalOverlay = document.getElementById('modal-overlay');
     const modalCloseBtn = document.getElementById('modal-close-btn');
 
-    // --- 이벤트 리스너 ---
     submitBtn.addEventListener('click', initializeApp);
     companyAddressInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') initializeApp(); });
     modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
     modalCloseBtn.addEventListener('click', closeModal);
     document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
     
-    // [개선] CSV 컬럼 매핑 확장
     const columnMapping = {
         '강의 ID / 코스 ID': 'id', '강의 제목 / 코스 제목': 'title', '강사 이름': 'instructor',
         '강의 난이도': 'difficulty', '카테고리 목록': 'category', '강의 주제 목록': 'topic',
         '평점': 'rating', '강의 헤드라인 / 소개 문구': 'headline', '학습 목표 / 배울 내용': 'objectives',
-        '강의 설명': 'description', '강의 언어': 'language', '자막 정보': 'subtitles'
+        '강의 설명': 'description', '강의 언어': 'language', '자막 언어 목록': 'subtitles'
     };
 
     const formatNumber = (num) => num.toLocaleString('ko-KR');
+
+    const languageMap = {
+        'en': 'English', 'ko': '한국어', 'ja': '日本語', 'zh': '中文',
+        'es': 'Español', 'fr': 'Français', 'de': 'Deutsch', 'pt': 'Português',
+        'ru': 'Русский', 'it': 'Italiano', 'tr': 'Türkçe', 'ar': 'العربية'
+    };
+    const mapLanguageCode = (code) => languageMap[code] || code;
 
     async function loadCourseData() {
         return new Promise((resolve, reject) => {
@@ -234,6 +290,8 @@
                         const newRow = {};
                         for (const key in columnMapping) if (row[key] !== undefined) newRow[columnMapping[key]] = row[key];
                         newRow.rating = parseFloat(newRow.rating) || 0;
+                        newRow.language = newRow.language ? mapLanguageCode(newRow.language.split('_')[0]) : 'N/A';
+                        newRow.subtitles = newRow.subtitles ? newRow.subtitles.split(',').map(mapLanguageCode).join(', ') : '없음';
                         return newRow;
                     }).filter(row => row.id && row.title);
                     resolve(processedData);
@@ -262,21 +320,30 @@
         setTimeout(() => {
             initialScreen.style.display = 'none';
             appContainer.innerHTML = `
+                <header class="app-header">
+                    <h1>🚀 Udemy Business 강의 목록</h1>
+                    <div class="header-meta">
+                         <div id="company-display" title="현재 조회중인 회사 계정입니다.">회사: <span>${companyName}</span></div>
+                         <span id="last-updated">데이터 업데이트: 2025-10-16</span>
+                    </div>
+                </header>
+
                 <div class="controls-header">
-                    <div class="search-container"> 🔍 <input type="text" id="search" placeholder="강의명, 강사, 주제, 언어 등 자유롭게 검색하세요..."> </div>
+                    <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."> 🔍 <input type="text" id="search" placeholder="자유롭게 검색하세요..."> </div>
                     <div class="filters-container">
-                        <div class="filter-group"> <label for="category-filter">🗂️ 카테고리</label> <select id="category-filter"><option value="">모든 카테고리</option></select> </div>
-                        <div class="filter-group"> <label for="difficulty-filter">📊 난이도</label> <select id="difficulty-filter"><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select> </div>
-                        <div class="filter-group"> <label for="rows-per-page">👀 표시 개수</label> <select id="rows-per-page"><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select> </div>
+                        <div class="filter-group"> <label for="category-filter">🗂️ 카테고리</label> <select id="category-filter" title="특정 카테고리의 강의만 필터링합니다."><option value="">모든 카테고리</option></select> </div>
+                        <div class="filter-group"> <label for="difficulty-filter">📊 난이도</label> <select id="difficulty-filter" title="특정 난이도의 강의만 필터링합니다."><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select> </div>
+                        <div class="filter-group"> <label for="language-filter">🌐 언어</label> <select id="language-filter" title="특정 언어로 진행되는 강의만 필터링합니다."><option value="">모든 언어</option></select> </div>
+                        <div class="filter-group"> <label for="subtitles-filter">💬 자막</label> <select id="subtitles-filter" title="특정 언어의 자막을 지원하는 강의만 필터링합니다."><option value="">모든 자막</option></select> </div>
+                        <div class="filter-group"> <label for="rows-per-page">👀 표시 개수</label> <select id="rows-per-page" title="한 페이지에 표시할 강의 수를 선택합니다."><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select> </div>
                         <div class="actions">
-                             <button id="download-csv">💾 CSV 저장</button>
-                             <button id="reset-filters">✨ 초기화</button>
+                             <button id="download-csv" title="현재 필터링된 목록을 CSV 파일로 저장합니다.">💾 CSV 저장</button>
+                             <button id="reset-filters" title="모든 필터와 정렬을 초기 상태로 되돌립니다.">✨ 초기화</button>
                         </div>
                     </div>
                 </div>
                 <div class="summary-bar">
                     <div class="results-summary" id="results-summary"></div>
-                    <div id="company-display">회사: <span>${companyName}</span></div>
                 </div>
                 <div class="table-container">
                     <table>
@@ -299,9 +366,9 @@
             setTimeout(() => appContainer.style.opacity = '1', 50);
 
             document.getElementById('search').addEventListener('input', handleFilters);
-            document.getElementById('category-filter').addEventListener('change', handleFilters);
-            document.getElementById('difficulty-filter').addEventListener('change', handleFilters);
-            document.getElementById('rows-per-page').addEventListener('change', handleFilters);
+            ['category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter', 'rows-per-page'].forEach(id => {
+                document.getElementById(id).addEventListener('change', handleFilters);
+            });
             document.getElementById('reset-filters').addEventListener('click', resetAllFilters);
             document.getElementById('download-csv').addEventListener('click', downloadCSV);
             document.querySelector('thead').addEventListener('click', (e) => {
@@ -316,39 +383,57 @@
                 }
             });
 
-            populateCategoryFilter();
+            populateFilterWithOptions('category-filter', 'category', true);
+            populateFilterWithOptions('language-filter', 'language');
+            populateFilterWithOptions('subtitles-filter', 'subtitles', true);
             handleFilters();
         }, 500);
     }
+    
+    function populateFilterWithOptions(elementId, dataKey, split = false) {
+        const filterEl = document.getElementById(elementId);
+        let items;
+        if (split) {
+            items = new Set(originalData.flatMap(c => c[dataKey] && c[dataKey] !== '없음' ? c[dataKey].split(',').map(item => item.trim()) : []));
+        } else {
+            items = new Set(originalData.map(c => c[dataKey]).filter(Boolean));
+        }
+        
+        [...items].sort().forEach(item => {
+            if (item && item !== 'N/A') {
+                const option = document.createElement('option');
+                option.value = item; 
+                option.textContent = item;
+                filterEl.appendChild(option);
+            }
+        });
+    }
 
     function resetAllFilters() {
-        ['search', 'category-filter', 'difficulty-filter'].forEach(id => document.getElementById(id).value = '');
+        ['search', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('rows-per-page').value = '15';
         sortColumn = 'title'; sortDirection = 'asc'; currentPage = 1;
         renderTable();
     }
-
-    function populateCategoryFilter() {
-        const categoryFilterEl = document.getElementById('category-filter');
-        const categories = new Set(originalData.flatMap(c => c.category ? c.category.split(',').map(cat => cat.trim()) : []));
-        [...categories].sort().forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat; option.textContent = cat;
-            categoryFilterEl.appendChild(option);
-        });
-    }
     
     function downloadCSV() {
-        if (filteredCourses.length === 0) {
-            alert("다운로드할 데이터가 없습니다.");
-            return;
-        }
+        if (filteredCourses.length === 0) { alert("다운로드할 데이터가 없습니다."); return; }
+        
+        const filters = {
+            keyword: document.getElementById('search').value,
+            category: document.getElementById('category-filter').value,
+            difficulty: document.getElementById('difficulty-filter').value,
+            language: document.getElementById('language-filter').value,
+        };
+        const filterNames = Object.values(filters).filter(Boolean).join('_');
+        const filename = `${companyName}_courses${filterNames ? '_' + filterNames : ''}_${new Date().toISOString().slice(0,10)}.csv`;
+
         const csv = Papa.unparse(filteredCourses);
         const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
-        link.setAttribute("download", `${companyName}_udemy_courses_${new Date().toISOString().slice(0,10)}.csv`);
+        link.setAttribute("download", filename);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -360,12 +445,16 @@
         const searchTerm = document.getElementById('search').value.toLowerCase();
         const selectedCategory = document.getElementById('category-filter').value;
         const selectedDifficulty = document.getElementById('difficulty-filter').value;
+        const selectedLanguage = document.getElementById('language-filter').value;
+        const selectedSubtitle = document.getElementById('subtitles-filter').value;
 
         filteredCourses = originalData.filter(course => {
-            const searchCorpus = `${course.title||''} ${course.instructor||''} ${course.topic||''} ${course.headline||''} ${course.objectives||''} ${course.language||''} ${course.subtitles||''}`.toLowerCase();
+            const searchCorpus = Object.values(course).join(' ').toLowerCase();
             return (searchTerm === '' || searchCorpus.includes(searchTerm)) &&
                    (selectedCategory === '' || (course.category && course.category.includes(selectedCategory))) &&
-                   (selectedDifficulty === '' || course.difficulty === selectedDifficulty);
+                   (selectedDifficulty === '' || course.difficulty === selectedDifficulty) &&
+                   (selectedLanguage === '' || course.language === selectedLanguage) &&
+                   (selectedSubtitle === '' || (course.subtitles && course.subtitles.includes(selectedSubtitle)));
         });
 
         document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 검색됨`;
@@ -394,7 +483,7 @@
                     <td>${course.category || ''}</td>
                     <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">${course.title}</a></td>
                     <td>${course.language || 'N/A'}</td>
-                    <td>${course.subtitles || 'N/A'}</td>
+                    <td>${course.subtitles || '없음'}</td>
                     <td>${course.difficulty || ''}</td>
                     <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
                     <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
@@ -412,38 +501,34 @@
         
         document.getElementById('modal-body').innerHTML = `
             <div class="modal-section"> <h3>📜 강의 소개</h3> <p>${course.headline || '정보 없음'}</p> </div> <br>
-            <div class="modal-section"> <h3>📝 상세 설명</h3> <p>${course.description || '정보 없음'}</p> </div> <br>
-            <div class="modal-section"> <h3>🎯 학습 목표</h3> ${objectivesHtml} </div>
+            <div class="modal-section"> <h3>🎯 강의 내용 및 학습 목표</h3> ${objectivesHtml} </div>
         `;
         modalOverlay.style.display = 'flex';
     }
     function closeModal() { modalOverlay.style.display = 'none'; }
     
     function handleFilters() { currentPage = 1; renderTable(); }
-    function handleSort(column) {
-        // [개선] 정렬 표시기 초기화 로직 추가
-        if (sortColumn !== column) {
-            const oldIndicator = document.querySelector(`th[data-sort="${sortColumn}"]`);
-            if(oldIndicator) oldIndicator.removeAttribute('data-direction');
-        }
 
+    function handleSort(column) {
         if (sortColumn === column) {
             sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
             sortColumn = column;
             sortDirection = 'asc';
         }
-
-        const newIndicator = document.querySelector(`th[data-sort="${sortColumn}"]`);
-        if(newIndicator) newIndicator.setAttribute('data-direction', sortDirection);
-
         currentPage = 1;
         renderTable();
     }
     
     function updateSortIndicators() {
         document.querySelectorAll('th[data-sort]').forEach(th => {
-            th.innerHTML = th.innerHTML.replace(' ▲', '').replace(' ▼', '');
+            let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
+            const helpSpanMatch = th.innerHTML.match(/<span .*?<\/span>/);
+            const helpSpan = helpSpanMatch ? helpSpanMatch[0] : '';
+            if(helpSpan) currentText = currentText.replace(th.querySelector('span').textContent, '');
+
+            th.innerHTML = currentText + (helpSpan || '');
+            
             if (th.dataset.sort === sortColumn) {
                 th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
             }
@@ -490,3 +575,5 @@
 
 </body>
 </html>
+
+

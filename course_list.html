@@ -20,6 +20,7 @@
             --shadow-soft: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
             --backdrop-blur: blur(16px);
+            --header-height: 110px;
         }
 
         body::before {
@@ -77,12 +78,20 @@
         .input-example strong { color: var(--text-color); font-weight: 500; }
 
         #app-container { display: none; opacity: 0; transition: opacity 0.5s ease-in; max-width: 1600px; margin: 0 auto; }
-
+        
+        .app-header-wrapper {
+            position: sticky;
+            top: -2rem; 
+            z-index: 100;
+            padding-top: 2rem;
+            margin: -2rem -2rem 0;
+            animation: fadeInDown 0.5s ease;
+        }
         .app-header {
             text-align: center;
-            margin-bottom: 1.5rem; padding: 1rem 0;
+            padding: 1rem 2rem;
             border-bottom: 1px solid var(--border-color);
-            animation: fadeInDown 0.5s ease;
+            background-color: var(--bg-color);
         }
         #welcome-message {
             font-size: 1.5rem;
@@ -95,6 +104,9 @@
              font-weight: 700;
         }
         #last-updated { font-size: 0.85rem; color: var(--text-muted-color); }
+        .main-content {
+            padding-top: 1.5rem;
+        }
 
         .recommendation-container {
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
@@ -108,7 +120,7 @@
             align-items: center;
             cursor: pointer;
             user-select: none;
-            margin-bottom: 1rem; /* [수정] 헤더와 카드 사이 간격 */
+            margin-bottom: 1rem;
         }
         .recommendation-header h2 {
             margin: 0;
@@ -123,10 +135,10 @@
         .recommendation-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
             transition: all 0.3s ease-in-out;
             max-height: 1000px;
-            overflow: hidden;
+            overflow: visible;
         }
         .recommendation-grid.collapsed {
              max-height: 0;
@@ -184,9 +196,12 @@
             display: flex; align-items: center; gap: 0.75rem;
         }
 
-        .filters-container { display: flex; flex-wrap: wrap; gap: 1.5rem 1rem; align-items: flex-end; }
-        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; flex-basis: 180px; }
-        .search-group { flex-grow: 2; flex-basis: 300px; }
+        .filters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem 1rem;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select, .filter-group .search-container { width: 100%; box-sizing: border-box; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
@@ -199,8 +214,7 @@
         .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3); }
         .search-container input { width: 100%; background-color: transparent; border: none; color: var(--text-color); font-size: 1rem; outline: none; }
         
-        .actions-group { flex-grow: 1; flex-basis: 320px; }
-        .actions { display: flex; gap: 1rem; }
+        .actions { display: flex; gap: 1rem; align-items: flex-end; }
         .action-item { flex: 1; }
         .action-item button {
             width: 100%; height: 50px; padding: 0.75rem; background-color: transparent; border: 1px solid var(--border-color);
@@ -236,7 +250,7 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 1.25rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
         tbody tr:last-child td { border-bottom: none; }
-        thead { background-color: rgba(26, 26, 46, 0.5); position: sticky; top: 0; z-index: 10; border-bottom: 2px solid var(--border-color); }
+        thead { background-color: rgba(26, 26, 46, 0.5); position: sticky; top: var(--header-height); z-index: 10; border-bottom: 2px solid var(--border-color); }
         th { cursor: pointer; user-select: none; font-weight: 500; color: var(--text-muted-color); font-size: 0.85rem; letter-spacing: 0.5px; }
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
         tbody tr:hover { background-color: rgba(167, 139, 250, 0.1); transform: translateY(-3px); }
@@ -455,7 +469,7 @@
         if (type === 'summarize' && context) {
             const createSummary = (objectives, category) => {
                 const lines = objectives.split('\n').filter(line => line.trim().length > 10);
-                if (lines.length === 0) return [];
+                if (lines.length === 0) return ["이 강의의 핵심 내용을 요약 중입니다."];
                 const summary = [];
                 summary.push(`${category.split(',')[0]} 분야의 핵심 역량을 다루는 올인원 과정입니다.`);
                 const skillKeywords = ['Python', 'Excel', 'Java', 'React', '데이터 분석', '머신러닝', '마케팅', '영업', '회계'];
@@ -464,6 +478,8 @@
                     summary.push(`${foundSkills.join(', ')} 등 실무에 필수적인 기술들을 집중적으로 학습합니다.`);
                 } else if (lines[1]) {
                     summary.push(lines[1].replace(/배웁니다|합니다|있습니다/g, '학습합니다.').trim());
+                } else {
+                     summary.push('실무 중심의 예제를 통해 개념을 확실히 이해할 수 있습니다.');
                 }
                 summary.push(`초보자도 쉽게 따라올 수 있도록 체계적인 커리큘럼으로 구성되어 있습니다.`);
                 return summary.slice(0, 3);
@@ -506,15 +522,16 @@
                 recommendations = originalData.filter(course => {
                     if (filteredCourses.some(fc => fc.id === course.id)) return false;
 
+                    let score = 0;
                     if (interestCategories.size > 0 && course.category) {
                          const courseCategories = course.category.split(',').map(cat => cat.trim());
-                         if (courseCategories.some(cat => interestCategories.has(cat))) return true;
+                         if (courseCategories.some(cat => interestCategories.has(cat))) score += 2;
                     }
                     if (interestTopics.size > 0 && course.topic) {
                         const courseTopics = course.topic.split(',').map(t => t.trim());
-                        if (courseTopics.some(t => interestTopics.has(t))) return true;
+                        if (courseTopics.some(t => interestTopics.has(t))) score += 1;
                     }
-                    return false;
+                    return score > 0;
                 })
                 .sort((a, b) => b.enrollments - a.enrollments)
                 .slice(0, 5);
@@ -609,108 +626,110 @@
         setTimeout(() => {
             initialScreen.style.display = 'none';
             appContainer.innerHTML = `
-                <header class="app-header">
-                    <h1 id="welcome-message"><strong>${companyName}</strong> 학습자님 어서오세요! Udemy와 즐겁게 성장해보세요.</h1>
-                    <div class="header-meta">
-                         <div id="last-updated">데이터 업데이트: 2025-10-16</div>
-                    </div>
-                </header>
-
-                <div id="top-courses-container" class="recommendation-container">
-                    <div class="recommendation-header">
-                        <h2>⭐ 3개월간 가장 사랑받은 TOP 10 강의 (한국어 자막) ⭐</h2>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="recommendation-grid"></div>
+                <div class="app-header-wrapper">
+                    <header class="app-header">
+                        <h1>🚀 Udemy Business Course Explorer</h1>
+                        <h2 id="welcome-message"><strong>${companyName}</strong> 학습자님 어서오세요! Udemy와 즐겁게 성장해보세요.</h2>
+                        <div id="last-updated">데이터 업데이트: 2025-10-16</div>
+                    </header>
                 </div>
+                <div class="main-content">
+                    <div id="top-courses-container" class="recommendation-container">
+                        <div class="recommendation-header">
+                            <h2>⭐ 3개월간 가장 사랑받은 TOP 10 강의 (한국어 자막) ⭐</h2>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="recommendation-grid"></div>
+                    </div>
 
-                <div class="controls-header">
-                    <div class="guide-bar">💡 각 항목에 마우스를 올리면 자세한 설명을 볼 수 있습니다.</div>
-                    <div class="filters-container">
-                        <div class="filter-group">
-                            <label for="search-mode">🤖 검색 모드</label>
-                            <select id="search-mode" title="일반 검색: 입력한 키워드와 정확히 일치하는 결과를 찾습니다.&#10;AI 확장 검색: AI가 연관어와 중요도를 분석하여 더 넓고 정확한 결과를 찾아줍니다.">
-                                <option value="standard">일반 검색</option>
-                                <option value="extended">AI 확장 검색</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="sort-order">📈 정렬 순서</label>
-                            <select id="sort-order" title="목록의 정렬 순서를 변경합니다. AI 확장 검색 시 '적합도순'을 추천합니다.">
-                                <option value="relevance">적합도순</option>
-                                <option value="popularity">인기순</option>
-                                <option value="alphabetical">가나다순</option>
-                            </select>
-                        </div>
-                        <div class="filter-group search-group">
-                            <label for="search">🔍 검색</label>
-                            <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
-                        </div>
-                        <div class="filter-group">
-                            <label for="category-filter">🗂️ 카테고리</label>
-                            <select id="category-filter" title="특정 카테고리의 강의만 필터링합니다."><option value="">모든 카테고리</option></select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="difficulty-filter">📊 난이도</label>
-                            <select id="difficulty-filter" title="특정 난이도의 강의만 필터링합니다."><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="language-filter">🌐 언어</label>
-                            <select id="language-filter" title="특정 언어로 진행되는 강의만 필터링합니다."><option value="">모든 언어</option></select>
-                        </div>
-                        <div class="filter-group">
-                            <label for="subtitles-filter">💬 자막</label>
-                            <select id="subtitles-filter" title="특정 언어의 자막을 지원하는 강의만 필터링합니다."><option value="">모든 자막</option></select>
-                        </div>
-                         <div class="filter-group">
-                             <label for="rows-per-page">👀 표시 개수</label>
-                            <select id="rows-per-page" title="한 페이지에 표시할 강의 수를 선택합니다."><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
-                        </div>
-                        <div class="filter-group actions-group">
-                            <label>⚙️ 기능</label>
-                            <div class="actions">
-                                <div class="action-item">
-                                    <button id="ai-recommend-btn" title="AI에게 직접 관심 분야를 알려주고 맞춤 강의를 추천받습니다.">🤖 AI 추천</button>
-                                </div>
-                                <div class="action-item">
-                                    <button id="download-csv" title="현재 필터링된 목록을 CSV 파일로 저장합니다.">💾 CSV 저장</button>
-                                </div>
-                                <div class="action-item">
-                                    <button id="reset-filters" title="모든 필터와 정렬을 초기 상태로 되돌립니다.">✨ 초기화</button>
+                    <div class="controls-header">
+                        <div class="guide-bar">💡 각 항목에 마우스를 올리면 자세한 설명을 볼 수 있습니다.</div>
+                        <div class="filters-container">
+                             <div class="filter-group">
+                                <label for="search-mode">🤖 검색 모드</label>
+                                <select id="search-mode" title="일반 검색: 입력한 키워드와 정확히 일치하는 결과를 찾습니다.&#10;AI 확장 검색: AI가 연관어와 중요도를 분석하여 더 넓고 정확한 결과를 찾아줍니다.">
+                                    <option value="standard">일반 검색</option>
+                                    <option value="extended">AI 확장 검색</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="sort-order">📈 정렬 순서</label>
+                                <select id="sort-order" title="목록의 정렬 순서를 변경합니다. AI 확장 검색 시 '적합도순'을 추천합니다.">
+                                    <option value="relevance">적합도순</option>
+                                    <option value="popularity">인기순</option>
+                                    <option value="alphabetical">가나다순</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="category-filter">🗂️ 카테고리</label>
+                                <select id="category-filter" title="특정 카테고리의 강의만 필터링합니다."><option value="">모든 카테고리</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="difficulty-filter">📊 난이도</label>
+                                <select id="difficulty-filter" title="특정 난이도의 강의만 필터링합니다."><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="language-filter">🌐 언어</label>
+                                <select id="language-filter" title="특정 언어로 진행되는 강의만 필터링합니다."><option value="">모든 언어</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="subtitles-filter">💬 자막</label>
+                                <select id="subtitles-filter" title="특정 언어의 자막을 지원하는 강의만 필터링합니다."><option value="">모든 자막</option></select>
+                            </div>
+                            <div class="filter-group search-group" style="grid-column: 1 / 4;">
+                                <label for="search">🔍 검색</label>
+                                <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
+                            </div>
+                             <div class="filter-group" style="grid-column: 4 / 5;">
+                                 <label for="rows-per-page">👀 표시 개수</label>
+                                <select id="rows-per-page" title="한 페이지에 표시할 강의 수를 선택합니다."><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
+                            </div>
+                            <div class="filter-group actions-group" style="grid-column: 5 / 7;">
+                                <label>⚙️ 기능</label>
+                                <div class="actions">
+                                    <div class="action-item">
+                                        <button id="ai-recommend-btn" title="AI에게 직접 관심 분야를 알려주고 맞춤 강의를 추천받습니다.">🤖 AI 추천</button>
+                                    </div>
+                                    <div class="action-item">
+                                        <button id="download-csv" title="현재 필터링된 목록을 CSV 파일로 저장합니다.">💾 CSV 저장</button>
+                                    </div>
+                                    <div class="action-item">
+                                        <button id="reset-filters" title="모든 필터와 정렬을 초기 상태로 되돌립니다.">✨ 초기화</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="summary-bar">
-                    <div class="results-summary" id="results-summary"></div>
-                </div>
-                <div class="table-wrapper">
-                    <div class="table-container">
-                        <table>
-                            <thead><tr>
-                                <th data-sort="category">카테고리</th>
-                                <th data-sort="topic">강의 주제</th>
-                                <th data-sort="title">강의명</th>
-                                <th>상세</th>
-                                <th data-sort="language">언어</th>
-                                <th data-sort="subtitles">자막</th>
-                                <th data-sort="difficulty">난이도</th>
-                                <th data-sort="rating">평점</th>
-                                <th data-sort="instructor">강사명</th>
-                            </tr></thead>
-                            <tbody id="course-table-body"></tbody>
-                        </table>
+                    <div class="summary-bar">
+                        <div class="results-summary" id="results-summary"></div>
                     </div>
-                    <div class="table-loader" id="table-loader">
-                        <div class="spinner"></div>
+                    <div class="table-wrapper">
+                        <div class="table-container">
+                            <table>
+                                <thead><tr>
+                                    <th data-sort="category">🗂️ 카테고리</th>
+                                    <th data-sort="topic">💡 강의 주제</th>
+                                    <th data-sort="title">📖 강의명</th>
+                                    <th>ℹ️ 상세</th>
+                                    <th data-sort="language">🌐 언어</th>
+                                    <th data-sort="subtitles">💬 자막</th>
+                                    <th data-sort="difficulty">📊 난이도</th>
+                                    <th data-sort="rating">⭐ 평점</th>
+                                    <th data-sort="instructor">👩‍🏫 강사명</th>
+                                </tr></thead>
+                                <tbody id="course-table-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="table-loader" id="table-loader">
+                            <div class="spinner"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="pagination" id="pagination"></div>
-                
-                <div id="ai-recommendations-container" class="recommendation-container">
-                     <h2>✨ AI 스마트 추천</h2>
-                     <div class="recommendation-grid"></div>
+                    <div class="pagination" id="pagination"></div>
+                    
+                    <div id="ai-recommendations-container" class="recommendation-container">
+                         <h2>✨ AI 스마트 추천</h2>
+                         <div class="recommendation-grid"></div>
+                    </div>
                 </div>
             `;
             
@@ -878,7 +897,7 @@
                     (selectedSubtitle === '' || (course.subtitles && course.subtitles.includes(selectedSubtitle)));
             });
 
-            document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
+            document.getElementById('results-summary').innerHTML = `2021년 이후 업데이트 된 총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
 
             filteredCourses.sort((a, b) => {
                 switch (sortOrder) {
@@ -939,12 +958,10 @@
         document.getElementById('modal-title').textContent = course.title;
         
         const objectivesHtml = course.objectives 
-            ? `<ul>${course.objectives.split('\n').filter(line => line.trim()).map(line => `<li>${line.trim()}</li>`).join('')}</ul>`
+            ? `<ul>${course.objectives.replace(/["\[\]]/g, '').split('\n').filter(line => line.trim()).map(line => `<li>${line.trim().replace(/^•\s*/, '')}</li>`).join('')}</ul>`
             : '<p>정보 없음</p>';
         
         modalBody.innerHTML = `
-            <div class="modal-section"> <h3>📜 강의 소개</h3> <p>${course.headline || '정보 없음'}</p> </div>
-            <div class="modal-section"> <h3>🎯 강의 내용 및 학습 목표</h3> ${objectivesHtml} </div>
             <div class="modal-section ai-section" id="ai-summary-section">
                 <h3>✨ AI 핵심 요약</h3>
                 <div class="spinner-container"><div class="spinner"></div><p>AI가 요약 중입니다...</p></div>
@@ -953,6 +970,8 @@
                 <h3>🎯 이런 분들께 추천해요</h3>
                 <div class="spinner-container"><div class="spinner"></div><p>AI가 분석 중입니다...</p></div>
             </div>
+            <div class="modal-section"> <h3>📜 강의 소개</h3> <p>${course.headline || '정보 없음'}</p> </div>
+            <div class="modal-section"> <h3>🎯 강의 내용 및 학습 목표</h3> ${objectivesHtml} </div>
         `;
         modalOverlay.style.display = 'flex';
 

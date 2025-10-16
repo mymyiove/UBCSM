@@ -203,6 +203,9 @@
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
             border: 1px solid var(--border-color);
+            /* --- 수정: 드롭다운 z-index 문제 해결 --- */
+            position: relative;
+            z-index: 50;
         }
         
         .filters-container {
@@ -308,50 +311,44 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed; /* 컬럼 너비 제어를 위해 fixed 사용 */
         }
         thead {
-            position: sticky;
+            position: sticky; /* thead에 직접 sticky 적용 */
             top: var(--header-height);
             z-index: 10;
         }
         th, td {
-            padding: 1.25rem 1.5rem;
-            text-align: left;
+            padding: 1.25rem 1.5rem; text-align: left;
             border-bottom: 1px solid var(--border-color);
             vertical-align: top; /* 셀 내용을 위로 정렬 */
         }
         th {
             background-color: var(--bg-color);
-            font-weight: 500;
-            color: var(--text-muted-color);
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            user-select: none;
+            font-weight: 500; color: var(--text-muted-color); font-size: 0.85rem;
+            letter-spacing: 0.5px; cursor: pointer; user-select: none;
             border-bottom: 2px solid var(--border-color);
             white-space: nowrap; /* 헤더는 잘리지 않도록 함 */
         }
-
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
             overflow: hidden;
             text-overflow: ellipsis;
-            word-break: break-word;
+            line-height: 1.6; /* 줄 간격 */
+            max-height: calc(1.6 * 2em); /* 2줄 높이로 제한 */
+            word-break: break-all;
         }
-        
         /* 컬럼별 너비 지정 */
-        th:nth-child(1), td:nth-child(1) { width: 220px; } /* 카테고리 */
-        th:nth-child(2), td:nth-child(2) { width: 220px; } /* 강의 주제 */
-        th:nth-child(3), td:nth-child(3) { width: 400px; } /* 강의명 */
+        th:nth-child(1), td:nth-child(1) { min-width: 220px; } /* 카테고리 */
+        th:nth-child(2), td:nth-child(2) { min-width: 220px; } /* 강의 주제 */
+        th:nth-child(3), td:nth-child(3) { min-width: 400px; } /* 강의명 */
         th:nth-child(4), td:nth-child(4) { width: 80px; text-align: center; } /* 상세 */
-        th:nth-child(5), td:nth-child(5) { width: 120px; } /* 언어 */
-        th:nth-child(6), td:nth-child(6) { width: 120px; } /* 자막 */
-        th:nth-child(7), td:nth-child(7) { width: 120px; } /* 난이도 */
-        th:nth-child(8), td:nth-child(8) { width: 100px; } /* 평점 */
-        th:nth-child(9), td:nth-child(9) { width: 150px; } /* 강사명 */
+        th:nth-child(5), td:nth-child(5) { min-width: 120px; } /* 언어 */
+        th:nth-child(6), td:nth-child(6) { min-width: 150px; } /* 자막 (너비 축소) */
+        th:nth-child(7), td:nth-child(7) { min-width: 120px; } /* 난이도 */
+        th:nth-child(8), td:nth-child(8) { min-width: 100px; } /* 평점 */
+        th:nth-child(9), td:nth-child(9) { min-width: 150px; } /* 강사명 */
 
         tbody tr:last-child td { border-bottom: none; }
         /* --- 수정 끝 --- */
@@ -1196,7 +1193,6 @@
                     <p>😥 일치하는 강의를 찾을 수 없습니다.</p>
                 </td></tr>`;
             } else {
-                // --- 수정: 2줄 말줄임 처리를 위한 div 및 title 속성 추가 ---
                 tableBody.innerHTML = paginatedCourses.map(course => `
                     <tr>
                         <td title="${course.category || ''}"><div class="line-clamp-2">${getCategoryEmoji(course.category)} ${course.category || ''}</div></td>
@@ -1204,7 +1200,7 @@
                         <td title="${course.title}"><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}"><div class="line-clamp-2">${course.title}</div></a></td>
                         <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
                         <td>${course.language || 'N/A'}</td>
-                        <td>${course.subtitles || '없음'}</td>
+                        <td title="${course.subtitles || ''}"><div class="line-clamp-2">${course.subtitles || '없음'}</div></td>
                         <td>${course.difficulty || ''}</td>
                         <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
                         <td title="${course.instructor || ''}"><div class="line-clamp-2">${course.instructor || ''}</div></td>

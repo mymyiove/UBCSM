@@ -145,12 +145,12 @@
             border-radius: 8px; padding: 1rem; transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
-            position: relative; /* [수정] 카드 잘림 현상 방지 */
+            position: relative;
         }
         .recommendation-card:hover {
             transform: translateY(-5px); box-shadow: var(--shadow-md);
             border-color: var(--primary-color);
-            z-index: 10; /* [수정] 카드 잘림 현상 방지 */
+            z-index: 10;
         }
         .recommendation-card h3 {
             font-size: 1.1rem; margin: 0 0 0.5rem 0; color: var(--text-color);
@@ -444,6 +444,13 @@
     };
     const mapLanguageCode = (code) => languageMap[code] || code;
     
+    // [추가] 연관 검색어 사전
+    const searchSynonyms = {
+        '영업': 'sales', '마케팅': 'marketing', '개발': 'develop', '데이터': 'data',
+        '분석': 'analysis', '보안': 'security', '클라우드': 'cloud', '파이썬': 'python',
+        '자바': 'java', '엑셀': 'excel', '리액트': 'react', '디자인': 'design'
+    };
+
     // --- AI 기능 시뮬레이션 ---
     async function callGeminiAPI(prompt, type, context) {
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
@@ -476,14 +483,14 @@
 
         if (type === 'recommend' && context) {
             const { searchTerm, basis } = context;
-            
             let recommendations = [];
             
             if (basis === 'direct') {
                 recommendations = originalData
                     .filter(course => {
                         const searchCorpus = (course.title + " " + course.topic + " " + course.headline).toLowerCase();
-                        return searchTerm.split(' ').every(term => searchCorpus.includes(term));
+                        const searchTerms = getSearchTerms(searchTerm);
+                        return searchTerms.some(term => searchCorpus.includes(term));
                     })
                     .sort((a, b) => b.enrollments - a.enrollments)
                     .slice(0, 5);
@@ -695,7 +702,6 @@
 
             displayTopCourses();
 
-            // TOP 10 접기/펴기 이벤트
             const topCoursesHeader = document.querySelector('#top-courses-container .recommendation-header');
             topCoursesHeader.addEventListener('click', () => {
                 const container = document.getElementById('top-courses-container');
@@ -755,7 +761,7 @@
         document.getElementById('rows-per-page').value = '15';
         sortColumn = 'title'; sortDirection = 'asc'; currentPage = 1;
         renderTable();
-        document.getElementById('ai-recommendations-container').style.display = 'none'; // AI 추천 숨기기
+        document.getElementById('ai-recommendations-container').style.display = 'none';
     }
     
     function downloadCSV() {
@@ -780,6 +786,26 @@
         link.click();
         document.body.removeChild(link);
     }
+    
+    // [수정] 연관 검색어 처리 로직 추가
+    function getSearchTerms(input) {
+        const term = input.toLowerCase();
+        if (term === '') return [''];
+        
+        let terms = [term];
+        const synonym = searchSynonyms[term];
+        if (synonym) {
+            terms.push(synonym);
+        }
+        for (const kor in searchSynonyms) {
+            if (searchSynonyms[kor] === term) {
+                terms.push(kor);
+                break;
+            }
+        }
+        return terms;
+    }
+
 
     function renderTable() {
         const loader = document.getElementById('table-loader');
@@ -788,7 +814,8 @@
         setTimeout(() => {
             rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
             const tableBody = document.getElementById('course-table-body');
-            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const searchTerm = document.getElementById('search').value;
+            const searchTerms = getSearchTerms(searchTerm);
             const selectedCategory = document.getElementById('category-filter').value;
             const selectedDifficulty = document.getElementById('difficulty-filter').value;
             const selectedLanguage = document.getElementById('language-filter').value;
@@ -796,7 +823,10 @@
 
             filteredCourses = originalData.filter(course => {
                 const searchCorpus = Object.values(course).join(' ').toLowerCase();
-                return (searchTerm === '' || searchCorpus.includes(searchTerm)) &&
+                
+                const matchesSearch = searchTerms[0] === '' || searchTerms.some(term => searchCorpus.includes(term));
+
+                return matchesSearch &&
                     (selectedCategory === '' || (course.category && course.category.includes(selectedCategory))) &&
                     (selectedDifficulty === '' || course.difficulty === selectedDifficulty) &&
                     (selectedLanguage === '' || course.language === selectedLanguage) &&
@@ -823,7 +853,7 @@
 
             if (paginatedCourses.length === 0) {
                 tableBody.innerHTML = `<tr class="empty-row"><td colspan="9">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <p>😥 일치하는 강의를 찾을 수 없습니다.</p>
                 </td></tr>`;
             } else {

@@ -145,10 +145,12 @@
             border-radius: 8px; padding: 1rem; transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
+            position: relative; /* [수정] 카드 잘림 현상 방지 */
         }
         .recommendation-card:hover {
             transform: translateY(-5px); box-shadow: var(--shadow-md);
             border-color: var(--primary-color);
+            z-index: 10; /* [수정] 카드 잘림 현상 방지 */
         }
         .recommendation-card h3 {
             font-size: 1.1rem; margin: 0 0 0.5rem 0; color: var(--text-color);
@@ -333,6 +335,15 @@
             border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .app-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted-color);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -373,6 +384,10 @@
 </div>
 
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
+
+<footer class="app-footer">
+    <p>&copy; 2025 Made by Hojun Jung</p>
+</footer>
 
 <script>
     // --- 전역 변수 및 상태 ---
@@ -434,7 +449,23 @@
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
 
         if (type === 'summarize' && context) {
-            const summaryPoints = context.objectives.split('\n').filter(line => line.trim() && line.length > 10).slice(0, 3);
+            const createSummary = (objectives, category) => {
+                const lines = objectives.split('\n').filter(line => line.trim().length > 10);
+                if (lines.length === 0) return [];
+                const summary = [];
+                summary.push(`${category.split(',')[0]} 분야의 핵심 역량을 다루는 올인원 과정입니다.`);
+                const skillKeywords = ['Python', 'Excel', 'Java', 'React', '데이터 분석', '머신러닝', '마케팅', '영업', '회계'];
+                const foundSkills = skillKeywords.filter(skill => objectives.toLowerCase().includes(skill.toLowerCase()));
+                if (foundSkills.length > 0) {
+                    summary.push(`${foundSkills.join(', ')} 등 실무에 필수적인 기술들을 집중적으로 학습합니다.`);
+                } else if (lines[1]) {
+                    summary.push(lines[1].replace(/배웁니다|합니다|있습니다/g, '학습합니다.').trim());
+                }
+                summary.push(`초보자도 쉽게 따라올 수 있도록 체계적인 커리큘럼으로 구성되어 있습니다.`);
+                return summary.slice(0, 3);
+            };
+
+            const summaryPoints = createSummary(context.objectives, context.category);
             const recommendedFor = [
                 `${context.category ? context.category.split(',')[0] : '해당 분야'} 입문자`,
                 `실무 역량 강화가 필요한 주니어`,
@@ -444,42 +475,45 @@
         }
 
         if (type === 'recommend' && context) {
-            const { searchTerm, category } = context;
-
-            let basisCourses = [...filteredCourses];
-            if (searchTerm && basisCourses.length === 0) {
-                 basisCourses = originalData.filter(c => (c.title + c.topic).toLowerCase().includes(searchTerm));
-            }
+            const { searchTerm, basis } = context;
             
-            const userInterestCourses = basisCourses
-                .sort((a, b) => b.enrollments - a.enrollments)
-                .slice(0, 3);
+            let recommendations = [];
             
-            if (userInterestCourses.length === 0 && !searchTerm) return [];
-
-            const interestCategories = new Set(userInterestCourses.flatMap(c => c.category ? c.category.split(',').map(cat => cat.trim()) : []));
-            const interestTopics = new Set(userInterestCourses.flatMap(c => c.topic ? c.topic.split(',').map(t => t.trim()) : []));
-
-            const recommendations = originalData.filter(course => {
-                if (filteredCourses.some(fc => fc.id === course.id)) return false;
-
-                const searchCorpus = (course.title + course.topic).toLowerCase();
-                if (searchTerm && searchCorpus.includes(searchTerm)) return true;
-
-                if (interestCategories.size > 0 && course.category) {
-                     const courseCategories = course.category.split(',').map(cat => cat.trim());
-                     if (courseCategories.some(cat => interestCategories.has(cat))) return true;
-                }
-                if (interestTopics.size > 0 && course.topic) {
-                    const courseTopics = course.topic.split(',').map(t => t.trim());
-                    if (courseTopics.some(t => interestTopics.has(t))) return true;
-                }
+            if (basis === 'direct') {
+                recommendations = originalData
+                    .filter(course => {
+                        const searchCorpus = (course.title + " " + course.topic + " " + course.headline).toLowerCase();
+                        return searchTerm.split(' ').every(term => searchCorpus.includes(term));
+                    })
+                    .sort((a, b) => b.enrollments - a.enrollments)
+                    .slice(0, 5);
+            } 
+            else {
+                const userInterestCourses = filteredCourses
+                    .sort((a, b) => b.enrollments - a.enrollments)
+                    .slice(0, 3);
                 
-                return false;
-            })
-            .sort((a, b) => b.enrollments - a.enrollments)
-            .slice(0, 5);
-            
+                if (userInterestCourses.length === 0) return [];
+
+                const interestCategories = new Set(userInterestCourses.flatMap(c => c.category ? c.category.split(',').map(cat => cat.trim()) : []));
+                const interestTopics = new Set(userInterestCourses.flatMap(c => c.topic ? c.topic.split(',').map(t => t.trim()) : []));
+
+                recommendations = originalData.filter(course => {
+                    if (filteredCourses.some(fc => fc.id === course.id)) return false;
+
+                    if (interestCategories.size > 0 && course.category) {
+                         const courseCategories = course.category.split(',').map(cat => cat.trim());
+                         if (courseCategories.some(cat => interestCategories.has(cat))) return true;
+                    }
+                    if (interestTopics.size > 0 && course.topic) {
+                        const courseTopics = course.topic.split(',').map(t => t.trim());
+                        if (courseTopics.some(t => interestTopics.has(t))) return true;
+                    }
+                    return false;
+                })
+                .sort((a, b) => b.enrollments - a.enrollments)
+                .slice(0, 5);
+            }
             return recommendations;
         }
         return null;
@@ -581,11 +615,6 @@
                     <div class="recommendation-grid"></div>
                 </div>
 
-                <div id="ai-recommendations-container" class="recommendation-container">
-                     <h2>✨ AI 스마트 추천</h2>
-                     <div class="recommendation-grid"></div>
-                </div>
-
                 <div class="controls-header">
                     <div class="guide-bar">💡 각 항목에 마우스를 올리면 자세한 설명을 볼 수 있습니다.</div>
                     <div class="filters-container">
@@ -653,7 +682,13 @@
                         <div class="spinner"></div>
                     </div>
                 </div>
-                <div class="pagination" id="pagination"></div>`;
+                <div class="pagination" id="pagination"></div>
+                
+                <div id="ai-recommendations-container" class="recommendation-container">
+                     <h2>✨ AI 스마트 추천</h2>
+                     <div class="recommendation-grid"></div>
+                </div>
+            `;
             
             appContainer.style.display = 'block';
             setTimeout(() => appContainer.style.opacity = '1', 50);
@@ -871,7 +906,7 @@
         const resultsContainer = document.getElementById('ai-modal-results');
         resultsContainer.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
 
-        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm: prompt.toLowerCase(), category: '' });
+        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm: prompt.toLowerCase(), basis: 'direct' });
         
         if (recommendations && recommendations.length > 0) {
             resultsContainer.innerHTML = recommendations.map(course => `
@@ -915,7 +950,7 @@
         container.style.display = 'block';
         grid.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
 
-        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, category: selectedCategory });
+        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, category: selectedCategory, basis: 'contextual' });
         
         if (recommendations && recommendations.length > 0) {
             container.querySelector('h2').textContent = `✨ "${searchTerm || selectedCategory}" 관련 AI 스마트 추천`;

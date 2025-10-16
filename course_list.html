@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>✨ Udemy Business 인터랙티브 강의 목록 (AI Edition)</title>
+    <title>🚀 Udemy Business Course Explorer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
@@ -84,10 +84,6 @@
             border-bottom: 1px solid var(--border-color);
             animation: fadeInDown 0.5s ease;
         }
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         #welcome-message {
             font-size: 1.5rem;
             margin: 0 0 0.5rem 0;
@@ -104,7 +100,7 @@
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
             border: 1px solid var(--border-color);
-            padding-top: 2rem; /* [수정] 카드 잘림 현상 방지를 위한 여백 추가 */
+            padding-top: 2rem;
         }
         .recommendation-header {
             display: flex;
@@ -112,6 +108,7 @@
             align-items: center;
             cursor: pointer;
             user-select: none;
+            margin-bottom: 1rem; /* [수정] 헤더와 카드 사이 간격 */
         }
         .recommendation-header h2 {
             margin: 0;
@@ -127,7 +124,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1rem;
-            margin-top: 1.5rem;
             transition: all 0.3s ease-in-out;
             max-height: 1000px;
             overflow: hidden;
@@ -137,6 +133,7 @@
              margin-top: 0;
              overflow: hidden;
              opacity: 0;
+             padding: 0;
         }
         .recommendation-container.collapsed .toggle-icon {
              transform: rotate(-90deg);
@@ -350,7 +347,7 @@
 <body>
 
 <div id="initial-screen">
-    <h1>🚀 Udemy Business 강의 목록</h1>
+    <h1>🚀 Udemy Business Course Explorer</h1>
     <p>회사 Udemy Business 주소를 입력하고 모든 강의를 만나보세요!</p>
     
     <div class="gate-info">
@@ -445,7 +442,6 @@
     };
     const mapLanguageCode = (code) => languageMap[code] || code;
     
-    // [추가] 연관 검색어 사전
     const searchSynonyms = {
         '영업': 'sales', '마케팅': 'marketing', '개발': 'develop', '데이터': 'data',
         '분석': 'analysis', '보안': 'security', '클라우드': 'cloud', '파이썬': 'python',
@@ -574,7 +570,11 @@
     }
     
     function displayTopCourses() {
-        const topCourses = [...originalData].sort((a, b) => b.enrollments - a.enrollments).slice(0, 10);
+        const topCourses = [...originalData]
+            .filter(course => course.subtitles && course.subtitles.includes('한국어'))
+            .sort((a, b) => b.enrollments - a.enrollments)
+            .slice(0, 10);
+
         const container = document.getElementById('top-courses-container');
         const grid = container.querySelector('.recommendation-grid');
         grid.innerHTML = topCourses.map((course, index) => `
@@ -618,7 +618,7 @@
 
                 <div id="top-courses-container" class="recommendation-container">
                     <div class="recommendation-header">
-                        <h2>⭐ 3개월간 가장 사랑받은 TOP 10 강의 ⭐</h2>
+                        <h2>⭐ 3개월간 가장 사랑받은 TOP 10 강의 (한국어 자막) ⭐</h2>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div class="recommendation-grid"></div>
@@ -627,10 +627,6 @@
                 <div class="controls-header">
                     <div class="guide-bar">💡 각 항목에 마우스를 올리면 자세한 설명을 볼 수 있습니다.</div>
                     <div class="filters-container">
-                        <div class="filter-group search-group">
-                            <label for="search">🔍 검색</label>
-                            <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
-                        </div>
                         <div class="filter-group">
                             <label for="search-mode">🤖 검색 모드</label>
                             <select id="search-mode" title="일반 검색: 입력한 키워드와 정확히 일치하는 결과를 찾습니다.&#10;AI 확장 검색: AI가 연관어와 중요도를 분석하여 더 넓고 정확한 결과를 찾아줍니다.">
@@ -645,6 +641,10 @@
                                 <option value="popularity">인기순</option>
                                 <option value="alphabetical">가나다순</option>
                             </select>
+                        </div>
+                        <div class="filter-group search-group">
+                            <label for="search">🔍 검색</label>
+                            <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
                         </div>
                         <div class="filter-group">
                             <label for="category-filter">🗂️ 카테고리</label>
@@ -662,7 +662,7 @@
                             <label for="subtitles-filter">💬 자막</label>
                             <select id="subtitles-filter" title="특정 언어의 자막을 지원하는 강의만 필터링합니다."><option value="">모든 자막</option></select>
                         </div>
-                        <div class="filter-group">
+                         <div class="filter-group">
                              <label for="rows-per-page">👀 표시 개수</label>
                             <select id="rows-per-page" title="한 페이지에 표시할 강의 수를 선택합니다."><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
                         </div>
@@ -780,9 +780,12 @@
     }
 
     function resetAllFilters() {
-        ['search', 'search-mode', 'sort-order', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('search').value = '';
+        document.getElementById('search-mode').value = 'standard';
+        document.getElementById('sort-order').value = 'relevance';
+        ['category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('rows-per-page').value = '15';
-        sortColumn = 'title'; sortDirection = 'asc'; currentPage = 1;
+        sortColumn = 'relevance'; sortDirection = 'desc'; currentPage = 1;
         renderTable();
         document.getElementById('ai-recommendations-container').style.display = 'none';
     }
@@ -877,7 +880,6 @@
 
             document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
 
-            // [수정] 정렬 로직
             filteredCourses.sort((a, b) => {
                 switch (sortOrder) {
                     case 'popularity':
@@ -889,7 +891,6 @@
                         if (searchTerm && searchMode === 'extended' && a.relevanceScore !== b.relevanceScore) {
                             return b.relevanceScore - a.relevanceScore;
                         }
-                        // 적합도순이 아닐 때 또는 점수가 같을 때 테이블 헤더 정렬 적용
                         let valA = a[sortColumn] || ''; 
                         let valB = b[sortColumn] || '';
                         if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
@@ -965,7 +966,6 @@
         }
     }
     
-    // [수정] 자연어 처리 로직 추가
     function extractKeywordsFromPrompt(prompt) {
         const text = prompt.toLowerCase();
         let keywords = [];
@@ -987,7 +987,7 @@
         else if (text.includes('중급') || text.includes('intermediate')) difficulty = 'Intermediate';
         else if (text.includes('고급') || text.includes('전문가') || text.includes('expert')) difficulty = 'Expert';
         
-        if (keywords.length === 0) keywords.push(text.replace(/추천|해줘|알려줘/g, '').trim());
+        if (keywords.length === 0) keywords.push(text.replace(/추천|해줘|알려줘|나는|입니다/g, '').trim());
 
         return { searchTerm: keywords.join(' '), difficulty };
     }
@@ -1025,7 +1025,6 @@
         const { searchTerm, difficulty } = extractKeywordsFromPrompt(prompt);
         let recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, difficulty, basis: 'direct' });
         
-        // [수정] 결과 없을 시 난이도 제외하고 재검색
         if (recommendations && recommendations.length === 0 && difficulty) {
             recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, basis: 'direct' });
         }

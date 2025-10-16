@@ -93,10 +93,11 @@
             border-bottom: 1px solid var(--border-color);
             background-color: var(--bg-color);
         }
+        .app-header h1 { font-size: 1.8rem; margin: 0; color: #fff; white-space: nowrap; }
         #welcome-message {
-            font-size: 1.5rem;
-            margin: 0 0 0.5rem 0;
-            color: #fff;
+            font-size: 1.2rem;
+            margin: 0.5rem 0 0.5rem 0;
+            color: var(--text-muted-color);
             font-weight: 300;
         }
         #welcome-message strong {
@@ -115,7 +116,7 @@
         }
         .recommendation-header {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             cursor: pointer;
             user-select: none;
@@ -190,13 +191,6 @@
             border: 1px solid var(--border-color);
         }
         
-        .guide-bar {
-            background-color: rgba(0,0,0,0.2); padding: 0.75rem 1rem; border-radius: 8px;
-            margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted-color);
-            display: flex; align-items: center; gap: 0.75rem;
-        }
-        
-        /* [개선] 필터 레이아웃 2줄 구조 */
         .filters-container { display: flex; flex-direction: column; gap: 1rem; }
         .filters-row { display: flex; flex-wrap: wrap; gap: 1rem; }
         .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1 1 160px; min-width: 160px; }
@@ -225,8 +219,9 @@
         .action-item button:hover { background-color: var(--border-color); color: var(--text-color); }
         .action-item button:active { transform: scale(0.95); }
         
-        .summary-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 0.5rem; flex-wrap: wrap; gap: 1rem;}
-        .results-summary { color: var(--text-muted-color); }
+        .list-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; padding: 0 0.5rem; flex-wrap: wrap; gap: 1rem;}
+        .list-header h2 { margin: 0; font-size: 1.5rem; color: var(--primary-color); }
+        .results-summary { color: var(--text-muted-color); font-size: 0.9rem; }
         .results-summary b { color: var(--primary-color); font-weight: 700; }
 
         .table-wrapper { position: relative; }
@@ -448,20 +443,11 @@
         '3개월 간 수강신청 수': 'enrollments'
     };
     
-    // [추가] 카테고리 이모지 맵
     const categoryEmojis = {
-        'Development': '💻',
-        'IT & Software': '💾',
-        'Business': '💼',
-        'Finance & Accounting': '💰',
-        'Marketing': '📈',
-        'Office Productivity': '📊',
-        'Personal Development': '🌱',
-        'Design': '🎨',
-        'Lifestyle': '🧘',
-        'Photography & Video': '📸',
-        'Health & Fitness': '💪',
-        'Music': '🎵',
+        'Development': '💻', 'IT & Software': '💾', 'Business': '💼',
+        'Finance & Accounting': '💰', 'Marketing': '📈', 'Office Productivity': '📊',
+        'Personal Development': '🌱', 'Design': '🎨', 'Lifestyle': '🧘',
+        'Photography & Video': '📸', 'Health & Fitness': '💪', 'Music': '🎵',
         'Teaching & Academics': '🏫'
     };
     const getCategoryEmoji = (category) => {
@@ -669,9 +655,12 @@
                     </div>
 
                     <div class="controls-header">
-                        <div class="guide-bar">💡 각 항목에 마우스를 올리면 자세한 설명을 볼 수 있습니다.</div>
+                        <div class="recommendation-header" id="filters-header">
+                             <h2>🧭 탐험 설정</h2>
+                            <span class="toggle-icon">▼</span>
+                        </div>
                         <div class="filters-container">
-                             <div class="filters-row">
+                            <div class="filters-row">
                                 <div class="filter-group">
                                     <label for="search-mode">🤖 검색 모드</label>
                                     <select id="search-mode" title="일반 검색: 입력한 키워드와 정확히 일치하는 결과를 찾습니다.&#10;AI 확장 검색: AI가 연관어와 중요도를 분석하여 더 넓고 정확한 결과를 찾아줍니다.">
@@ -730,7 +719,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="summary-bar">
+                    <div class="list-header">
+                        <h2>📖 탐험 목록</h2>
                         <div class="results-summary" id="results-summary"></div>
                     </div>
                     <div class="table-wrapper">
@@ -772,6 +762,14 @@
             topCoursesHeader.addEventListener('click', () => {
                 const container = document.getElementById('top-courses-container');
                 const grid = container.querySelector('.recommendation-grid');
+                container.classList.toggle('collapsed');
+                grid.classList.toggle('collapsed');
+            });
+
+            const filtersHeader = document.getElementById('filters-header');
+            filtersHeader.addEventListener('click', () => {
+                const container = filtersHeader.parentElement;
+                const grid = container.querySelector('.filters-container');
                 container.classList.toggle('collapsed');
                 grid.classList.toggle('collapsed');
             });
@@ -1154,7 +1152,7 @@
         document.querySelectorAll('th[data-sort]').forEach(th => {
             let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
             th.innerHTML = currentText;
-            if (sortOrder !== 'popularity' && sortOrder !== 'alphabetical' && th.dataset.sort === sortColumn) {
+            if (sortOrder === 'relevance' && th.dataset.sort === sortColumn) {
                 th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
             }
         });

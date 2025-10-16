@@ -17,7 +17,8 @@
             --text-muted-color: #a0a0a0;
             --border-color: #3b3b58;
             --border-radius-md: 12px;
-            --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+            --shadow-soft: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
             --backdrop-blur: blur(16px);
         }
 
@@ -38,6 +39,7 @@
         body {
             font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg-color);
             color: var(--text-color); margin: 0; padding: 2rem; line-height: 1.6;
+            scroll-behavior: smooth;
         }
 
         #initial-screen {
@@ -51,7 +53,6 @@
         .gate-info h3 { margin-top: 0; color: var(--primary-color); }
         .gate-info ul { padding-left: 20px; margin-bottom: 0; }
         
-        /* [개선] 초기 페이지 입력창 UI 수정 */
         .input-container {
             width: 100%;
             display: flex;
@@ -65,11 +66,11 @@
         }
         .input-group input { flex-grow: 1; background: transparent; border: none; color: var(--text-color); font-size: 1.1rem; padding: 0.75rem; outline: none; }
         .input-group button {
-            display: flex; align-items: center; gap: 0.5rem; background-color: var(--primary-color);
-            color: #fff; border: none; padding: 0.75rem 1.75rem; border-radius: 8px; cursor: pointer;
-            font-weight: 500; transition: all 0.2s; font-size: 1rem;
+            display: flex; align-items: center; gap: 0.5rem; background-image: linear-gradient(to right, var(--primary-color), #c4b5fd);
+            color: #1a1a2e; border: none; padding: 0.75rem 1.75rem; border-radius: 8px; cursor: pointer;
+            font-weight: 700; transition: all 0.2s; font-size: 1rem;
         }
-        .input-group button:hover { background-color: var(--primary-hover-color); transform: translateY(-2px); }
+        .input-group button:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
         .input-group button:active { transform: scale(0.95); }
         .input-group button:disabled { background-color: #555; cursor: not-allowed; opacity: 0.7; transform: none; }
         .input-example { font-size: 0.9rem; color: var(--text-muted-color); text-align: center; margin-top: 0.75rem; }
@@ -114,7 +115,7 @@
             border-radius: 8px; padding: 1rem; transition: all 0.2s ease;
         }
         .recommendation-card:hover {
-            transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transform: translateY(-5px); box-shadow: var(--shadow-md);
             border-color: var(--primary-color);
         }
         .recommendation-card h3 {
@@ -132,23 +133,30 @@
             border: 1px solid var(--border-color);
         }
         
+        .guide-bar {
+            background-color: rgba(0,0,0,0.2); padding: 0.75rem 1rem; border-radius: 8px;
+            margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted-color);
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+
         .filters-container { display: flex; flex-wrap: wrap; gap: 1.5rem 1rem; align-items: flex-end; }
         .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1 1 180px; min-width: 180px; }
         .search-group { flex: 2 1 300px; min-width: 300px; }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
-        .filter-group select { width: 100%; padding: 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
+        .filter-group select, .filter-group .search-container { width: 100%; }
+        .filter-group select { padding: 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
         .search-container {
-            display: flex; align-items: center; gap: 0.75rem; width: 100%;
+            display: flex; align-items: center; gap: 0.75rem;
             background-color: var(--bg-color); border: 1px solid var(--border-color);
             border-radius: 8px; padding: 0.25rem 1rem; transition: all 0.2s;
         }
         .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3); }
-        .search-container input { width: 100%; padding: 0.75rem 0.5rem; background-color: transparent; border: none; color: var(--text-color); font-size: 1.1rem; outline: none; }
+        .search-container input { width: 100%; padding: 0.5rem; background-color: transparent; border: none; color: var(--text-color); font-size: 1rem; outline: none; }
         
-        .actions-group { flex: 1 1 300px; }
+        .actions-group { flex: 1 1 320px; min-width: 320px;}
         .actions { display: flex; gap: 1rem; }
-        .action-item { display: flex; align-items: center; gap: 0.5rem; flex: 1; }
+        .action-item { flex: 1; }
         .action-item button {
             width: 100%; padding: 0.75rem; background-color: transparent; border: 1px solid var(--border-color);
             color: var(--text-muted-color); font-size: 1rem; border-radius: 8px; cursor: pointer;
@@ -157,16 +165,26 @@
         .action-item button:hover { background-color: var(--border-color); color: var(--text-color); }
         .action-item button:active { transform: scale(0.95); }
         
-        .help-q {
-            display: inline-block; margin-left: 6px; font-weight: normal; cursor: help;
-            opacity: 0.7; transition: opacity 0.2s; vertical-align: middle;
-        }
-        .help-q:hover { opacity: 1; }
-
         .summary-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 0.5rem; flex-wrap: wrap; gap: 1rem;}
         .results-summary { color: var(--text-muted-color); }
         .results-summary b { color: var(--primary-color); font-weight: 700; }
 
+        /* [개선] 테이블 로딩 상태 */
+        .table-wrapper { position: relative; }
+        .table-loader {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(26, 26, 46, 0.7);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 15;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        .table-loader.is-loading {
+            opacity: 1;
+            visibility: visible;
+        }
+        
         .table-container {
             overflow-x: auto; background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             border-radius: var(--border-radius-md); border: 1px solid var(--border-color);
@@ -176,14 +194,15 @@
         tbody tr:last-child td { border-bottom: none; }
         thead { background-color: rgba(26, 26, 46, 0.5); position: sticky; top: 0; z-index: 10; border-bottom: 2px solid var(--border-color); }
         th { cursor: pointer; user-select: none; font-weight: 500; color: var(--text-muted-color); font-size: 0.85rem; letter-spacing: 0.5px; }
-        tbody tr { transition: background-color 0.2s; }
-        tbody tr:hover { background-color: rgba(167, 139, 250, 0.1); }
+        tbody tr { transition: background-color 0.2s, transform 0.2s; }
+        tbody tr:hover { background-color: rgba(167, 139, 250, 0.1); transform: translateY(-3px); }
         td a { color: var(--text-color); text-decoration: none; font-weight: 500; transition: color 0.2s; }
         td a:hover { color: var(--primary-color); }
         .rating { font-weight: bold; }
         .details-btn { color: #fff; background: none; border: none; cursor: pointer; padding: 0.25rem; font-size: 1.5rem; line-height: 1; vertical-align: middle; transition: transform 0.2s; }
         .details-btn:hover { transform: scale(1.2); }
         .empty-row td { text-align: center; padding: 4rem; color: var(--text-muted-color); }
+        .empty-row svg { width: 64px; height: 64px; margin-bottom: 1rem; opacity: 0.5; }
         .col-instructor { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
         .col-topic { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
 
@@ -197,19 +216,21 @@
         .pagination button:disabled { opacity: 0.5; cursor: not-allowed; background-color: transparent; }
         .pagination button:active { transform: scale(0.95); }
         .pagination span { cursor: default; background-color: transparent; }
-
+        
+        /* [개선] 모달 애니메이션 */
         #modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000;
-            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000;
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #modal-content {
             background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md);
-            padding: 2rem; width: 90%; max-width: 700px; box-shadow: var(--shadow-md); animation: slideUp 0.3s ease;
+            padding: 2rem; width: 90%; max-width: 700px; box-shadow: var(--shadow-md); 
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             max-height: 80vh; overflow-y: auto;
         }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
         #modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
         #modal-title { font-size: 1.5rem; font-weight: 700; color: #fff; }
         #modal-close-btn { background: none; border: none; color: var(--text-muted-color); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
@@ -221,6 +242,49 @@
         
         .ai-section { border-top: 1px dashed var(--border-color); padding-top: 1.5rem; margin-top: 1.5rem; }
         .spinner-container { display: flex; align-items: center; gap: 1rem; color: var(--text-muted-color); }
+        
+        #ai-recommend-modal-input {
+             display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+        }
+        #ai-recommend-modal-input input {
+            flex-grow: 1; padding: 0.75rem; background-color: var(--bg-color);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-color); font-size: 1rem;
+        }
+        #ai-recommend-modal-input button {
+            background-color: var(--primary-color); color: #1a1a2e; font-weight: 700; border: none;
+            padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;
+        }
+        
+        /* [추가] 스크롤 최상단 이동 버튼 */
+        #scroll-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-color);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+            z-index: 999;
+        }
+        #scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
 
         .spinner {
             width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
@@ -266,6 +330,8 @@
     </div>
 </div>
 
+<button id="scroll-to-top" title="최상단으로 이동">↑</button>
+
 <script>
     // --- 전역 변수 및 상태 ---
     let companyName = '';
@@ -284,12 +350,26 @@
     const companyAddressInput = document.getElementById('company-address');
     const modalOverlay = document.getElementById('modal-overlay');
     const modalCloseBtn = document.getElementById('modal-close-btn');
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
 
     submitBtn.addEventListener('click', initializeApp);
     companyAddressInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') initializeApp(); });
     modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
     modalCloseBtn.addEventListener('click', closeModal);
     document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
+    
+    // [추가] 스크롤 이벤트
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            scrollToTopBtn.classList.add('visible');
+        } else {
+            scrollToTopBtn.classList.remove('visible');
+        }
+    });
+    scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo(0, 0);
+    });
+
     
     const columnMapping = {
         '강의 ID / 코스 ID': 'id', '강의 제목 / 코스 제목': 'title', '강사 이름': 'instructor',
@@ -420,8 +500,7 @@
                 <header class="app-header">
                     <h1>🚀 Udemy Business 강의 목록</h1>
                     <div class="header-meta">
-                         <div id="company-display">회사: <span>${companyName}</span><span class="help-q" title="현재 조회중인 회사 계정입니다.">❔</span></div>
-                         <span id="last-updated">데이터 업데이트: 2025-10-16</span>
+                         <div id="company-display" title="현재 조회중인 회사 계정입니다.">회사: <span>${companyName}</span></div>
                     </div>
                 </header>
 
@@ -436,39 +515,43 @@
                 </div>
 
                 <div class="controls-header">
+                    <div class="guide-bar">💡 각 항목에 마우스를 올리면 자세한 설명을 볼 수 있습니다.</div>
                     <div class="filters-container">
                         <div class="filter-group search-group">
-                            <label for="search">🔍 검색<span class="help-q" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다.">❔</span></label>
-                            <div class="search-container"><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
+                            <label for="search">🔍 검색</label>
+                            <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
                         </div>
                         <div class="filter-group">
-                            <label for="category-filter">🗂️ 카테고리<span class="help-q" title="특정 카테고리의 강의만 필터링합니다.">❔</span></label>
-                            <select id="category-filter"><option value="">모든 카테고리</option></select>
+                            <label for="category-filter">🗂️ 카테고리</label>
+                            <select id="category-filter" title="특정 카테고리의 강의만 필터링합니다."><option value="">모든 카테고리</option></select>
                         </div>
                         <div class="filter-group">
-                            <label for="difficulty-filter">📊 난이도<span class="help-q" title="특정 난이도의 강의만 필터링합니다.">❔</span></label>
-                            <select id="difficulty-filter"><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select>
+                            <label for="difficulty-filter">📊 난이도</label>
+                            <select id="difficulty-filter" title="특정 난이도의 강의만 필터링합니다."><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select>
                         </div>
                         <div class="filter-group">
-                            <label for="language-filter">🌐 언어<span class="help-q" title="특정 언어로 진행되는 강의만 필터링합니다.">❔</span></label>
-                            <select id="language-filter"><option value="">모든 언어</option></select>
+                            <label for="language-filter">🌐 언어</label>
+                            <select id="language-filter" title="특정 언어로 진행되는 강의만 필터링합니다."><option value="">모든 언어</option></select>
                         </div>
                         <div class="filter-group">
-                            <label for="subtitles-filter">💬 자막<span class="help-q" title="특정 언어의 자막을 지원하는 강의만 필터링합니다.">❔</span></label>
-                            <select id="subtitles-filter"><option value="">모든 자막</option></select>
+                            <label for="subtitles-filter">💬 자막</label>
+                            <select id="subtitles-filter" title="특정 언어의 자막을 지원하는 강의만 필터링합니다."><option value="">모든 자막</option></select>
                         </div>
                         <div class="filter-group">
-                             <label for="rows-per-page">👀 표시 개수<span class="help-q" title="한 페이지에 표시할 강의 수를 선택합니다.">❔</span></label>
-                            <select id="rows-per-page"><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
+                             <label for="rows-per-page">👀 표시 개수</label>
+                            <select id="rows-per-page" title="한 페이지에 표시할 강의 수를 선택합니다."><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
                         </div>
                         <div class="filter-group actions-group">
                             <label>⚙️ 기능</label>
                             <div class="actions">
                                 <div class="action-item">
-                                    <button id="download-csv">💾 CSV 저장</button><span class="help-q" title="현재 필터링된 목록을 CSV 파일로 저장합니다.">❔</span>
+                                    <button id="ai-recommend-btn" title="AI에게 직접 관심 분야를 알려주고 맞춤 강의를 추천받습니다.">🤖 AI 추천</button>
                                 </div>
                                 <div class="action-item">
-                                    <button id="reset-filters">✨ 초기화</button><span class="help-q" title="모든 필터와 정렬을 초기 상태로 되돌립니다.">❔</span>
+                                    <button id="download-csv" title="현재 필터링된 목록을 CSV 파일로 저장합니다.">💾 CSV 저장</button>
+                                </div>
+                                <div class="action-item">
+                                    <button id="reset-filters" title="모든 필터와 정렬을 초기 상태로 되돌립니다.">✨ 초기화</button>
                                 </div>
                             </div>
                         </div>
@@ -476,22 +559,28 @@
                 </div>
                 <div class="summary-bar">
                     <div class="results-summary" id="results-summary"></div>
+                    <div id="last-updated">데이터 업데이트: 2025-10-16</div>
                 </div>
-                <div class="table-container">
-                    <table>
-                        <thead><tr>
-                            <th data-sort="category">카테고리</th>
-                            <th data-sort="topic">강의 주제</th>
-                            <th data-sort="title">강의명 <span class="help-q" title="클릭 시 Udemy 강의 페이지로 이동합니다.">❔</span></th>
-                            <th data-sort="language">언어</th>
-                            <th data-sort="subtitles">자막</th>
-                            <th data-sort="difficulty">난이도</th>
-                            <th data-sort="rating">평점</th>
-                            <th>상세</th>
-                            <th data-sort="instructor">강사명</th>
-                        </tr></thead>
-                        <tbody id="course-table-body"></tbody>
-                    </table>
+                <div class="table-wrapper">
+                    <div class="table-container">
+                        <table>
+                            <thead><tr>
+                                <th data-sort="category">카테고리</th>
+                                <th data-sort="topic">강의 주제</th>
+                                <th data-sort="title" title="클릭 시 Udemy 강의 페이지로 이동합니다.">강의명</th>
+                                <th>상세</th>
+                                <th data-sort="language">언어</th>
+                                <th data-sort="subtitles">자막</th>
+                                <th data-sort="difficulty">난이도</th>
+                                <th data-sort="rating">평점</th>
+                                <th data-sort="instructor">강사명</th>
+                            </tr></thead>
+                            <tbody id="course-table-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="table-loader" id="table-loader">
+                        <div class="spinner"></div>
+                    </div>
                 </div>
                 <div class="pagination" id="pagination"></div>`;
             
@@ -506,6 +595,7 @@
             });
             document.getElementById('reset-filters').addEventListener('click', resetAllFilters);
             document.getElementById('download-csv').addEventListener('click', downloadCSV);
+            document.getElementById('ai-recommend-btn').addEventListener('click', showAIRecommendationModal);
             document.querySelector('thead').addEventListener('click', (e) => {
                 const header = e.target.closest('th');
                 if (header && header.dataset.sort) handleSort(header.dataset.sort);
@@ -576,58 +666,68 @@
     }
 
     function renderTable() {
-        rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
-        const tableBody = document.getElementById('course-table-body');
-        const searchTerm = document.getElementById('search').value.toLowerCase();
-        const selectedCategory = document.getElementById('category-filter').value;
-        const selectedDifficulty = document.getElementById('difficulty-filter').value;
-        const selectedLanguage = document.getElementById('language-filter').value;
-        const selectedSubtitle = document.getElementById('subtitles-filter').value;
+        // [개선] 테이블 로더 표시
+        const loader = document.getElementById('table-loader');
+        loader.classList.add('is-loading');
 
-        filteredCourses = originalData.filter(course => {
-            const searchCorpus = Object.values(course).join(' ').toLowerCase();
-            return (searchTerm === '' || searchCorpus.includes(searchTerm)) &&
-                   (selectedCategory === '' || (course.category && course.category.includes(selectedCategory))) &&
-                   (selectedDifficulty === '' || course.difficulty === selectedDifficulty) &&
-                   (selectedLanguage === '' || course.language === selectedLanguage) &&
-                   (selectedSubtitle === '' || (course.subtitles && course.subtitles.includes(selectedSubtitle)));
-        });
+        setTimeout(() => { // 실제 렌더링을 약간 지연시켜 로더가 보이게 함
+            rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
+            const tableBody = document.getElementById('course-table-body');
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const selectedCategory = document.getElementById('category-filter').value;
+            const selectedDifficulty = document.getElementById('difficulty-filter').value;
+            const selectedLanguage = document.getElementById('language-filter').value;
+            const selectedSubtitle = document.getElementById('subtitles-filter').value;
 
-        document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 검색됨`;
+            filteredCourses = originalData.filter(course => {
+                const searchCorpus = Object.values(course).join(' ').toLowerCase();
+                return (searchTerm === '' || searchCorpus.includes(searchTerm)) &&
+                    (selectedCategory === '' || (course.category && course.category.includes(selectedCategory))) &&
+                    (selectedDifficulty === '' || course.difficulty === selectedDifficulty) &&
+                    (selectedLanguage === '' || course.language === selectedLanguage) &&
+                    (selectedSubtitle === '' || (course.subtitles && course.subtitles.includes(selectedSubtitle)));
+            });
 
-        filteredCourses.sort((a, b) => {
-            let valA = a[sortColumn] || ''; let valB = b[sortColumn] || '';
-            if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
-            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-            return 0;
-        });
-        updateSortIndicators();
-        
-        const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
-        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+            document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 검색됨`;
 
-        const start = (currentPage - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        const paginatedCourses = filteredCourses.slice(start, end);
+            filteredCourses.sort((a, b) => {
+                let valA = a[sortColumn] || ''; let valB = b[sortColumn] || '';
+                if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+            updateSortIndicators();
+            
+            const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
+            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
-        if (paginatedCourses.length === 0) {
-            tableBody.innerHTML = `<tr class="empty-row"><td colspan="9">😥 일치하는 강의를 찾을 수 없습니다.</td></tr>`;
-        } else {
-            tableBody.innerHTML = paginatedCourses.map(course => `
-                <tr>
-                    <td>${course.category || ''}</td>
-                    <td class="col-topic" title="${course.topic || ''}">${course.topic || ''}</td>
-                    <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">${course.title}</a></td>
-                    <td>${course.language || 'N/A'}</td>
-                    <td>${course.subtitles || '없음'}</td>
-                    <td>${course.difficulty || ''}</td>
-                    <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
-                    <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
-                    <td class="col-instructor" title="${course.instructor || ''}">${course.instructor || ''}</td>
-                </tr>`).join('');
-        }
-        renderPagination(totalPages);
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedCourses = filteredCourses.slice(start, end);
+
+            if (paginatedCourses.length === 0) {
+                tableBody.innerHTML = `<tr class="empty-row"><td colspan="9">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <p>😥 일치하는 강의를 찾을 수 없습니다.</p>
+                </td></tr>`;
+            } else {
+                tableBody.innerHTML = paginatedCourses.map(course => `
+                    <tr>
+                        <td>${course.category || ''}</td>
+                        <td class="col-topic" title="${course.topic || ''}">${course.topic || ''}</td>
+                        <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">${course.title}</a></td>
+                        <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
+                        <td>${course.language || 'N/A'}</td>
+                        <td>${course.subtitles || '없음'}</td>
+                        <td>${course.difficulty || ''}</td>
+                        <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
+                        <td class="col-instructor" title="${course.instructor || ''}">${course.instructor || ''}</td>
+                    </tr>`).join('');
+            }
+            renderPagination(totalPages);
+            loader.classList.remove('is-loading'); // 로더 숨김
+        }, 100);
     }
     
     async function showCourseDetails(course) {
@@ -652,7 +752,6 @@
         `;
         modalOverlay.style.display = 'flex';
 
-        // AI 요약 호출 및 표시
         const aiData = await callGeminiAPI('summarize course', 'summarize', course);
         if(aiData) {
             const summaryList = aiData.summary.length > 0 ? `<ul>${aiData.summary.map(item => `<li>${item}</li>`).join('')}</ul>` : '<p>요약할 내용이 충분하지 않습니다.</p>';
@@ -663,6 +762,51 @@
         }
     }
 
+    // [추가] AI 추천 모달 표시 함수
+    function showAIRecommendationModal() {
+        const modalBody = document.getElementById('modal-body');
+        document.getElementById('modal-title').textContent = '🤖 AI 맞춤 강의 추천';
+        
+        modalBody.innerHTML = `
+            <p>학습하고 싶은 분야나 기술, 목표를 자유롭게 입력해보세요. AI가 최적의 강의를 찾아드릴게요!</p>
+            <div id="ai-recommend-modal-input">
+                <input type="text" id="ai-prompt" placeholder="예: 파이썬 데이터 분석, 신입사원을 위한 엑셀 스킬">
+                <button id="get-ai-recs">추천 받기</button>
+            </div>
+            <div id="ai-modal-results" class="recommendation-grid"></div>
+        `;
+        modalOverlay.style.display = 'flex';
+
+        document.getElementById('get-ai-recs').addEventListener('click', handleAIRecommendationRequest);
+        document.getElementById('ai-prompt').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') handleAIRecommendationRequest();
+        });
+    }
+
+    async function handleAIRecommendationRequest() {
+        const prompt = document.getElementById('ai-prompt').value;
+        if (!prompt) {
+            alert('키워드를 입력해주세요.');
+            return;
+        }
+        const resultsContainer = document.getElementById('ai-modal-results');
+        resultsContainer.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
+
+        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm: prompt.toLowerCase(), category: '' });
+        
+        if (recommendations && recommendations.length > 0) {
+            resultsContainer.innerHTML = recommendations.map(course => `
+                <div class="recommendation-card">
+                    <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
+                    <p>${generateRecommendation(course)}</p>
+                </div>
+            `).join('');
+        } else {
+            resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 강의를 찾지 못했어요. 다른 키워드로 시도해보세요.</p>';
+        }
+    }
+
+
     function closeModal() { modalOverlay.style.display = 'none'; }
     
     function handleFilters() {
@@ -672,7 +816,7 @@
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             updateAIRecommendations();
-        }, 500); // 사용자가 입력을 멈춘 후 0.5초 뒤에 AI 추천 실행
+        }, 500);
     }
 
     async function updateAIRecommendations() {
@@ -719,12 +863,7 @@
     function updateSortIndicators() {
         document.querySelectorAll('th[data-sort]').forEach(th => {
             let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
-            const helpSpanMatch = th.innerHTML.match(/<span .*?<\/span>/);
-            const helpSpan = helpSpanMatch ? helpSpanMatch[0] : '';
-            if(helpSpan) currentText = currentText.replace(th.querySelector('span').textContent, '');
-
-            th.innerHTML = currentText + (helpSpan || '');
-            
+            th.innerHTML = currentText;
             if (th.dataset.sort === sortColumn) {
                 th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
             }
@@ -771,5 +910,4 @@
 
 </body>
 </html>
-
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Udemy Business 인터랙티브 강의 목록</title>
+    <title>✨ Udemy Business 인터랙티브 강의 목록</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
@@ -16,20 +16,16 @@
             --text-color: #c9d1d9;
             --text-muted-color: #8b949e;
             --border-color: #30363d;
-            --border-radius-md: 10px;
+            --border-radius-md: 12px;
             --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
             --backdrop-blur: blur(16px);
         }
 
-        /* [개선] Aurora 배경 애니메이션 */
         body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.2), transparent 40%),
                         radial-gradient(circle at 80% 90%, rgba(200, 88, 255, 0.2), transparent 40%);
-            filter: blur(80px);
-            z-index: -1;
+            filter: blur(80px); z-index: -1;
             animation: aurora-flow 20s linear infinite;
         }
 
@@ -40,104 +36,108 @@
         }
 
         body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 2rem;
-            line-height: 1.6;
+            font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg-color);
+            color: var(--text-color); margin: 0; padding: 2rem; line-height: 1.6;
         }
 
         #initial-screen {
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; height: calc(100vh - 4rem); text-align: center;
-            transition: opacity 0.5s ease-out; max-width: 600px; margin: 0 auto;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: calc(100vh - 4rem); text-align: center; transition: opacity 0.5s ease-out;
+            max-width: 600px; margin: 0 auto;
         }
         #initial-screen h1 { font-size: 2.8rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
         #initial-screen p { font-size: 1.1rem; color: var(--text-muted-color); margin-bottom: 2rem; }
         .input-group {
             display: flex; background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
-            border-radius: var(--border-radius-md); padding: 0.5rem;
-            border: 1px solid var(--border-color); width: 100%; box-shadow: var(--shadow-md);
+            border-radius: var(--border-radius-md); padding: 0.5rem; border: 1px solid var(--border-color);
+            width: 100%; box-shadow: var(--shadow-md);
         }
         .input-group input { flex-grow: 1; background: transparent; border: none; color: var(--text-color); font-size: 1.1rem; padding: 0.75rem; outline: none; }
         .input-group button {
             display: flex; align-items: center; gap: 0.5rem; background-color: var(--primary-color);
-            color: #fff; border: none; padding: 0.75rem 1.75rem; border-radius: 6px; cursor: pointer;
-            font-weight: 500; transition: background-color 0.2s; font-size: 1rem;
+            color: #fff; border: none; padding: 0.75rem 1.75rem; border-radius: 8px; cursor: pointer;
+            font-weight: 500; transition: all 0.2s; font-size: 1rem;
         }
-        .input-group button:hover { background-color: var(--primary-hover-color); }
-        .input-group button:disabled { background-color: #555; cursor: not-allowed; opacity: 0.7; }
+        .input-group button:hover { background-color: var(--primary-hover-color); transform: translateY(-2px); }
+        .input-group button:active { transform: scale(0.95); }
+        .input-group button:disabled { background-color: #555; cursor: not-allowed; opacity: 0.7; transform: none; }
 
         #app-container { display: none; opacity: 0; transition: opacity 0.5s ease-in; max-width: 1400px; margin: 0 auto; }
 
         .controls-header {
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
-            padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 2rem;
+            padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
             border: 1px solid var(--border-color);
         }
         .search-container {
             display: flex; align-items: center; gap: 0.75rem; width: 100%;
             background-color: var(--bg-color); border: 1px solid var(--border-color);
-            border-radius: 6px; padding: 0.25rem 1rem; margin-bottom: 1.5rem; transition: all 0.2s;
+            border-radius: 8px; padding: 0.25rem 1rem; margin-bottom: 1.5rem; transition: all 0.2s;
         }
         .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3); }
         .search-container input { width: 100%; padding: 0.75rem 0.5rem; background-color: transparent; border: none; color: var(--text-color); font-size: 1.1rem; outline: none; }
-        .filters-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: center; }
+        .filters-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: flex-end; }
         .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
-        .filter-group select { width: 100%; padding: 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
-        .actions { display: flex; align-items: flex-end; }
+        .filter-group select { width: 100%; padding: 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         .actions button {
             width: 100%; padding: 0.75rem; background-color: transparent;
             border: 1px solid var(--border-color); color: var(--text-muted-color); font-size: 1rem;
-            border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex;
             align-items: center; justify-content: center; gap: 0.5rem;
         }
         .actions button:hover { background-color: var(--border-color); color: var(--text-color); }
-        .results-summary { margin-bottom: 1rem; color: var(--text-muted-color); }
+        .actions button:active { transform: scale(0.95); }
+        
+        .summary-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 0.5rem; }
+        .results-summary { color: var(--text-muted-color); }
         .results-summary b { color: var(--primary-color); font-weight: 700; }
+        #company-display {
+            background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
+            padding: 0.4rem 1rem; border-radius: 20px; border: 1px solid var(--border-color);
+            font-size: 0.9rem; font-weight: 500; color: var(--text-muted-color);
+        }
+        #company-display span { color: var(--text-color); font-weight: bold; }
 
         .table-container {
             overflow-x: auto; background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             border-radius: var(--border-radius-md); border: 1px solid var(--border-color);
         }
-        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        th, td { padding: 1.25rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1.25rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
         tbody tr:last-child td { border-bottom: none; }
         thead { background-color: rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 10; }
         th { cursor: pointer; user-select: none; font-weight: 500; color: var(--text-muted-color); }
-        .help-icon { cursor: help; color: var(--text-muted-color); font-size: 0.8rem; }
         tbody tr { transition: background-color 0.2s; }
         tbody tr:hover { background-color: rgba(88, 166, 255, 0.1); }
         td a { color: var(--text-color); text-decoration: none; font-weight: 500; transition: color 0.2s; }
         td a:hover { color: var(--primary-color); }
-        .rating { font-weight: bold; color: #ffd700; }
-        .details-btn { background: none; border: none; cursor: pointer; padding: 0.25rem; }
+        .rating { font-weight: bold; }
+        .details-btn { color: #fff; background: none; border: none; cursor: pointer; padding: 0.25rem; font-size: 1.5rem; line-height: 1; vertical-align: middle; transition: transform 0.2s; }
+        .details-btn:hover { transform: scale(1.2); }
         .empty-row td { text-align: center; padding: 4rem; color: var(--text-muted-color); }
+        .col-instructor { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
 
         .pagination { display: flex; justify-content: center; align-items: center; margin-top: 2.5rem; gap: 0.5rem; user-select: none; }
         .pagination button, .pagination span {
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             border: 1px solid var(--border-color); color: var(--text-color); padding: 0.6rem 1.1rem;
-            border-radius: 6px; cursor: pointer; transition: all 0.2s;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s;
         }
         .pagination button:hover, .pagination button.active { background-color: var(--primary-color); color: #fff; border-color: var(--primary-color); }
         .pagination button:disabled { opacity: 0.5; cursor: not-allowed; background-color: transparent; }
+        .pagination button:active { transform: scale(0.95); }
         .pagination span { cursor: default; background-color: transparent; }
 
-        /* [추가] 모달 스타일 */
         #modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center; z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000;
             animation: fadeIn 0.3s ease;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #modal-content {
-            background-color: var(--surface-color); border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-md); padding: 2rem; width: 90%; max-width: 700px;
-            box-shadow: var(--shadow-md); animation: slideUp 0.3s ease;
+            background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md);
+            padding: 2rem; width: 90%; max-width: 700px; box-shadow: var(--shadow-md); animation: slideUp 0.3s ease;
             max-height: 80vh; overflow-y: auto;
         }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -146,11 +146,10 @@
         #modal-close-btn { background: none; border: none; color: var(--text-muted-color); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
         #modal-close-btn:hover { color: #fff; }
         .modal-section h3 { font-size: 1.1rem; font-weight: 500; color: var(--primary-color); margin-bottom: 0.75rem; border-left: 3px solid var(--primary-color); padding-left: 0.75rem; }
-        .modal-section p, .modal-section ul { color: var(--text-color); margin: 0; padding: 0; font-size: 1rem; line-height: 1.7; }
+        .modal-section p, .modal-section ul { color: var(--text-color); margin: 0; padding: 0; font-size: 1rem; line-height: 1.7; word-break: keep-all; }
         .modal-section ul { list-style-position: inside; }
         .modal-section ul li { margin-bottom: 0.5rem; }
 
-        /* [추가] 로딩 스피너 */
         .spinner {
             width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
             border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;
@@ -161,8 +160,8 @@
 <body>
 
 <div id="initial-screen">
-    <h1>Udemy Business 강의 목록</h1>
-    <p>시작하려면 귀사의 Udemy Business 주소를 입력해주세요.</p>
+    <h1>🚀 Udemy Business 강의 목록</h1>
+    <p>회사 Udemy Business 주소를 입력하고 모든 강의를 만나보세요!</p>
     <div class="input-group">
         <input id="company-address" placeholder="회사 주소 (예: woongjin)" type="text" />
         <button id="submit-address">강의 목록 확인</button>
@@ -181,16 +180,9 @@
     </div>
 </div>
 
-
 <script>
-    // --- 아이콘 SVG ---
-    const ICONS = {
-        search: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
-        reset: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
-        details: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`
-    };
-
     // --- 전역 변수 및 상태 ---
+    let companyName = '';
     let companyUrl = '';
     let filteredCourses = [];
     let currentPage = 1;
@@ -205,7 +197,6 @@
     const submitBtn = document.getElementById('submit-address');
     const companyAddressInput = document.getElementById('company-address');
     const modalOverlay = document.getElementById('modal-overlay');
-    const modalContent = document.getElementById('modal-content');
     const modalCloseBtn = document.getElementById('modal-close-btn');
 
     // --- 이벤트 리스너 ---
@@ -221,6 +212,9 @@
         '평점': 'rating', '강의 헤드라인 / 소개 문구': 'headline', '학습 목표 / 배울 내용': 'objectives'
     };
 
+    // --- 유틸리티 함수 ---
+    const formatNumber = (num) => num.toLocaleString('ko-KR');
+
     async function loadCourseData() {
         return new Promise((resolve, reject) => {
             Papa.parse('courses_web.csv', {
@@ -232,16 +226,14 @@
                     }
                     const processedData = results.data.map(row => {
                         const newRow = {};
-                        for (const key in columnMapping) {
-                            if (row[key] !== undefined) newRow[columnMapping[key]] = row[key];
-                        }
+                        for (const key in columnMapping) if (row[key] !== undefined) newRow[columnMapping[key]] = row[key];
                         newRow.rating = parseFloat(newRow.rating) || 0;
                         return newRow;
                     }).filter(row => row.id && row.title);
                     resolve(processedData);
                 },
                 error: (error) => {
-                    alert("강의 데이터(CSV)를 불러오는 데 실패했습니다. 파일 경로를 확인해주세요.");
+                    alert("강의 데이터(CSV)를 불러오는 데 실패했습니다.");
                     reject(error);
                 }
             });
@@ -249,9 +241,9 @@
     }
 
     async function initializeApp() {
-        const address = companyAddressInput.value.trim();
-        if (!address) { alert('회사 주소를 입력해주세요.'); return; }
-        companyUrl = `https://${address}.udemy.com/course/`;
+        companyName = companyAddressInput.value.trim();
+        if (!companyName) { alert('회사 주소를 입력해주세요.'); return; }
+        companyUrl = `https://${companyName}.udemy.com/course/`;
         
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<div class="spinner"></div> 데이터 로딩 중...`;
@@ -265,24 +257,30 @@
             initialScreen.style.display = 'none';
             appContainer.innerHTML = `
                 <div class="controls-header">
-                    <div class="search-container"> ${ICONS.search} <input type="text" id="search" placeholder="강의명, 강사, 주제, 학습 내용 등 자유롭게 검색하세요..."> </div>
+                    <div class="search-container"> 🔍 <input type="text" id="search" placeholder="강의명, 강사, 주제, 학습 내용 등 자유롭게 검색하세요..."> </div>
                     <div class="filters-container">
-                        <div class="filter-group"> <label for="category-filter">카테고리</label> <select id="category-filter"><option value="">모든 카테고리</option></select> </div>
-                        <div class="filter-group"> <label for="difficulty-filter">난이도</label> <select id="difficulty-filter"><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select> </div>
-                        <div class="filter-group"> <label for="rows-per-page">표시 개수</label> <select id="rows-per-page"><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select> </div>
-                        <div class="actions"> <button id="reset-filters">${ICONS.reset} 초기화</button> </div>
+                        <div class="filter-group"> <label for="category-filter">🗂️ 카테고리</label> <select id="category-filter"><option value="">모든 카테고리</option></select> </div>
+                        <div class="filter-group"> <label for="difficulty-filter">📊 난이도</label> <select id="difficulty-filter"><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select> </div>
+                        <div class="filter-group"> <label for="rows-per-page">👀 표시 개수</label> <select id="rows-per-page"><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select> </div>
+                        <div class="actions">
+                             <button id="download-csv">💾 CSV 저장</button>
+                             <button id="reset-filters">✨ 초기화</button>
+                        </div>
                     </div>
                 </div>
-                <div class="results-summary" id="results-summary"></div>
+                <div class="summary-bar">
+                    <div class="results-summary" id="results-summary"></div>
+                    <div id="company-display">회사: <span>${companyName}</span></div>
+                </div>
                 <div class="table-container">
                     <table>
                         <thead><tr>
-                            <th data-sort="title">강의명 <span class="help-icon" title="클릭 시 Udemy 강의 페이지로 이동합니다.">?</span> <span class="sort-indicator"></span></th>
-                            <th data-sort="instructor">강사명 <span class="sort-indicator"></span></th>
                             <th data-sort="category">카테고리 <span class="sort-indicator"></span></th>
+                            <th data-sort="title">강의명 <span title="클릭 시 Udemy 강의 페이지로 이동합니다.">❔</span> <span class="sort-indicator"></span></th>
                             <th data-sort="difficulty">난이도 <span class="sort-indicator"></span></th>
                             <th data-sort="rating">평점 <span class="sort-indicator"></span></th>
-                            <th>상세보기</th>
+                            <th>상세</th>
+                            <th data-sort="instructor">강사명 <span class="sort-indicator"></span></th>
                         </tr></thead>
                         <tbody id="course-table-body"></tbody>
                     </table>
@@ -297,6 +295,7 @@
             document.getElementById('difficulty-filter').addEventListener('change', handleFilters);
             document.getElementById('rows-per-page').addEventListener('change', handleFilters);
             document.getElementById('reset-filters').addEventListener('click', resetAllFilters);
+            document.getElementById('download-csv').addEventListener('click', downloadCSV);
             document.querySelector('thead').addEventListener('click', (e) => {
                 const header = e.target.closest('th');
                 if (header && header.dataset.sort) handleSort(header.dataset.sort);
@@ -304,8 +303,7 @@
             document.getElementById('course-table-body').addEventListener('click', (e) => {
                 const detailsButton = e.target.closest('.details-btn');
                 if (detailsButton) {
-                    const courseId = detailsButton.dataset.id;
-                    const course = originalData.find(c => c.id === courseId);
+                    const course = originalData.find(c => c.id === detailsButton.dataset.id);
                     if (course) showCourseDetails(course);
                 }
             });
@@ -316,13 +314,9 @@
     }
 
     function resetAllFilters() {
-        document.getElementById('search').value = '';
-        document.getElementById('category-filter').value = '';
-        document.getElementById('difficulty-filter').value = '';
+        ['search', 'category-filter', 'difficulty-filter'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('rows-per-page').value = '15';
-        sortColumn = 'title';
-        sortDirection = 'asc';
-        currentPage = 1;
+        sortColumn = 'title'; sortDirection = 'asc'; currentPage = 1;
         renderTable();
     }
 
@@ -335,6 +329,22 @@
             categoryFilterEl.appendChild(option);
         });
     }
+    
+    function downloadCSV() {
+        if (filteredCourses.length === 0) {
+            alert("다운로드할 데이터가 없습니다.");
+            return;
+        }
+        const csv = Papa.unparse(filteredCourses);
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `${companyName}_udemy_courses.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
     function renderTable() {
         rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
@@ -345,13 +355,12 @@
 
         filteredCourses = originalData.filter(course => {
             const searchCorpus = `${course.title||''} ${course.instructor||''} ${course.topic||''} ${course.headline||''} ${course.objectives||''}`.toLowerCase();
-            const matchesSearch = searchTerm === '' || searchCorpus.includes(searchTerm);
-            const matchesCategory = selectedCategory === '' || (course.category && course.category.includes(selectedCategory));
-            const matchesDifficulty = selectedDifficulty === '' || course.difficulty === selectedDifficulty;
-            return matchesSearch && matchesCategory && matchesDifficulty;
+            return (searchTerm === '' || searchCorpus.includes(searchTerm)) &&
+                   (selectedCategory === '' || (course.category && course.category.includes(selectedCategory))) &&
+                   (selectedDifficulty === '' || course.difficulty === selectedDifficulty);
         });
 
-        document.getElementById('results-summary').innerHTML = `총 <b>${originalData.length}</b>개의 강의 중 <b>${filteredCourses.length}</b>개의 결과를 찾았습니다.`;
+        document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 검색됨`;
 
         filteredCourses.sort((a, b) => {
             let valA = a[sortColumn] || ''; let valB = b[sortColumn] || '';
@@ -369,23 +378,22 @@
         const end = start + rowsPerPage;
         const paginatedCourses = filteredCourses.slice(start, end);
 
-        if(paginatedCourses.length === 0){
-            tableBody.innerHTML = `<tr class="empty-row"><td colspan="6">일치하는 강의를 찾을 수 없습니다.</td></tr>`;
+        if (paginatedCourses.length === 0) {
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="6">😥 일치하는 강의를 찾을 수 없습니다.</td></tr>`;
         } else {
             tableBody.innerHTML = paginatedCourses.map(course => `
                 <tr>
-                    <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">${course.title}</a></td>
-                    <td>${course.instructor || ''}</td>
                     <td>${course.category || ''}</td>
+                    <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">${course.title}</a></td>
                     <td>${course.difficulty || ''}</td>
                     <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
-                    <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">${ICONS.details}</button></td>
+                    <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
+                    <td class="col-instructor" title="${course.instructor || ''}">${course.instructor || ''}</td>
                 </tr>`).join('');
         }
         renderPagination(totalPages);
     }
-    
-    // [추가] 상세 정보 모달 표시/숨김 함수
+
     function showCourseDetails(course) {
         document.getElementById('modal-title').textContent = course.title;
         const objectivesHtml = course.objectives 
@@ -393,15 +401,8 @@
             : '<p>제공된 정보가 없습니다.</p>';
         
         document.getElementById('modal-body').innerHTML = `
-            <div class="modal-section">
-                <h3>강의 소개</h3>
-                <p>${course.headline || '제공된 소개가 없습니다.'}</p>
-            </div>
-            <br>
-            <div class="modal-section">
-                <h3>학습 목표</h3>
-                ${objectivesHtml}
-            </div>
+            <div class="modal-section"> <h3>📜 강의 소개</h3> <p>${course.headline || '제공된 소개가 없습니다.'}</p> </div> <br>
+            <div class="modal-section"> <h3>🎯 학습 목표</h3> ${objectivesHtml} </div>
         `;
         modalOverlay.style.display = 'flex';
     }
@@ -432,11 +433,6 @@
             if (page === currentPage) button.classList.add('active');
             return button;
         };
-        const createSpan = (text) => {
-            const span = document.createElement('span');
-            span.textContent = text;
-            return span;
-        };
 
         const prevButton = createButton('이전', currentPage - 1);
         prevButton.disabled = currentPage === 1;
@@ -454,7 +450,7 @@
         }
 
         pageNumbers.forEach(num => {
-            paginationContainer.appendChild(num === '...' ? createSpan('...') : createButton(num, num));
+            paginationContainer.appendChild(num === '...' ? Object.assign(document.createElement('span'), {textContent: '...'}) : createButton(num, num));
         });
 
         const nextButton = createButton('다음', currentPage + 1);

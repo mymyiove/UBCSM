@@ -397,8 +397,8 @@
     let filteredCourses = [];
     let currentPage = 1;
     let rowsPerPage = 15;
-    let sortColumn = 'title';
-    let sortDirection = 'asc';
+    let sortColumn = 'relevance';
+    let sortDirection = 'desc';
     let originalData = [];
     let debounceTimer;
 
@@ -738,7 +738,6 @@
             document.querySelector('thead').addEventListener('click', (e) => {
                 const header = e.target.closest('th');
                 if (header && header.dataset.sort) {
-                    // [수정] 헤더 클릭 시에도 정렬 드롭다운과 연동되도록
                     const sortOrderSelect = document.getElementById('sort-order');
                     if (sortOrderSelect.value !== 'relevance') {
                         sortOrderSelect.value = 'relevance';
@@ -1024,8 +1023,13 @@
         resultsContainer.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
 
         const { searchTerm, difficulty } = extractKeywordsFromPrompt(prompt);
-        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, difficulty, basis: 'direct' });
+        let recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, difficulty, basis: 'direct' });
         
+        // [수정] 결과 없을 시 난이도 제외하고 재검색
+        if (recommendations && recommendations.length === 0 && difficulty) {
+            recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, basis: 'direct' });
+        }
+
         if (recommendations && recommendations.length > 0) {
             resultsContainer.innerHTML = recommendations.map(course => `
                 <div class="recommendation-card">
@@ -1102,7 +1106,6 @@
         document.querySelectorAll('th[data-sort]').forEach(th => {
             let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
             th.innerHTML = currentText;
-            // '적합도순'이 아닐 때만 테이블 헤더 정렬 표시
             if (sortOrder === 'relevance' && th.dataset.sort === sortColumn) {
                 th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
             }
@@ -1149,5 +1152,4 @@
 
 </body>
 </html>
-
 

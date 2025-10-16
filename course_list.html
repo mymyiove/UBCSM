@@ -20,7 +20,9 @@
             --shadow-soft: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
             --backdrop-blur: blur(16px);
-            --header-height: 125px;
+            /* --- 수정: 스티키 헤더의 top 위치를 결정하는 변수 --- */
+            /* 최상단 헤더의 높이를 고려하여 설정합니다. */
+            --sticky-header-top: 125px;
         }
 
         body::before {
@@ -273,11 +275,9 @@
             overflow-x: auto;
         }
         
-        /* --- 수정: 테이블 헤더 렌더링 오류 최종 수정 --- */
         table {
             width: 100%;
-            border-collapse: separate; /* collapse 대신 separate 사용 */
-            border-spacing: 0; /* 셀 간격 제거 */
+            border-collapse: collapse; /* 원상 복구 */
         }
         th, td {
             padding: 1.25rem 1.5rem; text-align: left;
@@ -285,14 +285,19 @@
             white-space: nowrap;
         }
         tbody tr:last-child td { border-bottom: none; }
+        
+        /* --- 수정: 테이블 헤더 오류 최종 수정 --- */
         thead {
-            background-color: var(--bg-color); /* 불투명 배경으로 겹침 방지 */
-            position: sticky; top: var(--header-height); z-index: 20;
+            /* thead 자체에는 position sticky를 적용하지 않음 */
+            z-index: 20; 
         }
         th {
+            position: sticky; /* th(셀)에 직접 sticky 적용 */
+            top: var(--sticky-header-top);
+            background-color: var(--bg-color); /* 스크롤 시 아래 내용 가리기 위한 배경색 */
+            
             cursor: pointer; user-select: none; font-weight: 500;
             color: var(--text-muted-color); font-size: 0.85rem; letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border-color);
         }
         
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
@@ -336,13 +341,11 @@
         #modal-close-btn { background: none; border: none; color: var(--text-muted-color); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
         #modal-close-btn:hover { color: #fff; }
         
-        /* --- 수정: 모달 구분선 UI 개선 --- */
         .modal-section h3 { font-size: 1.1rem; font-weight: 500; color: var(--primary-color); margin-bottom: 0.75rem; border-left: 3px solid var(--primary-color); padding-left: 0.75rem; }
         .modal-section p, .modal-section ul { color: var(--text-color); margin: 0; padding: 0; font-size: 1rem; line-height: 1.7; word-break: keep-all; }
         .modal-section ul { list-style-position: inside; }
         .modal-section ul li { margin-bottom: 0.5rem; }
         
-        /* 각 섹션 사이에만 구분선이 생기도록 수정 */
         .modal-section + .modal-section {
             border-top: 1px solid var(--border-color);
             margin-top: 1.5rem;
@@ -538,10 +541,8 @@
                 const { objectives, headline, category } = course;
                 const summary = [];
                 
-                // 첫 문장은 카테고리를 활용해 생성
                 summary.push(`${(category || '').split(',')[0]} 분야의 핵심 역량을 다루는 실용적인 강의입니다.`);
                 
-                // 학습 목표와 소개 문구에서 핵심 기술/키워드 추출
                 const skillKeywords = ['Python', 'Excel', 'Java', 'React', 'JavaScript', 'AWS', '데이터 분석', '머신러닝', '마케팅', '영업', '회계', '디자인'];
                 const corpus = (objectives + ' ' + headline).toLowerCase();
                 const foundSkills = skillKeywords.filter(skill => corpus.includes(skill.toLowerCase()));
@@ -549,7 +550,6 @@
                 if (foundSkills.length > 0) {
                     summary.push(`실무에 필수적인 **${foundSkills.join(', ')}** 등의 기술을 집중적으로 학습합니다.`);
                 } else if (objectives) {
-                    // 키워드가 없으면, 학습 목표 중 한 줄을 가져와 변형
                     const objectiveLines = objectives.split('\n').filter(line => line.trim().length > 15);
                     if(objectiveLines[1]) {
                         summary.push(`'${objectiveLines[1].trim().replace(/^•\s*/, '')}' 등 실무 중심의 기술을 학습합니다.`);
@@ -562,10 +562,9 @@
 
             // 2. 추천 대상 생성 로직
             const createRecommendedFor = (course) => {
-                const { difficulty, category, title } = course;
+                const { difficulty, category } = course;
                 const recommendedFor = [];
 
-                // 난이도에 따라 추천 대상 생성
                 switch(difficulty) {
                     case 'Beginner':
                         recommendedFor.push(`**${(category || '').split(',')[0]} 분야에 처음 입문**하는 분`);
@@ -581,7 +580,6 @@
                         break;
                 }
 
-                // 카테고리에 따라 추가 추천 대상 생성
                 const lowerCategory = (category || '').toLowerCase();
                 if (lowerCategory.includes('development') || lowerCategory.includes('software')) {
                     recommendedFor.push('**실무 프로젝트 경험**이 필요한 예비 개발자');
@@ -1087,7 +1085,6 @@
             ? `<ul>${course.objectives.replace(/["\[\]]/g, '').split('\n').filter(line => line.trim()).map(line => `<li>${line.trim().replace(/^•\s*/, '')}</li>`).join('')}</ul>`
             : '<p>정보 없음</p>';
         
-        // --- 수정: 모달 UI 개선을 위해 HTML 구조 변경 (ai-section 클래스 제거) ---
         modalBody.innerHTML = `
             <div class="modal-section" id="ai-summary-section">
                 <h3>✨ AI 핵심 요약</h3>
@@ -1176,124 +1173,4 @@
         }
 
         if (recommendations && recommendations.length > 0) {
-            resultsContainer.innerHTML = recommendations.map(course => `
-                <div class="recommendation-card">
-                    <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
-                    <p>${generateRecommendation(course)}</p>
-                     <div class="card-footer">
-                        <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 강의를 찾지 못했어요. 다른 키워드로 시도해보세요.</p>';
-        }
-    }
-
-
-    function closeModal() { modalOverlay.style.display = 'none'; }
-    
-    function handleFilters() {
-        currentPage = 1;
-        renderTable();
-        
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            updateAIRecommendations();
-        }, 500);
-    }
-
-    async function updateAIRecommendations() {
-        const container = document.getElementById('ai-recommendations-container');
-        const grid = container.querySelector('.recommendation-grid');
-        const searchTerm = document.getElementById('search').value.toLowerCase();
-        const selectedCategory = document.getElementById('category-filter').value;
-        
-        if (!searchTerm && !selectedCategory) {
-            container.style.display = 'none';
-            return;
-        }
-
-        container.style.display = 'block';
-        grid.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
-
-        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, category: selectedCategory, basis: 'contextual' });
-        
-        if (recommendations && recommendations.length > 0) {
-            container.querySelector('h2').textContent = `✨ "${searchTerm || selectedCategory}" 관련 AI 스마트 추천`;
-            grid.innerHTML = recommendations.map(course => `
-                <div class="recommendation-card">
-                    <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
-                    <p>${generateRecommendation(course)}</p>
-                     <div class="card-footer">
-                        <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-             container.querySelector('h2').textContent = `✨ AI 스마트 추천`;
-             grid.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 다른 강의를 찾지 못했어요.</p>';
-        }
-    }
-
-    function handleSort(column) {
-        if (sortColumn === column) {
-            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            sortColumn = column;
-            sortDirection = 'asc';
-        }
-        currentPage = 1;
-        renderTable();
-    }
-    
-    function updateSortIndicators(sortOrder) {
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-            let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
-            th.innerHTML = currentText;
-            if (sortOrder === 'relevance' && th.dataset.sort === sortColumn) {
-                th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
-            }
-        });
-    }
-
-    function renderPagination(totalPages) {
-        const paginationContainer = document.getElementById('pagination');
-        paginationContainer.innerHTML = '';
-        if (totalPages <= 1) return;
-
-        const createButton = (text, page) => {
-            const button = document.createElement('button');
-            button.textContent = text;
-            button.addEventListener('click', () => { currentPage = page; renderTable(); });
-            if (page === currentPage) button.classList.add('active');
-            return button;
-        };
-
-        const prevButton = createButton('이전', currentPage - 1);
-        prevButton.disabled = currentPage === 1;
-        paginationContainer.appendChild(prevButton);
-
-        let pageNumbers = [];
-        if (totalPages <= 7) {
-            for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
-        } else {
-            pageNumbers = [1];
-            if (currentPage > 3) pageNumbers.push('...');
-            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pageNumbers.push(i);
-            if (currentPage < totalPages - 2) pageNumbers.push('...');
-            pageNumbers.push(totalPages);
-        }
-
-        pageNumbers.forEach(num => {
-            paginationContainer.appendChild(num === '...' ? Object.assign(document.createElement('span'), {textContent: '...'}) : createButton(num, num));
-        });
-
-        const nextButton = createButton('다음', currentPage + 1);
-        nextButton.disabled = currentPage === totalPages;
-        paginationContainer.appendChild(nextButton);
-    }
-</script>
-
-</body>
-</html>
+            resultsContainer.innerHTML = recommendations

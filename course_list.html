@@ -310,7 +310,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1400px;
+            min-width: 1400px; 
         }
         thead {
             position: sticky;
@@ -502,7 +502,7 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.012 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.013 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
 </footer>
 
 <script>
@@ -635,7 +635,7 @@
                         }
                         newRow.rating = parseFloat(newRow.rating) || 0;
                         newRow.enrollments = parseInt(newRow.enrollments, 10) || 0;
-                        // --- 수정: 날짜 파싱 오류 방지 ---
+                        
                         const dateValue = row['최근 업데이트 날짜'];
                         newRow.lastUpdated = dateValue ? new Date(dateValue.replace(/\./g, '-')) : null;
                         

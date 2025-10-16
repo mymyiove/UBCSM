@@ -113,6 +113,7 @@
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
             border: 1px solid var(--border-color);
+            padding-top: 2rem;
         }
         .recommendation-header {
             display: flex;
@@ -246,7 +247,7 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 1.25rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
         tbody tr:last-child td { border-bottom: none; }
-        thead { background-color: rgba(26, 26, 46, 0.5); position: sticky; top: var(--header-height); z-index: 10; border-bottom: 2px solid var(--border-color); }
+        thead { background-color: rgba(26, 26, 46, 0.5); position: sticky; top: var(--header-height); z-index: 20; border-bottom: 2px solid var(--border-color); }
         th { cursor: pointer; user-select: none; font-weight: 500; color: var(--text-muted-color); font-size: 0.85rem; letter-spacing: 0.5px; }
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
         tbody tr:hover { background-color: rgba(167, 139, 250, 0.1); transform: translateY(-3px); }
@@ -448,7 +449,7 @@
         'Finance & Accounting': '💰', 'Marketing': '📈', 'Office Productivity': '📊',
         'Personal Development': '🌱', 'Design': '🎨', 'Lifestyle': '🧘',
         'Photography & Video': '📸', 'Health & Fitness': '💪', 'Music': '🎵',
-        'Teaching & Academics': '🏫'
+        'Teaching & Academics': '🏫', 'AI': '🤖', 'Cloud': '☁️', 'Security': '🛡️'
     };
     const getCategoryEmoji = (category) => {
         if (!category) return '📁';

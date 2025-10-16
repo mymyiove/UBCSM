@@ -240,7 +240,6 @@
         .action-item button:hover { background-color: var(--border-color); color: var(--text-color); }
         .action-item button:active { transform: scale(0.95); }
         
-        /* --- 수정 1: '탐험 목록' 섹션을 감싸는 컨테이너 스타일 추가 --- */
         .list-container {
             background-color: var(--surface-color);
             backdrop-filter: var(--backdrop-blur);
@@ -272,17 +271,13 @@
         
         .table-container {
             overflow-x: auto;
-            /* --- 수정 1: 컨테이너가 생겼으므로 기존 카드 스타일 제거 --- */
-            background-color: transparent;
-            backdrop-filter: none;
-            border-radius: 0;
-            border: none;
         }
-        /* --- 수정 2: 테이블 헤더 렌더링 오류 해결 --- */
+        
+        /* --- 수정: 테이블 헤더 렌더링 오류 최종 수정 --- */
         table {
             width: 100%;
-            border-collapse: separate; /* collapse에서 separate로 변경 */
-            border-spacing: 0;
+            border-collapse: separate; /* collapse 대신 separate 사용 */
+            border-spacing: 0; /* 셀 간격 제거 */
         }
         th, td {
             padding: 1.25rem 1.5rem; text-align: left;
@@ -291,17 +286,15 @@
         }
         tbody tr:last-child td { border-bottom: none; }
         thead {
-            background-color: var(--bg-color); /* 불투명 배경 유지 */
+            background-color: var(--bg-color); /* 불투명 배경으로 겹침 방지 */
             position: sticky; top: var(--header-height); z-index: 20;
-            /* thead 자체의 border-bottom은 separate 모드에서 동작하지 않으므로 제거 */
         }
         th {
             cursor: pointer; user-select: none; font-weight: 500;
             color: var(--text-muted-color); font-size: 0.85rem; letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border-color); /* th 셀에 직접 두꺼운 하단 테두리 적용 */
+            border-bottom: 2px solid var(--border-color);
         }
-        /* --- 수정 2 끝 --- */
-
+        
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
         tbody tr:hover { background-color: rgba(167, 139, 250, 0.1); transform: translateY(-3px); }
         td a { color: var(--text-color); text-decoration: none; font-weight: 500; transition: color 0.2s; }
@@ -342,12 +335,19 @@
         #modal-title { font-size: 1.5rem; font-weight: 700; color: #fff; }
         #modal-close-btn { background: none; border: none; color: var(--text-muted-color); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
         #modal-close-btn:hover { color: #fff; }
+        
+        /* --- 수정: 모달 구분선 UI 개선 --- */
         .modal-section h3 { font-size: 1.1rem; font-weight: 500; color: var(--primary-color); margin-bottom: 0.75rem; border-left: 3px solid var(--primary-color); padding-left: 0.75rem; }
         .modal-section p, .modal-section ul { color: var(--text-color); margin: 0; padding: 0; font-size: 1rem; line-height: 1.7; word-break: keep-all; }
         .modal-section ul { list-style-position: inside; }
         .modal-section ul li { margin-bottom: 0.5rem; }
         
-        .ai-section { border-top: 1px dashed var(--border-color); padding-top: 1.5rem; margin-top: 1.5rem; }
+        /* 각 섹션 사이에만 구분선이 생기도록 수정 */
+        .modal-section + .modal-section {
+            border-top: 1px solid var(--border-color);
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+        }
         .spinner-container { display: flex; align-items: center; gap: 1rem; color: var(--text-muted-color); }
         
         #ai-recommend-modal-input {
@@ -528,36 +528,77 @@
         '자바': 'java', '엑셀': 'excel', '리액트': 'react', '디자인': 'design'
     };
 
-    // --- AI 기능 시뮬레이션 ---
+    /* --- 수정: AI 기능 로직 대폭 업그레이드 --- */
     async function callGeminiAPI(prompt, type, context) {
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
 
         if (type === 'summarize' && context) {
-            const createSummary = (objectives, category) => {
-                const lines = objectives.split('\n').filter(line => line.trim().length > 10);
-                if (lines.length === 0) return ["이 강의의 핵심 내용을 요약 중입니다."];
+            // 1. AI 핵심 요약 생성 로직
+            const createSummary = (course) => {
+                const { objectives, headline, category } = course;
                 const summary = [];
-                summary.push(`${category.split(',')[0]} 분야의 핵심 역량을 다루는 올인원 과정입니다.`);
-                const skillKeywords = ['Python', 'Excel', 'Java', 'React', '데이터 분석', '머신러닝', '마케팅', '영업', '회계'];
-                const foundSkills = skillKeywords.filter(skill => objectives.toLowerCase().includes(skill.toLowerCase()));
+                
+                // 첫 문장은 카테고리를 활용해 생성
+                summary.push(`${(category || '').split(',')[0]} 분야의 핵심 역량을 다루는 실용적인 강의입니다.`);
+                
+                // 학습 목표와 소개 문구에서 핵심 기술/키워드 추출
+                const skillKeywords = ['Python', 'Excel', 'Java', 'React', 'JavaScript', 'AWS', '데이터 분석', '머신러닝', '마케팅', '영업', '회계', '디자인'];
+                const corpus = (objectives + ' ' + headline).toLowerCase();
+                const foundSkills = skillKeywords.filter(skill => corpus.includes(skill.toLowerCase()));
+                
                 if (foundSkills.length > 0) {
-                    summary.push(`${foundSkills.join(', ')} 등 실무에 필수적인 기술들을 집중적으로 학습합니다.`);
-                } else if (lines[1]) {
-                    summary.push(lines[1].replace(/배웁니다|합니다|있습니다/g, '학습합니다.').trim());
-                } else {
-                     summary.push('실무 중심의 예제를 통해 개념을 확실히 이해할 수 있습니다.');
+                    summary.push(`실무에 필수적인 **${foundSkills.join(', ')}** 등의 기술을 집중적으로 학습합니다.`);
+                } else if (objectives) {
+                    // 키워드가 없으면, 학습 목표 중 한 줄을 가져와 변형
+                    const objectiveLines = objectives.split('\n').filter(line => line.trim().length > 15);
+                    if(objectiveLines[1]) {
+                        summary.push(`'${objectiveLines[1].trim().replace(/^•\s*/, '')}' 등 실무 중심의 기술을 학습합니다.`);
+                    }
                 }
-                summary.push(`초보자도 쉽게 따라올 수 있도록 체계적인 커리큘럼으로 구성되어 있습니다.`);
-                return summary.slice(0, 3);
+                
+                summary.push(`체계적인 커리큘럼을 통해 수강생의 성장을 돕습니다.`);
+                return summary;
             };
 
-            const summaryPoints = createSummary(context.objectives, context.category);
-            const recommendedFor = [
-                `${context.category ? context.category.split(',')[0] : '해당 분야'} 입문자`,
-                `실무 역량 강화가 필요한 주니어`,
-                `최신 트렌드를 빠르게 습득하고 싶은 분`
-            ];
-            return { summary: summaryPoints, recommendedFor: recommendedFor };
+            // 2. 추천 대상 생성 로직
+            const createRecommendedFor = (course) => {
+                const { difficulty, category, title } = course;
+                const recommendedFor = [];
+
+                // 난이도에 따라 추천 대상 생성
+                switch(difficulty) {
+                    case 'Beginner':
+                        recommendedFor.push(`**${(category || '').split(',')[0]} 분야에 처음 입문**하는 분`);
+                        break;
+                    case 'Intermediate':
+                        recommendedFor.push(`기본기를 넘어 **실무 역량을 강화하고 싶은 주니어**`);
+                        break;
+                    case 'Expert':
+                        recommendedFor.push(`**전문성을 한 단계 높이고 싶은 시니어 및 전문가**`);
+                        break;
+                    case 'All Levels':
+                        recommendedFor.push(`**수준에 관계없이 핵심 역량을 마스터**하고 싶은 분`);
+                        break;
+                }
+
+                // 카테고리에 따라 추가 추천 대상 생성
+                const lowerCategory = (category || '').toLowerCase();
+                if (lowerCategory.includes('development') || lowerCategory.includes('software')) {
+                    recommendedFor.push('**실무 프로젝트 경험**이 필요한 예비 개발자');
+                } else if (lowerCategory.includes('business') || lowerCategory.includes('marketing')) {
+                     recommendedFor.push('**데이터 기반의 전략적인 의사결정**이 필요한 분');
+                } else if (lowerCategory.includes('design')) {
+                    recommendedFor.push('**매력적인 포트폴리오**를 만들고 싶은 디자이너');
+                }
+                
+                recommendedFor.push('최신 트렌드를 빠르게 습득하고 싶은 모든 학습자');
+                return recommendedFor;
+            };
+
+            const summaryPoints = createSummary(context);
+            const recommendedForPoints = createRecommendedFor(context);
+            
+            return { summary: summaryPoints, recommendedFor: recommendedForPoints };
         }
 
         if (type === 'recommend' && context) {
@@ -691,7 +732,6 @@
         initialScreen.style.opacity = '0';
         setTimeout(() => {
             initialScreen.style.display = 'none';
-            // --- 수정 1: '탐험 목록' 섹션 전체를 .list-container로 감싸도록 HTML 구조 변경 ---
             appContainer.innerHTML = `
                 <div class="app-header-wrapper">
                     <header class="app-header">
@@ -1047,12 +1087,13 @@
             ? `<ul>${course.objectives.replace(/["\[\]]/g, '').split('\n').filter(line => line.trim()).map(line => `<li>${line.trim().replace(/^•\s*/, '')}</li>`).join('')}</ul>`
             : '<p>정보 없음</p>';
         
+        // --- 수정: 모달 UI 개선을 위해 HTML 구조 변경 (ai-section 클래스 제거) ---
         modalBody.innerHTML = `
-            <div class="modal-section ai-section" id="ai-summary-section">
+            <div class="modal-section" id="ai-summary-section">
                 <h3>✨ AI 핵심 요약</h3>
                 <div class="spinner-container"><div class="spinner"></div><p>AI가 요약 중입니다...</p></div>
             </div>
-            <div class="modal-section ai-section" id="ai-recommend-for-section">
+            <div class="modal-section" id="ai-recommend-for-section">
                 <h3>🎯 이런 분들께 추천해요</h3>
                 <div class="spinner-container"><div class="spinner"></div><p>AI가 분석 중입니다...</p></div>
             </div>

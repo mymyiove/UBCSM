@@ -277,9 +277,9 @@
         
         table {
             width: 100%;
-            border-collapse: collapse; /* 원상 복구 */
+            border-collapse: collapse;
         }
-        th, td {
+        td {
             padding: 1.25rem 1.5rem; text-align: left;
             border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
@@ -287,17 +287,22 @@
         tbody tr:last-child td { border-bottom: none; }
         
         /* --- 수정: 테이블 헤더 오류 최종 수정 --- */
-        thead {
-            /* thead 자체에는 position sticky를 적용하지 않음 */
-            z-index: 20; 
-        }
         th {
-            position: sticky; /* th(셀)에 직접 sticky 적용 */
-            top: var(--sticky-header-top);
+            position: sticky;
+            top: var(--sticky-header-top); /* CSS 변수를 사용하여 top 위치 설정 */
             background-color: var(--bg-color); /* 스크롤 시 아래 내용 가리기 위한 배경색 */
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: 2px solid var(--border-color); /* 헤더 아래 구분선 강화 */
             
-            cursor: pointer; user-select: none; font-weight: 500;
-            color: var(--text-muted-color); font-size: 0.85rem; letter-spacing: 0.5px;
+            cursor: pointer; 
+            user-select: none; 
+            font-weight: 500;
+            color: var(--text-muted-color); 
+            font-size: 0.85rem; 
+            letter-spacing: 0.5px;
+            z-index: 10;
         }
         
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
@@ -531,12 +536,10 @@
         '자바': 'java', '엑셀': 'excel', '리액트': 'react', '디자인': 'design'
     };
 
-    /* --- 수정: AI 기능 로직 대폭 업그레이드 --- */
     async function callGeminiAPI(prompt, type, context) {
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
 
         if (type === 'summarize' && context) {
-            // 1. AI 핵심 요약 생성 로직
             const createSummary = (course) => {
                 const { objectives, headline, category } = course;
                 const summary = [];
@@ -560,7 +563,6 @@
                 return summary;
             };
 
-            // 2. 추천 대상 생성 로직
             const createRecommendedFor = (course) => {
                 const { difficulty, category } = course;
                 const recommendedFor = [];
@@ -1173,4 +1175,124 @@
         }
 
         if (recommendations && recommendations.length > 0) {
-            resultsContainer.innerHTML = recommendations
+            resultsContainer.innerHTML = recommendations.map(course => `
+                <div class="recommendation-card">
+                    <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
+                    <p>${generateRecommendation(course)}</p>
+                     <div class="card-footer">
+                        <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 강의를 찾지 못했어요. 다른 키워드로 시도해보세요.</p>';
+        }
+    }
+
+
+    function closeModal() { modalOverlay.style.display = 'none'; }
+    
+    function handleFilters() {
+        currentPage = 1;
+        renderTable();
+        
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            updateAIRecommendations();
+        }, 500);
+    }
+
+    async function updateAIRecommendations() {
+        const container = document.getElementById('ai-recommendations-container');
+        const grid = container.querySelector('.recommendation-grid');
+        const searchTerm = document.getElementById('search').value.toLowerCase();
+        const selectedCategory = document.getElementById('category-filter').value;
+        
+        if (!searchTerm && !selectedCategory) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+        grid.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
+
+        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, category: selectedCategory, basis: 'contextual' });
+        
+        if (recommendations && recommendations.length > 0) {
+            container.querySelector('h2').textContent = `✨ "${searchTerm || selectedCategory}" 관련 AI 스마트 추천`;
+            grid.innerHTML = recommendations.map(course => `
+                <div class="recommendation-card">
+                    <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
+                    <p>${generateRecommendation(course)}</p>
+                     <div class="card-footer">
+                        <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+             container.querySelector('h2').textContent = `✨ AI 스마트 추천`;
+             grid.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 다른 강의를 찾지 못했어요.</p>';
+        }
+    }
+
+    function handleSort(column) {
+        if (sortColumn === column) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortColumn = column;
+            sortDirection = 'asc';
+        }
+        currentPage = 1;
+        renderTable();
+    }
+    
+    function updateSortIndicators(sortOrder) {
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
+            th.innerHTML = currentText;
+            if (sortOrder === 'relevance' && th.dataset.sort === sortColumn) {
+                th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
+            }
+        });
+    }
+
+    function renderPagination(totalPages) {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const createButton = (text, page) => {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.addEventListener('click', () => { currentPage = page; renderTable(); });
+            if (page === currentPage) button.classList.add('active');
+            return button;
+        };
+
+        const prevButton = createButton('이전', currentPage - 1);
+        prevButton.disabled = currentPage === 1;
+        paginationContainer.appendChild(prevButton);
+
+        let pageNumbers = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
+        } else {
+            pageNumbers = [1];
+            if (currentPage > 3) pageNumbers.push('...');
+            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pageNumbers.push(i);
+            if (currentPage < totalPages - 2) pageNumbers.push('...');
+            pageNumbers.push(totalPages);
+        }
+
+        pageNumbers.forEach(num => {
+            paginationContainer.appendChild(num === '...' ? Object.assign(document.createElement('span'), {textContent: '...'}) : createButton(num, num));
+        });
+
+        const nextButton = createButton('다음', currentPage + 1);
+        nextButton.disabled = currentPage === totalPages;
+        paginationContainer.appendChild(nextButton);
+    }
+</script>
+
+</body>
+</html>

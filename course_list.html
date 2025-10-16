@@ -79,8 +79,8 @@
         #app-container { display: none; opacity: 0; transition: opacity 0.5s ease-in; max-width: 1600px; margin: 0 auto; }
 
         .app-header {
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
-            gap: 1rem; margin-bottom: 1.5rem; padding: 1rem 0;
+            text-align: center;
+            margin-bottom: 1.5rem; padding: 1rem 0;
             border-bottom: 1px solid var(--border-color);
             animation: fadeInDown 0.5s ease;
         }
@@ -88,31 +88,63 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .app-header h1 { font-size: 1.8rem; margin: 0; color: #fff; white-space: nowrap; }
-        .header-meta { text-align: right; }
-        #company-display {
-            background-color: var(--surface-color); padding: 0.4rem 1rem; border-radius: 20px;
-            border: 1px solid var(--border-color); font-size: 0.9rem; font-weight: 500;
-            color: var(--text-muted-color); display: inline-block;
+        #welcome-message {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+            color: #fff;
+            font-weight: 300;
         }
-        #company-display span { color: var(--text-color); font-weight: bold; }
-        #last-updated { font-size: 0.85rem; color: var(--text-muted-color); display: block; margin-top: 0.5rem; }
+        #welcome-message strong {
+             color: var(--primary-hover-color);
+             font-weight: 700;
+        }
+        #last-updated { font-size: 0.85rem; color: var(--text-muted-color); }
 
         .recommendation-container {
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
             border: 1px solid var(--border-color);
         }
-        .recommendation-container h2 {
-            margin-top: 0; margin-bottom: 1.5rem; color: var(--primary-color);
-            text-align: center; font-size: 1.5rem;
+        .recommendation-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .recommendation-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+        .toggle-icon {
+            margin-left: 1rem;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
         }
         .recommendation-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease-in-out;
+            max-height: 1000px; /* 충분히 큰 값 */
+            overflow: hidden;
+        }
+        .recommendation-grid.collapsed {
+             max-height: 0;
+             margin-top: 0;
+             overflow: hidden;
+             opacity: 0;
+        }
+        .recommendation-container.collapsed .toggle-icon {
+             transform: rotate(-90deg);
         }
         .recommendation-card {
             background-color: var(--bg-color); border: 1px solid var(--border-color);
             border-radius: 8px; padding: 1rem; transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
         }
         .recommendation-card:hover {
             transform: translateY(-5px); box-shadow: var(--shadow-md);
@@ -123,7 +155,20 @@
         }
         .recommendation-card h3 a { color: inherit; text-decoration: none; }
         .recommendation-card h3 .rank { color: var(--primary-color); margin-right: 0.5rem; }
-        .recommendation-card p { font-size: 0.9rem; color: var(--text-muted-color); margin: 0; line-height: 1.5; }
+        .recommendation-card p { font-size: 0.9rem; color: var(--text-muted-color); margin: 0; line-height: 1.5; flex-grow: 1;}
+        .card-footer {
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .category-badge {
+            background-color: var(--surface-color);
+            color: var(--text-muted-color);
+            font-size: 0.8rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
         
         #ai-recommendations-container { display: none; }
 
@@ -140,25 +185,25 @@
         }
 
         .filters-container { display: flex; flex-wrap: wrap; gap: 1.5rem 1rem; align-items: flex-end; }
-        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1 1 180px; min-width: 180px; }
-        .search-group { flex: 2 1 300px; min-width: 300px; }
+        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; flex-basis: 180px; }
+        .search-group { flex-grow: 2; flex-basis: 300px; }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
-        .filter-group select, .filter-group .search-container { width: 100%; }
-        .filter-group select { padding: 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
+        .filter-group select, .filter-group .search-container { width: 100%; box-sizing: border-box; }
+        .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
         .search-container {
-            display: flex; align-items: center; gap: 0.75rem;
+            display: flex; align-items: center; gap: 0.75rem; height: 50px;
             background-color: var(--bg-color); border: 1px solid var(--border-color);
-            border-radius: 8px; padding: 0.25rem 1rem; transition: all 0.2s;
+            border-radius: 8px; padding: 0 1rem; transition: all 0.2s;
         }
         .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3); }
-        .search-container input { width: 100%; padding: 0.5rem; background-color: transparent; border: none; color: var(--text-color); font-size: 1rem; outline: none; }
+        .search-container input { width: 100%; background-color: transparent; border: none; color: var(--text-color); font-size: 1rem; outline: none; }
         
-        .actions-group { flex: 1 1 320px; min-width: 320px;}
+        .actions-group { flex-grow: 1; flex-basis: 320px; }
         .actions { display: flex; gap: 1rem; }
         .action-item { flex: 1; }
         .action-item button {
-            width: 100%; padding: 0.75rem; background-color: transparent; border: 1px solid var(--border-color);
+            width: 100%; height: 50px; padding: 0.75rem; background-color: transparent; border: 1px solid var(--border-color);
             color: var(--text-muted-color); font-size: 1rem; border-radius: 8px; cursor: pointer;
             transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
         }
@@ -169,7 +214,6 @@
         .results-summary { color: var(--text-muted-color); }
         .results-summary b { color: var(--primary-color); font-weight: 700; }
 
-        /* [개선] 테이블 로딩 상태 */
         .table-wrapper { position: relative; }
         .table-loader {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -217,7 +261,6 @@
         .pagination button:active { transform: scale(0.95); }
         .pagination span { cursor: default; background-color: transparent; }
         
-        /* [개선] 모달 애니메이션 */
         #modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7);
             backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000;
@@ -256,7 +299,6 @@
             padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;
         }
         
-        /* [추가] 스크롤 최상단 이동 버튼 */
         #scroll-to-top {
             position: fixed;
             bottom: 2rem;
@@ -358,7 +400,6 @@
     modalCloseBtn.addEventListener('click', closeModal);
     document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
     
-    // [추가] 스크롤 이벤트
     window.addEventListener('scroll', () => {
         if (window.scrollY > 300) {
             scrollToTopBtn.classList.add('visible');
@@ -390,7 +431,6 @@
     
     // --- AI 기능 시뮬레이션 ---
     async function callGeminiAPI(prompt, type, context) {
-        // 실제 API 호출을 시뮬레이션하기 위한 지연
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
 
         if (type === 'summarize' && context) {
@@ -405,17 +445,41 @@
 
         if (type === 'recommend' && context) {
             const { searchTerm, category } = context;
+
+            let basisCourses = [...filteredCourses];
+            if (searchTerm && basisCourses.length === 0) {
+                 basisCourses = originalData.filter(c => (c.title + c.topic).toLowerCase().includes(searchTerm));
+            }
+            
+            const userInterestCourses = basisCourses
+                .sort((a, b) => b.enrollments - a.enrollments)
+                .slice(0, 3);
+            
+            if (userInterestCourses.length === 0 && !searchTerm) return [];
+
+            const interestCategories = new Set(userInterestCourses.flatMap(c => c.category ? c.category.split(',').map(cat => cat.trim()) : []));
+            const interestTopics = new Set(userInterestCourses.flatMap(c => c.topic ? c.topic.split(',').map(t => t.trim()) : []));
+
             const recommendations = originalData.filter(course => {
-                if (filteredCourses.some(fc => fc.id === course.id)) return false; // 현재 목록에 있는 강의 제외
+                if (filteredCourses.some(fc => fc.id === course.id)) return false;
 
                 const searchCorpus = (course.title + course.topic).toLowerCase();
-                const matchesSearch = searchTerm ? searchCorpus.includes(searchTerm) : false;
-                const matchesCategory = category ? (course.category && course.category.includes(category)) : false;
+                if (searchTerm && searchCorpus.includes(searchTerm)) return true;
+
+                if (interestCategories.size > 0 && course.category) {
+                     const courseCategories = course.category.split(',').map(cat => cat.trim());
+                     if (courseCategories.some(cat => interestCategories.has(cat))) return true;
+                }
+                if (interestTopics.size > 0 && course.topic) {
+                    const courseTopics = course.topic.split(',').map(t => t.trim());
+                    if (courseTopics.some(t => interestTopics.has(t))) return true;
+                }
                 
-                return matchesSearch || matchesCategory;
+                return false;
             })
             .sort((a, b) => b.enrollments - a.enrollments)
-            .slice(0, 3);
+            .slice(0, 5);
+            
             return recommendations;
         }
         return null;
@@ -472,11 +536,16 @@
         const grid = container.querySelector('.recommendation-grid');
         grid.innerHTML = topCourses.map((course, index) => `
             <div class="recommendation-card">
-                <h3>
-                    <span class="rank">🏆 TOP ${index + 1}</span>
-                    <a href="${companyUrl}${course.id}" target="_blank">${course.title}</a>
-                </h3>
-                <p>${generateRecommendation(course)}</p>
+                <div>
+                    <h3>
+                        <span class="rank">🏆 TOP ${index + 1}</span>
+                        <a href="${companyUrl}${course.id}" target="_blank">${course.title}</a>
+                    </h3>
+                    <p>${generateRecommendation(course)}</p>
+                </div>
+                <div class="card-footer">
+                    <span class="category-badge">${course.category.split(',')[0].trim()}</span>
+                </div>
             </div>
         `).join('');
     }
@@ -498,14 +567,17 @@
             initialScreen.style.display = 'none';
             appContainer.innerHTML = `
                 <header class="app-header">
-                    <h1>🚀 Udemy Business 강의 목록</h1>
+                    <h1 id="welcome-message"><strong>${companyName}</strong> 학습자님 어서오세요! Udemy와 즐겁게 성장해보세요.</h1>
                     <div class="header-meta">
-                         <div id="company-display" title="현재 조회중인 회사 계정입니다.">회사: <span>${companyName}</span></div>
+                         <div id="last-updated">데이터 업데이트: 2025-10-16</div>
                     </div>
                 </header>
 
                 <div id="top-courses-container" class="recommendation-container">
-                    <h2>⭐ 3개월간 가장 사랑받은 TOP 10 강의 ⭐</h2>
+                    <div class="recommendation-header">
+                        <h2>⭐ 3개월간 가장 사랑받은 TOP 10 강의 ⭐</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
                     <div class="recommendation-grid"></div>
                 </div>
 
@@ -559,7 +631,6 @@
                 </div>
                 <div class="summary-bar">
                     <div class="results-summary" id="results-summary"></div>
-                    <div id="last-updated">데이터 업데이트: 2025-10-16</div>
                 </div>
                 <div class="table-wrapper">
                     <div class="table-container">
@@ -588,6 +659,16 @@
             setTimeout(() => appContainer.style.opacity = '1', 50);
 
             displayTopCourses();
+
+            // TOP 10 접기/펴기 이벤트
+            const topCoursesHeader = document.querySelector('#top-courses-container .recommendation-header');
+            topCoursesHeader.addEventListener('click', () => {
+                const container = document.getElementById('top-courses-container');
+                const grid = container.querySelector('.recommendation-grid');
+                container.classList.toggle('collapsed');
+                grid.classList.toggle('collapsed');
+            });
+
 
             document.getElementById('search').addEventListener('input', handleFilters);
             ['category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter', 'rows-per-page'].forEach(id => {
@@ -666,11 +747,10 @@
     }
 
     function renderTable() {
-        // [개선] 테이블 로더 표시
         const loader = document.getElementById('table-loader');
         loader.classList.add('is-loading');
 
-        setTimeout(() => { // 실제 렌더링을 약간 지연시켜 로더가 보이게 함
+        setTimeout(() => {
             rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
             const tableBody = document.getElementById('course-table-body');
             const searchTerm = document.getElementById('search').value.toLowerCase();
@@ -726,7 +806,7 @@
                     </tr>`).join('');
             }
             renderPagination(totalPages);
-            loader.classList.remove('is-loading'); // 로더 숨김
+            loader.classList.remove('is-loading');
         }, 100);
     }
     
@@ -762,7 +842,6 @@
         }
     }
 
-    // [추가] AI 추천 모달 표시 함수
     function showAIRecommendationModal() {
         const modalBody = document.getElementById('modal-body');
         document.getElementById('modal-title').textContent = '🤖 AI 맞춤 강의 추천';
@@ -799,6 +878,9 @@
                 <div class="recommendation-card">
                     <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
                     <p>${generateRecommendation(course)}</p>
+                     <div class="card-footer">
+                        <span class="category-badge">${course.category.split(',')[0].trim()}</span>
+                    </div>
                 </div>
             `).join('');
         } else {
@@ -841,6 +923,9 @@
                 <div class="recommendation-card">
                     <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
                     <p>${generateRecommendation(course)}</p>
+                     <div class="card-footer">
+                        <span class="category-badge">${course.category.split(',')[0].trim()}</span>
+                    </div>
                 </div>
             `).join('');
         } else {

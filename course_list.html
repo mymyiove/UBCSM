@@ -28,9 +28,11 @@
             background: radial-gradient(circle at 10% 20%, rgba(167, 139, 250, 0.2), transparent 40%),
                         radial-gradient(circle at 80% 90%, rgba(139, 92, 246, 0.2), transparent 40%);
             filter: blur(80px); z-index: -1;
-            animation: aurora-flow 20s linear infinite;
+            /* --- 수정: 배경 애니메이션 속도 조절 --- */
+            animation: aurora-flow 35s linear infinite;
         }
 
+        /* --- 수정: 배경 애니메이션 속도 조절 --- */
         @keyframes aurora-flow {
             0% { transform: rotate(0deg) scale(1.2); }
             50% { transform: rotate(180deg) scale(1.5); }
@@ -42,15 +44,21 @@
             color: var(--text-color); margin: 0; padding: 2rem; line-height: 1.6;
             scroll-behavior: smooth;
         }
+        
+        /* --- 수정: 초기 화면 등장 애니메이션 --- */
+        @keyframes fadeInFromBottom {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         #initial-screen {
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             height: calc(100vh - 4rem); text-align: center; transition: opacity 0.5s ease-out;
             max-width: 600px; margin: 0 auto;
         }
-        #initial-screen h1 { font-size: 2.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; white-space: nowrap; }
-        #initial-screen p { font-size: 1.1rem; color: var(--text-muted-color); margin-bottom: 2rem; line-height: 1.8; }
-        .gate-info { text-align: left; background-color: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--border-radius-md); margin-bottom: 2rem; border: 1px solid var(--border-color); }
+        #initial-screen h1 { font-size: 2.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; white-space: nowrap; animation: fadeInFromBottom 0.6s ease-out both; }
+        #initial-screen p { font-size: 1.1rem; color: var(--text-muted-color); margin-bottom: 2rem; line-height: 1.8; animation: fadeInFromBottom 0.6s 0.2s ease-out both; }
+        .gate-info { text-align: left; background-color: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--border-radius-md); margin-bottom: 2rem; border: 1px solid var(--border-color); animation: fadeInFromBottom 0.6s 0.4s ease-out both; }
         .gate-info h3 { margin-top: 0; color: var(--primary-color); }
         .gate-info ul { padding-left: 20px; margin-bottom: 0; }
         
@@ -59,6 +67,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            animation: fadeInFromBottom 0.6s 0.6s ease-out both;
         }
         .input-group {
             display: flex; background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
@@ -165,9 +174,11 @@
             flex-direction: column;
             position: relative;
         }
+        /* --- 수정: 카드 호버 효과 강화 --- */
         .recommendation-card:hover {
-            transform: translateY(-5px); box-shadow: var(--shadow-md);
+            transform: translateY(-5px); 
             border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
             z-index: 101;
         }
         .recommendation-card h3 {
@@ -216,7 +227,6 @@
         .filters-row { display: flex; flex-wrap: wrap; gap: 1rem; }
         .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1 1 160px; min-width: 160px; }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
-        .filter-group select, .filter-group .search-container { width: 100%; box-sizing: border-box; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
         /* --- 수정: 다중 선택 필터 CSS --- */
@@ -225,14 +235,20 @@
             width: 100%; height: 50px; padding: 0 0.75rem; background-color: var(--bg-color);
             border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color);
             font-size: 1rem; cursor: pointer; text-align: left; display: flex; align-items: center;
+            transition: all 0.2s ease;
         }
+        .custom-select-button:hover { border-color: var(--primary-color); }
         .custom-select-panel {
             display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 101;
             background-color: var(--bg-color); border: 1px solid var(--border-color);
             border-radius: 8px; margin-top: 0.5rem; max-height: 250px; overflow-y: auto;
             padding: 0.5rem;
+            /* 애니메이션 */
+            opacity: 0; transform: translateY(-10px); transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        .custom-select-panel.visible { display: block; }
+        .custom-select-panel.visible { 
+            display: block; opacity: 1; transform: translateY(0);
+        }
         .custom-select-panel .checkbox-item {
             display: block; padding: 0.5rem 0.75rem; border-radius: 4px;
         }
@@ -279,7 +295,8 @@
         .table-wrapper { position: relative; }
         .table-loader {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(26, 26, 46, 0.7);
+            background-color: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(2px);
             display: flex; justify-content: center; align-items: center;
             z-index: 15;
             opacity: 0;
@@ -317,19 +334,33 @@
         }
         td {
             white-space: normal; /* 내용은 기본적으로 줄바꿈 허용 */
+            vertical-align: top;
         }
-        /* 특정 컬럼만 nowrap으로 설정하여 한 줄로 표시 */
-        td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7), td:nth-child(8), td:nth-child(9) {
-            white-space: nowrap;
+        /* 강의명 컬럼은 넓게, 나머지는 최소 너비 보장 */
+        th:nth-child(3), td:nth-child(3) { 
+            white-space: normal; /* 강의명은 줄바꿈 허용 */
+            min-width: 300px;
         }
-        td:nth-child(3) { /* 강의명 컬럼은 넓게 */
-             min-width: 300px;
+        /* 다른 컬럼들은 한 줄로 표시하고 최소 너비 지정 */
+        th:nth-child(1), td:nth-child(1) { min-width: 200px; white-space: nowrap; }
+        th:nth-child(2), td:nth-child(2) { min-width: 200px; white-space: nowrap; }
+        th:nth-child(4), td:nth-child(4) { min-width: 80px; text-align: center; }
+        th:nth-child(5), td:nth-child(5),
+        th:nth-child(6), td:nth-child(6),
+        th:nth-child(7), td:nth-child(7),
+        th:nth-child(8), td:nth-child(8),
+        th:nth-child(9), td:nth-child(9) {
+             min-width: 120px; white-space: nowrap;
         }
+
         tbody tr:last-child td { border-bottom: none; }
         /* --- 수정 끝 --- */
         
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
-        tbody tr:hover { background-color: rgba(167, 139, 250, 0.1); transform: translateY(-3px); }
+        tbody tr:hover { 
+            background-color: rgba(167, 139, 250, 0.1); 
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.2);
+        }
         td a { color: var(--text-color); text-decoration: none; font-weight: 500; transition: color 0.2s; }
         td a:hover { color: var(--primary-color); }
         .rating { font-weight: bold; }
@@ -526,15 +557,16 @@
         '3개월 간 수강신청 수': 'enrollments'
     };
     
+    // --- 수정: 카테고리 아이콘 교체 ---
     const categoryEmojis = {
-        'Development': '💻', 'IT & Software': '💾', 'Business': '💼',
-        'Finance & Accounting': '💰', 'Marketing': '📈', 'Office Productivity': '📊',
-        'Personal Development': '🌱', 'Design': '🎨', 'Lifestyle': '🧘',
-        'Photography & Video': '📸', 'Health & Fitness': '💪', 'Music': '🎵',
-        'Teaching & Academics': '🏫', 'AI': '🤖', 'Cloud': '☁️', 'Security': '🛡️'
+        'Development': '👨‍💻', 'IT & Software': '⚙️', 'Business': '💼',
+        'Finance & Accounting': '🧾', 'Marketing': '📣', 'Office Productivity': '📊',
+        'Personal Development': '🧠', 'Design': '🎨', 'Lifestyle': '🧘',
+        'Photography & Video': '🎬', 'Health & Fitness': '💪', 'Music': '🎧',
+        'Teaching & Academics': '📚', 'AI': '🤖', 'Cloud': '☁️', 'Security': '🛡️'
     };
     const getCategoryEmoji = (category) => {
-        if (!category) return '📁';
+        if (!category) return '📁'; // 기본 아이콘
         for (const key in categoryEmojis) {
             if (category.includes(key)) return categoryEmojis[key];
         }
@@ -669,12 +701,11 @@
         return null;
     }
 
-    // --- 수정: 데이터 파싱 시 헤더가 데이터에 포함되는 문제 해결 ---
     async function loadCourseData() {
         return new Promise((resolve, reject) => {
             Papa.parse('courses_web.csv', {
                 download: true, 
-                header: true, // header: true 옵션으로 첫 행을 헤더로 사용하도록 명시
+                header: true, 
                 skipEmptyLines: true,
                 complete: (results) => {
                     if (results.errors.length > 0) {
@@ -699,7 +730,7 @@
                             newRow.subtitles = '없음';
                         }
                         return newRow;
-                    }).filter(row => row.id && row.title); // 유효한 데이터만 필터링
+                    }).filter(row => row.id && row.title);
                     
                     resolve(processedData);
                 },
@@ -763,7 +794,6 @@
         initialScreen.style.opacity = '0';
         setTimeout(() => {
             initialScreen.style.display = 'none';
-            // --- 수정: 다중 선택 필터를 위한 HTML 구조 변경 ---
             appContainer.innerHTML = `
                 <div class="app-header-wrapper">
                     <header class="app-header">
@@ -944,21 +974,17 @@
                 }
             });
 
-            // 다중 선택 필터 초기화
             initializeMultiSelectFilters();
-            
             handleFilters();
         }, 500);
     }
     
-    // --- 수정: 다중 선택 필터 관련 함수들 ---
     function initializeMultiSelectFilters() {
         populateMultiSelect('category-filter', 'category', true, true);
         populateMultiSelect('difficulty-filter', 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
         populateMultiSelect('language-filter', 'language', false, false);
         populateMultiSelect('subtitles-filter', 'subtitles', true, false);
 
-        // 드롭다운 토글 및 외부 클릭 시 닫기 기능
         document.querySelectorAll('.custom-select-button').forEach(button => {
             button.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1045,19 +1071,19 @@
         document.getElementById('ai-recommendations-container').style.display = 'none';
     }
     
+    // --- 수정: 다운로드 파일명 변경 및 enrollments 열 제거 ---
     function downloadCSV() {
         if (filteredCourses.length === 0) { alert("다운로드할 데이터가 없습니다."); return; }
         
-        const filters = {
-            keyword: document.getElementById('search').value,
-            category: document.getElementById('category-filter').value,
-            difficulty: document.getElementById('difficulty-filter').value,
-            language: document.getElementById('language-filter').value,
-        };
-        const filterNames = Object.values(filters).filter(Boolean).join('_').replace(/[\s,&]/g, '');
-        const filename = `${companyName}_courses${filterNames ? '_' + filterNames : ''}_${new Date().toISOString().slice(0,10)}.csv`;
+        const filename = `Udemy Business course_${companyName}_${new Date().toISOString().slice(0,10)}.csv`;
+        
+        // enrollments를 제외한 새로운 데이터 배열 생성
+        const dataForExport = filteredCourses.map(course => {
+            const { enrollments, ...rest } = course;
+            return rest;
+        });
 
-        const csv = Papa.unparse(filteredCourses);
+        const csv = Papa.unparse(dataForExport);
         const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
@@ -1096,7 +1122,6 @@
             const sortOrder = document.getElementById('sort-order').value;
             const searchTerm = document.getElementById('search').value;
 
-            // 다중 선택 필터 값 가져오기
             const selectedCategories = Array.from(document.querySelectorAll('[data-filter-id="category-filter"] input:checked')).map(cb => cb.value);
             const selectedDifficulties = Array.from(document.querySelectorAll('[data-filter-id="difficulty-filter"] input:checked')).map(cb => cb.value);
             const selectedLanguages = Array.from(document.querySelectorAll('[data-filter-id="language-filter"] input:checked')).map(cb => cb.value);
@@ -1128,7 +1153,6 @@
                 const searchCorpus = Object.values(course).join(' ').toLowerCase();
                 const matchesSearch = searchTerm === '' || searchMode === 'extended' || searchCorpus.includes(searchTerm.toLowerCase());
                 
-                // 다중 선택 필터 로직 적용
                 const matchesCategory = selectedCategories.length === 0 || selectedCategories.some(cat => course.category && course.category.includes(cat));
                 const matchesDifficulty = selectedDifficulties.length === 0 || selectedDifficulties.includes(course.difficulty);
                 const matchesLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(course.language);
@@ -1178,14 +1202,14 @@
                 tableBody.innerHTML = paginatedCourses.map(course => `
                     <tr>
                         <td>${getCategoryEmoji(course.category)} ${course.category || ''}</td>
-                        <td><div title="${course.topic || ''}">${course.topic || ''}</div></td>
+                        <td>${course.topic || ''}</td>
                         <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">${course.title}</a></td>
                         <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
                         <td>${course.language || 'N/A'}</td>
                         <td>${course.subtitles || '없음'}</td>
                         <td>${course.difficulty || ''}</td>
                         <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
-                        <td><div title="${course.instructor || ''}">${course.instructor || ''}</div></td>
+                        <td>${course.instructor || ''}</td>
                     </tr>`).join('');
             }
             renderPagination(totalPages);

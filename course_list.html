@@ -921,16 +921,13 @@
         }, 500);
     }
     
-    // 🔧 [수정 1/3] initializeMultiSelectFilters: HOT/NEW 필터의 내부 값(value)과 표시(label)를 분리하여 안정성 확보
     function initializeMultiSelectFilters() {
         populateMultiSelect('category-filter', 'category', true, true);
         populateMultiSelect('difficulty-filter', 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
         populateMultiSelect('language-filter', 'language', false, false);
         populateMultiSelect('subtitles-filter', 'subtitles', true, false);
-        populateMultiSelect('hot-new-filter', null, false, false, [
-            { value: 'HOT', label: '🔥 HOT' },
-            { value: 'NEW', label: '✨ NEW' }
-        ]);
+        populateMultiSelect('hot-new-filter', null, false, false, ['🔥 HOT', '✨ NEW']);
+
 
         document.querySelectorAll('.custom-select-button').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -949,41 +946,26 @@
         });
     }
 
-    // 🔧 [수정 2/3] populateMultiSelect: 필터 항목이 {value, label} 형태의 객체일 경우를 처리하도록 개선
     function populateMultiSelect(filterId, dataKey, split, showEmoji, predefinedItems = null) {
         const wrapper = document.querySelector(`[data-filter-id="${filterId}"]`);
         const panel = wrapper.querySelector('.custom-select-panel');
         
         let items;
         if (predefinedItems) {
-            // 항목이 객체인지 문자열인지 확인
-            if (typeof predefinedItems[0] === 'object' && predefinedItems[0] !== null) {
-                items = predefinedItems; // 객체 배열 그대로 사용
-            } else {
-                items = new Set(predefinedItems); // 문자열 배열은 Set으로 변환
-            }
+            items = new Set(predefinedItems);
         } else if (split) {
             items = new Set(originalData.flatMap(c => c[dataKey] && c[dataKey] !== '없음' ? c[dataKey].split(',').map(item => item.trim()) : []));
         } else {
             items = new Set(originalData.map(c => c[dataKey]).filter(Boolean));
         }
         
-        panel.innerHTML = [...items].map(item => {
-            let value, text;
-            // 항목 타입에 따라 value와 text를 설정
-            if (typeof item === 'object' && item !== null) {
-                value = item.value;
-                text = item.label;
-            } else {
-                value = item;
-                text = showEmoji ? `${getCategoryEmoji(item)} ${item}` : item;
-            }
-            if (!value || value === 'N/A') return '';
-            
+        panel.innerHTML = [...items].sort().map(item => {
+            if (!item || item === 'N/A') return '';
+            const text = showEmoji ? `${getCategoryEmoji(item)} ${item}` : item;
             return `
                 <div class="checkbox-item">
                     <label>
-                        <input type="checkbox" value="${value}">
+                        <input type="checkbox" value="${item}">
                         <span>${text}</span>
                     </label>
                 </div>
@@ -1081,7 +1063,7 @@
         return terms;
     }
 
-    // 🔧 [수정 3/3] renderTable: HOT/NEW 필터 값을 이모티콘이 아닌 'HOT', 'NEW' 문자열로 비교하도록 수정
+
     function renderTable() {
         const loader = document.getElementById('table-loader');
         loader.classList.add('is-loading');
@@ -1139,9 +1121,8 @@
                         thresholdDate.setMonth(thresholdDate.getMonth() - NEW_COURSE_THRESHOLD_MONTHS);
                         isNew = course.lastUpdated > thresholdDate;
                     }
-                    // 'HOT' 또는 'NEW' 문자열과 직접 비교하여 필터링
                     matchesHotNew = selectedHotNew.some(val => {
-                        return (val === 'HOT' && isHot) || (val === 'NEW' && isNew);
+                        return (val === '🔥 HOT' && isHot) || (val === '✨ NEW' && isNew);
                     });
                 }
 
@@ -1434,5 +1415,6 @@
         paginationContainer.appendChild(nextButton);
     }
 </script>
+
 </body>
 </html>

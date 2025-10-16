@@ -20,9 +20,6 @@
             --shadow-soft: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
             --backdrop-blur: blur(16px);
-            /* --- 수정: 스티키 헤더의 top 위치를 결정하는 변수 --- */
-            /* 최상단 헤더의 높이를 고려하여 설정합니다. */
-            --sticky-header-top: 125px;
         }
 
         body::before {
@@ -271,42 +268,67 @@
             visibility: visible;
         }
         
+        /* --- 수정: 테이블 헤더 오류 최종 수정 --- */
         .table-container {
-            overflow-x: auto;
+            /* table-container는 스크롤을 담당하지 않음 */
         }
-        
         table {
             width: 100%;
+            table-layout: fixed; /* 컬럼 너비 고정을 위해 필요 */
             border-collapse: collapse;
         }
-        td {
-            padding: 1.25rem 1.5rem; text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
+        thead th {
+            background-color: var(--bg-color); /* 헤더 배경색 */
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-muted-color);
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
         }
-        tbody tr:last-child td { border-bottom: none; }
+        /* tbody를 스크롤 가능하게 만듦 */
+        tbody {
+            display: block; /* tbody를 블록 요소로 만들어 스크롤 적용 */
+            max-height: 65vh; /* 화면 높이의 65%를 최대 높이로 설정 (조절 가능) */
+            overflow-y: auto; /* 세로 스크롤 활성화 */
+            overflow-x: hidden; /* 가로 스크롤은 tr에서 처리 */
+        }
+        /* 스크롤바 스타일링 (선택 사항) */
+        tbody::-webkit-scrollbar { width: 8px; }
+        tbody::-webkit-scrollbar-track { background: transparent; }
+        tbody::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
         
-        /* --- 수정: 테이블 헤더 오류 최종 수정 --- */
-        th {
-            position: sticky;
-            top: var(--sticky-header-top); /* CSS 변수를 사용하여 top 위치 설정 */
-            background-color: var(--bg-color); /* 스크롤 시 아래 내용 가리기 위한 배경색 */
+        tr {
+            display: table; /* tr을 테이블처럼 동작하게 함 */
+            width: 100%;
+            table-layout: fixed;
+        }
+        th, td {
             padding: 1.25rem 1.5rem;
             text-align: left;
             white-space: nowrap;
-            border-bottom: 2px solid var(--border-color); /* 헤더 아래 구분선 강화 */
-            
-            cursor: pointer; 
-            user-select: none; 
-            font-weight: 500;
-            color: var(--text-muted-color); 
-            font-size: 0.85rem; 
-            letter-spacing: 0.5px;
-            z-index: 10;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+        tbody td {
+             border-bottom: 1px solid var(--border-color);
+        }
+        tbody tr:last-child td { border-bottom: none; }
         
-        tbody tr { transition: background-color 0.2s, transform 0.2s; }
-        tbody tr:hover { background-color: rgba(167, 139, 250, 0.1); transform: translateY(-3px); }
+        /* 컬럼 너비 수동 할당 */
+        th:nth-child(1), td:nth-child(1) { width: 18%; } /* 카테고리 */
+        th:nth-child(2), td:nth-child(2) { width: 18%; } /* 강의 주제 */
+        th:nth-child(3), td:nth-child(3) { width: 25%; } /* 강의명 */
+        th:nth-child(4), td:nth-child(4) { width: 5%; text-align: center; } /* 상세 */
+        th:nth-child(5), td:nth-child(5) { width: 7%; } /* 언어 */
+        th:nth-child(6), td:nth-child(6) { width: 7%; } /* 자막 */
+        th:nth-child(7), td:nth-child(7) { width: 8%; } /* 난이도 */
+        th:nth-child(8), td:nth-child(8) { width: 6%; } /* 평점 */
+        th:nth-child(9), td:nth-child(9) { width: 6%; } /* 강사명 */
+        /* --- 수정 끝 --- */
+        
+        tbody tr:hover { background-color: rgba(167, 139, 250, 0.1); }
         td a { color: var(--text-color); text-decoration: none; font-weight: 500; transition: color 0.2s; }
         td a:hover { color: var(--primary-color); }
         .rating { font-weight: bold; }
@@ -314,8 +336,6 @@
         .details-btn:hover { transform: scale(1.2); }
         .empty-row td { text-align: center; padding: 4rem; color: var(--text-muted-color); }
         .empty-row svg { width: 64px; height: 64px; margin-bottom: 1rem; opacity: 0.5; }
-        .col-instructor { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
-        .col-topic { max-width: 250px; overflow: hidden; text-overflow: ellipsis; }
 
         .pagination { display: flex; justify-content: center; align-items: center; margin-top: 2.5rem; gap: 0.5rem; user-select: none; }
         .pagination button, .pagination span {
@@ -1103,10 +1123,10 @@
 
         const aiData = await callGeminiAPI('summarize course', 'summarize', course);
         if(aiData) {
-            const summaryList = aiData.summary.length > 0 ? `<ul>${aiData.summary.map(item => `<li>${item}</li>`).join('')}</ul>` : '<p>요약할 내용이 충분하지 않습니다.</p>';
+            const summaryList = aiData.summary.length > 0 ? `<ul>${aiData.summary.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}</ul>` : '<p>요약할 내용이 충분하지 않습니다.</p>';
             document.getElementById('ai-summary-section').innerHTML = `<h3>✨ AI 핵심 요약</h3>${summaryList}`;
 
-            const recommendForList = `<ul>${aiData.recommendedFor.map(item => `<li>${item}</li>`).join('')}</ul>`;
+            const recommendForList = `<ul>${aiData.recommendedFor.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}</ul>`;
             document.getElementById('ai-recommend-for-section').innerHTML = `<h3>🎯 이런 분들께 추천해요</h3>${recommendForList}`;
         }
     }

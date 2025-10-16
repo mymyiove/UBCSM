@@ -304,16 +304,17 @@
             visibility: visible;
         }
         
+        /* --- 수정: 테이블 스크롤 및 2줄 말줄임 최종 수정 --- */
         .table-container {
-            overflow-x: auto;
+            overflow-x: auto; /* 좌우 스크롤 담당 */
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1200px; 
+            min-width: 1400px; /* 테이블 최소 너비 지정 */
         }
         thead {
-            position: sticky;
+            position: sticky; /* thead에 직접 sticky 적용 */
             top: var(--header-height);
             z-index: 10;
         }
@@ -332,7 +333,7 @@
             cursor: pointer;
             user-select: none;
             border-bottom: 2px solid var(--border-color);
-            white-space: nowrap;
+            white-space: nowrap; /* 헤더는 잘리지 않도록 함 */
         }
         td {
             font-size: 0.9rem;
@@ -348,17 +349,8 @@
             word-break: break-all;
         }
         
-        th:nth-child(1), td:nth-child(1) { width: 15%; }
-        th:nth-child(2), td:nth-child(2) { width: 15%; }
-        th:nth-child(3), td:nth-child(3) { width: 28%; }
-        th:nth-child(4), td:nth-child(4) { width: 5%; text-align: center; }
-        th:nth-child(5), td:nth-child(5) { width: 7%; }
-        th:nth-child(6), td:nth-child(6) { width: 10%; }
-        th:nth-child(7), td:nth-child(7) { width: 7%; }
-        th:nth-child(8), td:nth-child(8) { width: 5%; }
-        th:nth-child(9), td:nth-child(9) { width: 8%; }
-
         tbody tr:last-child td { border-bottom: none; }
+        /* --- 수정 끝 --- */
         
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
         tbody tr:hover { 
@@ -601,7 +593,6 @@
         await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
 
         if (type === 'summarize' && context) {
-            // 실제라면 여기서 API로 번역/요약 로직 수행
             const textToSummarize = `${context.headline}\n${context.objectives}\n${context.description}`;
             
             const summaryPoints = [
@@ -646,6 +637,9 @@
                         }
                         newRow.rating = parseFloat(newRow.rating) || 0;
                         newRow.enrollments = parseInt(newRow.enrollments, 10) || 0;
+                        // --- 수정: 날짜 파싱 오류 방지 ---
+                        newRow.lastUpdated = row['최근 업데이트 날짜'] ? new Date(row['최근 업데이트 날짜'].replace(/\./g, '-')) : null;
+                        
                         newRow.language = newRow.language ? mapLanguageCode(newRow.language.split('_')[0]) : 'N/A';
                         if (newRow.subtitles && newRow.subtitles !== 'null' && newRow.subtitles.trim() !== '') {
                             newRow.subtitles = newRow.subtitles.split(',').map(s => s.trim()).map(mapLanguageCode).join(', ');
@@ -1152,11 +1146,10 @@
                     const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
                     
                     let isNew = false;
-                    if (course.lastUpdated) {
-                        const lastUpdatedDate = new Date(course.lastUpdated);
+                    if (course.lastUpdated && course.lastUpdated.getTime()) {
                         const thresholdDate = new Date();
                         thresholdDate.setMonth(thresholdDate.getMonth() - NEW_COURSE_THRESHOLD_MONTHS);
-                        isNew = lastUpdatedDate > thresholdDate;
+                        isNew = course.lastUpdated > thresholdDate;
                     }
                     
                     return `

@@ -128,7 +128,7 @@
             gap: 1rem;
             margin-top: 1.5rem;
             transition: all 0.3s ease-in-out;
-            max-height: 1000px; /* 충분히 큰 값 */
+            max-height: 1000px;
             overflow: hidden;
         }
         .recommendation-grid.collapsed {
@@ -482,12 +482,13 @@
         }
 
         if (type === 'recommend' && context) {
-            const { searchTerm, basis } = context;
+            const { searchTerm, basis, difficulty } = context;
             let recommendations = [];
             
             if (basis === 'direct') {
                 recommendations = originalData
                     .filter(course => {
+                        if (difficulty && course.difficulty !== difficulty) return false;
                         const searchCorpus = (course.title + " " + course.topic + " " + course.headline).toLowerCase();
                         const searchTerms = getSearchTerms(searchTerm);
                         return searchTerms.some(term => searchCorpus.includes(term));
@@ -637,6 +638,14 @@
                             </select>
                         </div>
                         <div class="filter-group">
+                            <label for="sort-order">📈 정렬 순서</label>
+                            <select id="sort-order" title="목록의 정렬 순서를 변경합니다. AI 확장 검색 시 '적합도순'을 추천합니다.">
+                                <option value="relevance">적합도순</option>
+                                <option value="popularity">인기순</option>
+                                <option value="alphabetical">가나다순</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
                             <label for="category-filter">🗂️ 카테고리</label>
                             <select id="category-filter" title="특정 카테고리의 강의만 필터링합니다."><option value="">모든 카테고리</option></select>
                         </div>
@@ -681,7 +690,7 @@
                             <thead><tr>
                                 <th data-sort="category">카테고리</th>
                                 <th data-sort="topic">강의 주제</th>
-                                <th data-sort="title" title="클릭 시 Udemy 강의 페이지로 이동합니다.">강의명</th>
+                                <th data-sort="title">강의명</th>
                                 <th>상세</th>
                                 <th data-sort="language">언어</th>
                                 <th data-sort="subtitles">자막</th>
@@ -719,7 +728,7 @@
 
 
             document.getElementById('search').addEventListener('input', handleFilters);
-            ['search-mode', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter', 'rows-per-page'].forEach(id => {
+            ['search-mode', 'sort-order', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter', 'rows-per-page'].forEach(id => {
                 document.getElementById(id).addEventListener('change', handleFilters);
             });
             document.getElementById('reset-filters').addEventListener('click', resetAllFilters);
@@ -727,7 +736,14 @@
             document.getElementById('ai-recommend-btn').addEventListener('click', showAIRecommendationModal);
             document.querySelector('thead').addEventListener('click', (e) => {
                 const header = e.target.closest('th');
-                if (header && header.dataset.sort) handleSort(header.dataset.sort);
+                if (header && header.dataset.sort) {
+                    // [수정] 헤더 클릭 시에도 정렬 드롭다운과 연동되도록
+                    const sortOrderSelect = document.getElementById('sort-order');
+                    if (sortOrderSelect.value !== 'relevance') {
+                        sortOrderSelect.value = 'relevance';
+                    }
+                    handleSort(header.dataset.sort);
+                }
             });
             document.getElementById('course-table-body').addEventListener('click', (e) => {
                 const detailsButton = e.target.closest('.details-btn');
@@ -764,7 +780,7 @@
     }
 
     function resetAllFilters() {
-        ['search', 'search-mode', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter'].forEach(id => document.getElementById(id).value = '');
+        ['search', 'search-mode', 'sort-order', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('rows-per-page').value = '15';
         sortColumn = 'title'; sortDirection = 'asc'; currentPage = 1;
         renderTable();
@@ -819,6 +835,7 @@
 
         setTimeout(() => {
             const searchMode = document.getElementById('search-mode').value;
+            const sortOrder = document.getElementById('sort-order').value;
             const searchTerm = document.getElementById('search').value;
             const selectedCategory = document.getElementById('category-filter').value;
             const selectedDifficulty = document.getElementById('difficulty-filter').value;
@@ -860,17 +877,28 @@
 
             document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
 
+            // [수정] 정렬 로직
             filteredCourses.sort((a, b) => {
-                if (searchTerm && searchMode === 'extended' && a.relevanceScore !== b.relevanceScore) {
-                    return b.relevanceScore - a.relevanceScore;
+                switch (sortOrder) {
+                    case 'popularity':
+                        return b.enrollments - a.enrollments;
+                    case 'alphabetical':
+                        return (a.title || '').localeCompare(b.title || '');
+                    case 'relevance':
+                    default:
+                        if (searchTerm && searchMode === 'extended' && a.relevanceScore !== b.relevanceScore) {
+                            return b.relevanceScore - a.relevanceScore;
+                        }
+                        // 적합도순이 아닐 때 또는 점수가 같을 때 테이블 헤더 정렬 적용
+                        let valA = a[sortColumn] || ''; 
+                        let valB = b[sortColumn] || '';
+                        if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+                        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                        return 0;
                 }
-                let valA = a[sortColumn] || ''; let valB = b[sortColumn] || '';
-                if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
-                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-                return 0;
             });
-            updateSortIndicators();
+            updateSortIndicators(sortOrder);
             
             rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
             const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
@@ -936,6 +964,34 @@
             document.getElementById('ai-recommend-for-section').innerHTML = `<h3>🎯 이런 분들께 추천해요</h3>${recommendForList}`;
         }
     }
+    
+    // [수정] 자연어 처리 로직 추가
+    function extractKeywordsFromPrompt(prompt) {
+        const text = prompt.toLowerCase();
+        let keywords = [];
+        let difficulty = '';
+
+        const allSynonyms = {...searchSynonyms};
+        Object.values(searchSynonyms).forEach(val => {
+            for(const key in searchSynonyms) {
+                if(searchSynonyms[key] === val) allSynonyms[val] = key;
+            }
+        });
+        
+        const allKeywords = Object.keys(allSynonyms);
+        allKeywords.forEach(kw => {
+            if (text.includes(kw)) keywords.push(kw);
+        });
+
+        if (text.includes('초보') || text.includes('입문') || text.includes('beginner')) difficulty = 'Beginner';
+        else if (text.includes('중급') || text.includes('intermediate')) difficulty = 'Intermediate';
+        else if (text.includes('고급') || text.includes('전문가') || text.includes('expert')) difficulty = 'Expert';
+        
+        if (keywords.length === 0) keywords.push(text.replace(/추천|해줘|알려줘/g, '').trim());
+
+        return { searchTerm: keywords.join(' '), difficulty };
+    }
+
 
     function showAIRecommendationModal() {
         const modalBody = document.getElementById('modal-body');
@@ -966,7 +1022,8 @@
         const resultsContainer = document.getElementById('ai-modal-results');
         resultsContainer.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
 
-        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm: prompt.toLowerCase(), basis: 'direct' });
+        const { searchTerm, difficulty } = extractKeywordsFromPrompt(prompt);
+        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, difficulty, basis: 'direct' });
         
         if (recommendations && recommendations.length > 0) {
             resultsContainer.innerHTML = recommendations.map(course => `
@@ -1040,11 +1097,12 @@
         renderTable();
     }
     
-    function updateSortIndicators() {
+    function updateSortIndicators(sortOrder) {
         document.querySelectorAll('th[data-sort]').forEach(th => {
             let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
             th.innerHTML = currentText;
-            if (th.dataset.sort === sortColumn) {
+            // '적합도순'이 아닐 때만 테이블 헤더 정렬 표시
+            if (sortOrder === 'relevance' && th.dataset.sort === sortColumn) {
                 th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
             }
         });

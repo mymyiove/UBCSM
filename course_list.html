@@ -112,7 +112,6 @@
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
             border: 1px solid var(--border-color);
-            padding-top: 2rem;
         }
         .recommendation-header {
             display: flex;
@@ -120,7 +119,6 @@
             align-items: center;
             cursor: pointer;
             user-select: none;
-            margin-bottom: 1rem;
         }
         .recommendation-header h2 {
             margin: 0;
@@ -136,6 +134,8 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
+            margin-top: 1.5rem;
+            padding-top: 0.5rem;
             transition: all 0.3s ease-in-out;
             max-height: 1000px;
             overflow: visible;
@@ -195,16 +195,17 @@
             margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted-color);
             display: flex; align-items: center; gap: 0.75rem;
         }
-
-        .filters-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1.5rem 1rem;
-        }
-        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        
+        /* [개선] 필터 레이아웃 2줄 구조 */
+        .filters-container { display: flex; flex-direction: column; gap: 1rem; }
+        .filters-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1 1 160px; min-width: 160px; }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select, .filter-group .search-container { width: 100%; box-sizing: border-box; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
+        
+        .search-group { flex: 3 1 400px; }
+        .actions-group { flex: 2 1 320px; }
         
         .search-container {
             display: flex; align-items: center; gap: 0.75rem; height: 50px;
@@ -214,7 +215,7 @@
         .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3); }
         .search-container input { width: 100%; background-color: transparent; border: none; color: var(--text-color); font-size: 1rem; outline: none; }
         
-        .actions { display: flex; gap: 1rem; align-items: flex-end; }
+        .actions { display: flex; gap: 1rem; align-items: flex-end; height: 100%; }
         .action-item { flex: 1; }
         .action-item button {
             width: 100%; height: 50px; padding: 0.75rem; background-color: transparent; border: 1px solid var(--border-color);
@@ -408,7 +409,7 @@
     let filteredCourses = [];
     let currentPage = 1;
     let rowsPerPage = 15;
-    let sortColumn = 'relevance';
+    let sortColumn = 'popularity';
     let sortDirection = 'desc';
     let originalData = [];
     let debounceTimer;
@@ -446,6 +447,31 @@
         '강의 설명': 'description', '강의 언어': 'language', '강의 자막 언어 목록': 'subtitles',
         '3개월 간 수강신청 수': 'enrollments'
     };
+    
+    // [추가] 카테고리 이모지 맵
+    const categoryEmojis = {
+        'Development': '💻',
+        'IT & Software': '💾',
+        'Business': '💼',
+        'Finance & Accounting': '💰',
+        'Marketing': '📈',
+        'Office Productivity': '📊',
+        'Personal Development': '🌱',
+        'Design': '🎨',
+        'Lifestyle': '🧘',
+        'Photography & Video': '📸',
+        'Health & Fitness': '💪',
+        'Music': '🎵',
+        'Teaching & Academics': '🏫'
+    };
+    const getCategoryEmoji = (category) => {
+        if (!category) return '📁';
+        for (const key in categoryEmojis) {
+            if (category.includes(key)) return categoryEmojis[key];
+        }
+        return '📁';
+    };
+
 
     const formatNumber = (num) => num.toLocaleString('ko-KR');
 
@@ -604,7 +630,7 @@
                     <p>${generateRecommendation(course)}</p>
                 </div>
                 <div class="card-footer">
-                    <span class="category-badge">${course.category.split(',')[0].trim()}</span>
+                    <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
                 </div>
             </div>
         `).join('');
@@ -645,56 +671,60 @@
                     <div class="controls-header">
                         <div class="guide-bar">💡 각 항목에 마우스를 올리면 자세한 설명을 볼 수 있습니다.</div>
                         <div class="filters-container">
-                             <div class="filter-group">
-                                <label for="search-mode">🤖 검색 모드</label>
-                                <select id="search-mode" title="일반 검색: 입력한 키워드와 정확히 일치하는 결과를 찾습니다.&#10;AI 확장 검색: AI가 연관어와 중요도를 분석하여 더 넓고 정확한 결과를 찾아줍니다.">
-                                    <option value="standard">일반 검색</option>
-                                    <option value="extended">AI 확장 검색</option>
-                                </select>
+                             <div class="filters-row">
+                                <div class="filter-group">
+                                    <label for="search-mode">🤖 검색 모드</label>
+                                    <select id="search-mode" title="일반 검색: 입력한 키워드와 정확히 일치하는 결과를 찾습니다.&#10;AI 확장 검색: AI가 연관어와 중요도를 분석하여 더 넓고 정확한 결과를 찾아줍니다.">
+                                        <option value="standard">일반 검색</option>
+                                        <option value="extended">AI 확장 검색</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="sort-order">📈 정렬 순서</label>
+                                    <select id="sort-order" title="목록의 정렬 순서를 변경합니다. AI 확장 검색 시 '적합도순'을 추천합니다.">
+                                        <option value="popularity">인기순</option>
+                                        <option value="relevance">적합도순</option>
+                                        <option value="alphabetical">가나다순</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="category-filter">🗂️ 카테고리</label>
+                                    <select id="category-filter" title="특정 카테고리의 강의만 필터링합니다."><option value="">모든 카테고리</option></select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="difficulty-filter">📊 난이도</label>
+                                    <select id="difficulty-filter" title="특정 난이도의 강의만 필터링합니다."><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="language-filter">🌐 언어</label>
+                                    <select id="language-filter" title="특정 언어로 진행되는 강의만 필터링합니다."><option value="">모든 언어</option></select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="subtitles-filter">💬 자막</label>
+                                    <select id="subtitles-filter" title="특정 언어의 자막을 지원하는 강의만 필터링합니다."><option value="">모든 자막</option></select>
+                                </div>
                             </div>
-                            <div class="filter-group">
-                                <label for="sort-order">📈 정렬 순서</label>
-                                <select id="sort-order" title="목록의 정렬 순서를 변경합니다. AI 확장 검색 시 '적합도순'을 추천합니다.">
-                                    <option value="relevance">적합도순</option>
-                                    <option value="popularity">인기순</option>
-                                    <option value="alphabetical">가나다순</option>
-                                </select>
-                            </div>
-                            <div class="filter-group">
-                                <label for="category-filter">🗂️ 카테고리</label>
-                                <select id="category-filter" title="특정 카테고리의 강의만 필터링합니다."><option value="">모든 카테고리</option></select>
-                            </div>
-                            <div class="filter-group">
-                                <label for="difficulty-filter">📊 난이도</label>
-                                <select id="difficulty-filter" title="특정 난이도의 강의만 필터링합니다."><option value="">모든 난이도</option><option>Beginner</option><option>Intermediate</option><option>Expert</option><option>All Levels</option></select>
-                            </div>
-                            <div class="filter-group">
-                                <label for="language-filter">🌐 언어</label>
-                                <select id="language-filter" title="특정 언어로 진행되는 강의만 필터링합니다."><option value="">모든 언어</option></select>
-                            </div>
-                            <div class="filter-group">
-                                <label for="subtitles-filter">💬 자막</label>
-                                <select id="subtitles-filter" title="특정 언어의 자막을 지원하는 강의만 필터링합니다."><option value="">모든 자막</option></select>
-                            </div>
-                            <div class="filter-group search-group" style="grid-column: 1 / 4;">
-                                <label for="search">🔍 검색</label>
-                                <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
-                            </div>
-                             <div class="filter-group" style="grid-column: 4 / 5;">
-                                 <label for="rows-per-page">👀 표시 개수</label>
-                                <select id="rows-per-page" title="한 페이지에 표시할 강의 수를 선택합니다."><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
-                            </div>
-                            <div class="filter-group actions-group" style="grid-column: 5 / 7;">
-                                <label>⚙️ 기능</label>
-                                <div class="actions">
-                                    <div class="action-item">
-                                        <button id="ai-recommend-btn" title="AI에게 직접 관심 분야를 알려주고 맞춤 강의를 추천받습니다.">🤖 AI 추천</button>
-                                    </div>
-                                    <div class="action-item">
-                                        <button id="download-csv" title="현재 필터링된 목록을 CSV 파일로 저장합니다.">💾 CSV 저장</button>
-                                    </div>
-                                    <div class="action-item">
-                                        <button id="reset-filters" title="모든 필터와 정렬을 초기 상태로 되돌립니다.">✨ 초기화</button>
+                             <div class="filters-row">
+                                <div class="filter-group search-group">
+                                    <label for="search">🔍 검색</label>
+                                    <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
+                                </div>
+                                 <div class="filter-group">
+                                     <label for="rows-per-page">👀 표시 개수</label>
+                                    <select id="rows-per-page" title="한 페이지에 표시할 강의 수를 선택합니다."><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
+                                </div>
+                                <div class="filter-group actions-group">
+                                    <label>⚙️ 기능</label>
+                                    <div class="actions">
+                                        <div class="action-item">
+                                            <button id="ai-recommend-btn" title="AI에게 직접 관심 분야를 알려주고 맞춤 강의를 추천받습니다.">🤖 AI 추천</button>
+                                        </div>
+                                        <div class="action-item">
+                                            <button id="download-csv" title="현재 필터링된 목록을 CSV 파일로 저장합니다.">💾 CSV 저장</button>
+                                        </div>
+                                        <div class="action-item">
+                                            <button id="reset-filters" title="모든 필터와 정렬을 초기 상태로 되돌립니다.">✨ 초기화</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -792,7 +822,7 @@
             if (item && item !== 'N/A') {
                 const option = document.createElement('option');
                 option.value = item; 
-                option.textContent = item;
+                option.textContent = `${getCategoryEmoji(item)} ${item}`;
                 filterEl.appendChild(option);
             }
         });
@@ -801,10 +831,10 @@
     function resetAllFilters() {
         document.getElementById('search').value = '';
         document.getElementById('search-mode').value = 'standard';
-        document.getElementById('sort-order').value = 'relevance';
+        document.getElementById('sort-order').value = 'popularity';
         ['category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('rows-per-page').value = '15';
-        sortColumn = 'relevance'; sortDirection = 'desc'; currentPage = 1;
+        sortColumn = 'enrollments'; sortDirection = 'desc'; currentPage = 1;
         renderTable();
         document.getElementById('ai-recommendations-container').style.display = 'none';
     }
@@ -937,7 +967,7 @@
             } else {
                 tableBody.innerHTML = paginatedCourses.map(course => `
                     <tr>
-                        <td>${course.category || ''}</td>
+                        <td>${getCategoryEmoji(course.category)} ${course.category || ''}</td>
                         <td class="col-topic" title="${course.topic || ''}">${course.topic || ''}</td>
                         <td><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">${course.title}</a></td>
                         <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
@@ -1054,7 +1084,7 @@
                     <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
                     <p>${generateRecommendation(course)}</p>
                      <div class="card-footer">
-                        <span class="category-badge">${course.category.split(',')[0].trim()}</span>
+                        <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
                     </div>
                 </div>
             `).join('');
@@ -1099,7 +1129,7 @@
                     <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
                     <p>${generateRecommendation(course)}</p>
                      <div class="card-footer">
-                        <span class="category-badge">${course.category.split(',')[0].trim()}</span>
+                        <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
                     </div>
                 </div>
             `).join('');
@@ -1124,7 +1154,7 @@
         document.querySelectorAll('th[data-sort]').forEach(th => {
             let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
             th.innerHTML = currentText;
-            if (sortOrder === 'relevance' && th.dataset.sort === sortColumn) {
+            if (sortOrder !== 'popularity' && sortOrder !== 'alphabetical' && th.dataset.sort === sortColumn) {
                 th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
             }
         });

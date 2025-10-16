@@ -306,7 +306,7 @@
         
         /* --- 수정: 테이블 스크롤 및 2줄 말줄임 최종 수정 --- */
         .table-container {
-            overflow-x: auto; /* 좌우 스크롤 담당 */
+            overflow-x: auto; /* 좌우 스크롤을 여기서 담당 */
         }
         table {
             width: 100%;
@@ -345,7 +345,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             line-height: 1.5;
-            max-height: calc(1.5em * 2);
+            max-height: calc(1.5em * 2); /* 2줄 높이로 제한 */
             word-break: break-all;
         }
         
@@ -504,7 +504,7 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.1 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.012 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
 </footer>
 
 <script>
@@ -638,7 +638,8 @@
                         newRow.rating = parseFloat(newRow.rating) || 0;
                         newRow.enrollments = parseInt(newRow.enrollments, 10) || 0;
                         // --- 수정: 날짜 파싱 오류 방지 ---
-                        newRow.lastUpdated = row['최근 업데이트 날짜'] ? new Date(row['최근 업데이트 날짜'].replace(/\./g, '-')) : null;
+                        const dateValue = row['최근 업데이트 날짜'];
+                        newRow.lastUpdated = dateValue ? new Date(dateValue.replace(/\./g, '-')) : null;
                         
                         newRow.language = newRow.language ? mapLanguageCode(newRow.language.split('_')[0]) : 'N/A';
                         if (newRow.subtitles && newRow.subtitles !== 'null' && newRow.subtitles.trim() !== '') {
@@ -764,6 +765,13 @@
                                     </select>
                                 </div>
                                 <div class="filter-group">
+                                    <label>🔥 속성</label>
+                                    <div class="custom-select-wrapper" data-filter-id="hot-new-filter">
+                                        <button class="custom-select-button">모든 강의</button>
+                                        <div class="custom-select-panel"></div>
+                                    </div>
+                                </div>
+                                <div class="filter-group">
                                     <label>🗂️ 카테고리</label>
                                     <div class="custom-select-wrapper" data-filter-id="category-filter">
                                         <button class="custom-select-button">모든 카테고리</button>
@@ -841,6 +849,7 @@
                                         <th data-sort="difficulty">📊 난이도</th>
                                         <th data-sort="rating">⭐ 평점</th>
                                         <th data-sort="instructor">👩‍🏫 강사명</th>
+                                        <th>속성</th>
                                     </tr></thead>
                                     <tbody id="course-table-body"></tbody>
                                 </table>
@@ -919,6 +928,8 @@
         populateMultiSelect('difficulty-filter', 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
         populateMultiSelect('language-filter', 'language', false, false);
         populateMultiSelect('subtitles-filter', 'subtitles', true, false);
+        populateMultiSelect('hot-new-filter', null, false, false, ['🔥 HOT', '✨ NEW']);
+
 
         document.querySelectorAll('.custom-select-button').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -978,7 +989,8 @@
             'category-filter': '모든 카테고리',
             'difficulty-filter': '모든 난이도',
             'language-filter': '모든 언어',
-            'subtitles-filter': '모든 자막'
+            'subtitles-filter': '모든 자막',
+            'hot-new-filter': '모든 강의'
         }[filterId];
 
         if (checkedCount === 0) {
@@ -1068,6 +1080,7 @@
             const selectedDifficulties = Array.from(document.querySelectorAll('[data-filter-id="difficulty-filter"] input:checked')).map(cb => cb.value);
             const selectedLanguages = Array.from(document.querySelectorAll('[data-filter-id="language-filter"] input:checked')).map(cb => cb.value);
             const selectedSubtitles = Array.from(document.querySelectorAll('[data-filter-id="subtitles-filter"] input:checked')).map(cb => cb.value);
+            const selectedHotNew = Array.from(document.querySelectorAll('[data-filter-id="hot-new-filter"] input:checked')).map(cb => cb.value);
 
             let coursesToFilter = [...originalData];
 
@@ -1101,7 +1114,21 @@
                 const matchesLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(course.language);
                 const matchesSubtitle = selectedSubtitles.length === 0 || selectedSubtitles.some(sub => course.subtitles && course.subtitles.includes(sub));
 
-                return matchesSearch && matchesRating && matchesCategory && matchesDifficulty && matchesLanguage && matchesSubtitle;
+                let matchesHotNew = true;
+                if (selectedHotNew.length > 0) {
+                    const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
+                    let isNew = false;
+                    if (course.lastUpdated && course.lastUpdated.getTime()) {
+                        const thresholdDate = new Date();
+                        thresholdDate.setMonth(thresholdDate.getMonth() - NEW_COURSE_THRESHOLD_MONTHS);
+                        isNew = course.lastUpdated > thresholdDate;
+                    }
+                    matchesHotNew = selectedHotNew.some(val => {
+                        return (val === '🔥 HOT' && isHot) || (val === '✨ NEW' && isNew);
+                    });
+                }
+
+                return matchesSearch && matchesRating && matchesCategory && matchesDifficulty && matchesLanguage && matchesSubtitle && matchesHotNew;
             });
 
             document.getElementById('results-summary').innerHTML = `2021년 이후 업데이트 된 총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
@@ -1137,7 +1164,7 @@
 
             const tableBody = document.getElementById('course-table-body');
             if (paginatedCourses.length === 0) {
-                tableBody.innerHTML = `<tr class="empty-row"><td colspan="9">
+                tableBody.innerHTML = `<tr class="empty-row"><td colspan="10">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <p>😥 일치하는 강의를 찾을 수 없습니다.</p>
                 </td></tr>`;
@@ -1146,7 +1173,7 @@
                     const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
                     
                     let isNew = false;
-                    if (course.lastUpdated && course.lastUpdated.getTime()) {
+                    if (course.lastUpdated && !isNaN(course.lastUpdated.getTime())) {
                         const thresholdDate = new Date();
                         thresholdDate.setMonth(thresholdDate.getMonth() - NEW_COURSE_THRESHOLD_MONTHS);
                         isNew = course.lastUpdated > thresholdDate;
@@ -1158,7 +1185,7 @@
                         <td title="${course.topic || ''}"><div class="line-clamp-2">${course.topic || ''}</div></td>
                         <td title="${course.title}">
                             <a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">
-                                <div class="line-clamp-2">${course.title} ${isHot ? '🔥' : ''} ${isNew ? '✨' : ''}</div>
+                                <div class="line-clamp-2">${course.title}</div>
                             </a>
                         </td>
                         <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
@@ -1167,6 +1194,7 @@
                         <td>${course.difficulty || ''}</td>
                         <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
                         <td title="${course.instructor || ''}"><div class="line-clamp-2">${course.instructor || ''}</div></td>
+                        <td>${isHot ? '🔥' : ''} ${isNew ? '✨' : ''}</td>
                     </tr>`;
                 }).join('');
             }

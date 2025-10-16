@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>🚀 Udemy Business Course Explorer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>🚀 Udemy Business Course Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
         :root {
@@ -362,48 +363,40 @@
     </style>
 </head>
 <body>
-
 <div id="initial-screen">
-    <h1>🚀 Udemy Business Course Explorer</h1>
-    <p>회사 Udemy Business 주소를 입력하고 모든 강의를 만나보세요!</p>
-    
-    <div class="gate-info">
-        <h3>🤔 이 목록은 왜 필요한가요?</h3>
-        <ul>
-            <li>Udemy 사이트보다 훨씬 빠르고 강력한 검색/필터링이 가능합니다.</li>
-            <li>전체 강의 데이터를 한눈에 파악하고 비교할 수 있습니다.</li>
-            <li>원하는 강의만 필터링하여 목록(CSV)을 만들고 공유할 수 있습니다.</li>
-            <li>✨AI가 강의를 요약/추천해주고, 관심사에 맞는 강의를 발견해줘요.</li>
-        </ul>
-    </div>
-
-    <div class="input-container">
-        <div class="input-group">
-            <input id="company-address" placeholder="회사 주소" type="text" />
-            <button id="submit-address">강의 목록 확인</button>
-        </div>
-        <p class="input-example">예시) 기업 Udemy URL이 <strong>woongjin.udemy.com</strong>일 경우 '<strong>woongjin</strong>' 입력</p>
-    </div>
+<h1 style="margin-bottom: 20px;">🚀 Udemy Business Course Explorer</h1>
+<p>회사 Udemy Business 주소를 입력하고 모든 강의를 만나보세요!</p>
+<div class="gate-info">
+<h3>🤔 이 목록은 왜 필요한가요?</h3>
+<ul>
+<li>Udemy 사이트보다 훨씬 빠르고 강력한 검색/필터링이 가능합니다.</li>
+<li>전체 강의 데이터를 한눈에 파악하고 비교할 수 있습니다.</li>
+<li>원하는 강의만 필터링하여 목록(CSV)을 만들고 공유할 수 있습니다.</li>
+<li>✨AI가 강의를 요약/추천해주고, 관심사에 맞는 강의를 발견해줘요.</li>
+</ul>
 </div>
-
+<div class="input-container">
+<div class="input-group">
+<input id="company-address" placeholder="회사 주소" type="text"/>
+<button id="submit-address">강의 목록 확인</button>
+</div>
+<p class="input-example">예시) 기업 Udemy URL이 <strong>woongjin.udemy.com</strong>일 경우 '<strong>woongjin</strong>' 입력</p>
+</div>
+</div>
 <div id="app-container"></div>
-
 <div id="modal-overlay">
-    <div id="modal-content">
-        <div id="modal-header">
-            <h2 id="modal-title"></h2>
-            <button id="modal-close-btn">&times;</button>
-        </div>
-        <div id="modal-body"></div>
-    </div>
+<div id="modal-content">
+<div id="modal-header">
+<h2 id="modal-title"></h2>
+<button id="modal-close-btn">×</button>
 </div>
-
+<div id="modal-body"></div>
+</div>
+</div>
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
-
 <footer class="app-footer">
-    <p>&copy; 2025 Made by Hojun Jung</p>
+<p>© 2025 Made by Hojun Jung</p>
 </footer>
-
 <script>
     // --- 전역 변수 및 상태 ---
     let companyName = '';
@@ -1202,7 +1195,5 @@
         paginationContainer.appendChild(nextButton);
     }
 </script>
-
 </body>
 </html>
-

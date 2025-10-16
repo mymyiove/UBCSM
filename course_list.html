@@ -358,7 +358,7 @@
             <li>Udemy 사이트보다 훨씬 빠르고 강력한 검색/필터링이 가능합니다.</li>
             <li>전체 강의 데이터를 한눈에 파악하고 비교할 수 있습니다.</li>
             <li>원하는 강의만 필터링하여 목록(CSV)을 만들고 공유할 수 있습니다.</li>
-            <li>✨ **AI가 강의를 요약/추천해주고, 관심사에 맞는 강의를 발견해줘요.**</li>
+            <li>✨AI가 강의를 요약/추천해주고, 관심사에 맞는 강의를 발견해줘요.</li>
         </ul>
     </div>
 
@@ -630,6 +630,13 @@
                             <div class="search-container" title="강의명, 강사, 주제, 언어 등 다양한 키워드로 검색할 수 있습니다."><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
                         </div>
                         <div class="filter-group">
+                            <label for="search-mode">🤖 검색 모드</label>
+                            <select id="search-mode" title="일반 검색: 입력한 키워드와 정확히 일치하는 결과를 찾습니다.&#10;AI 확장 검색: AI가 연관어와 중요도를 분석하여 더 넓고 정확한 결과를 찾아줍니다.">
+                                <option value="standard">일반 검색</option>
+                                <option value="extended">AI 확장 검색</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
                             <label for="category-filter">🗂️ 카테고리</label>
                             <select id="category-filter" title="특정 카테고리의 강의만 필터링합니다."><option value="">모든 카테고리</option></select>
                         </div>
@@ -712,7 +719,7 @@
 
 
             document.getElementById('search').addEventListener('input', handleFilters);
-            ['category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter', 'rows-per-page'].forEach(id => {
+            ['search-mode', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter', 'rows-per-page'].forEach(id => {
                 document.getElementById(id).addEventListener('change', handleFilters);
             });
             document.getElementById('reset-filters').addEventListener('click', resetAllFilters);
@@ -757,7 +764,7 @@
     }
 
     function resetAllFilters() {
-        ['search', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter'].forEach(id => document.getElementById(id).value = '');
+        ['search', 'search-mode', 'category-filter', 'difficulty-filter', 'language-filter', 'subtitles-filter'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('rows-per-page').value = '15';
         sortColumn = 'title'; sortDirection = 'asc'; currentPage = 1;
         renderTable();
@@ -787,7 +794,6 @@
         document.body.removeChild(link);
     }
     
-    // [수정] 연관 검색어 처리 로직 추가
     function getSearchTerms(input) {
         const term = input.toLowerCase();
         if (term === '') return [''];
@@ -812,19 +818,38 @@
         loader.classList.add('is-loading');
 
         setTimeout(() => {
-            rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
-            const tableBody = document.getElementById('course-table-body');
+            const searchMode = document.getElementById('search-mode').value;
             const searchTerm = document.getElementById('search').value;
-            const searchTerms = getSearchTerms(searchTerm);
             const selectedCategory = document.getElementById('category-filter').value;
             const selectedDifficulty = document.getElementById('difficulty-filter').value;
             const selectedLanguage = document.getElementById('language-filter').value;
             const selectedSubtitle = document.getElementById('subtitles-filter').value;
+            
+            let coursesToFilter = [...originalData];
 
-            filteredCourses = originalData.filter(course => {
+            if (searchTerm && searchMode === 'extended') {
+                const searchTerms = getSearchTerms(searchTerm);
+                coursesToFilter = coursesToFilter.map(course => {
+                    let score = 0;
+                    const title = (course.title || '').toLowerCase();
+                    const category = (course.category || '').toLowerCase();
+                    const topic = (course.topic || '').toLowerCase();
+                    const headline = (course.headline || '').toLowerCase();
+                    const objectives = (course.objectives || '').toLowerCase();
+
+                    for (const term of searchTerms) {
+                        if (category.includes(term)) score += 10;
+                        if (title.includes(term)) score += 5;
+                        if (topic.includes(term)) score += 3;
+                        if (headline.includes(term) || objectives.includes(term)) score += 1;
+                    }
+                    return { ...course, relevanceScore: score };
+                }).filter(course => course.relevanceScore > 0);
+            }
+
+            filteredCourses = coursesToFilter.filter(course => {
                 const searchCorpus = Object.values(course).join(' ').toLowerCase();
-                
-                const matchesSearch = searchTerms[0] === '' || searchTerms.some(term => searchCorpus.includes(term));
+                const matchesSearch = searchTerm === '' || searchMode === 'extended' || searchCorpus.includes(searchTerm.toLowerCase());
 
                 return matchesSearch &&
                     (selectedCategory === '' || (course.category && course.category.includes(selectedCategory))) &&
@@ -833,9 +858,12 @@
                     (selectedSubtitle === '' || (course.subtitles && course.subtitles.includes(selectedSubtitle)));
             });
 
-            document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 검색됨`;
+            document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
 
             filteredCourses.sort((a, b) => {
+                if (searchTerm && searchMode === 'extended' && a.relevanceScore !== b.relevanceScore) {
+                    return b.relevanceScore - a.relevanceScore;
+                }
                 let valA = a[sortColumn] || ''; let valB = b[sortColumn] || '';
                 if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
                 if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
@@ -844,6 +872,7 @@
             });
             updateSortIndicators();
             
+            rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
             const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
             if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
@@ -851,6 +880,7 @@
             const end = start + rowsPerPage;
             const paginatedCourses = filteredCourses.slice(start, end);
 
+            const tableBody = document.getElementById('course-table-body');
             if (paginatedCourses.length === 0) {
                 tableBody.innerHTML = `<tr class="empty-row"><td colspan="9">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>

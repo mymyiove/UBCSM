@@ -304,17 +304,16 @@
             visibility: visible;
         }
         
-        /* --- 수정: 테이블 스크롤 및 2줄 말줄임 최종 수정 --- */
         .table-container {
-            overflow-x: auto; /* 좌우 스크롤을 여기서 담당 */
+            overflow-x: auto;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1400px; /* 테이블 최소 너비 지정 */
+            min-width: 1400px;
         }
         thead {
-            position: sticky; /* thead에 직접 sticky 적용 */
+            position: sticky;
             top: var(--header-height);
             z-index: 10;
         }
@@ -333,7 +332,7 @@
             cursor: pointer;
             user-select: none;
             border-bottom: 2px solid var(--border-color);
-            white-space: nowrap; /* 헤더는 잘리지 않도록 함 */
+            white-space: nowrap;
         }
         td {
             font-size: 0.9rem;
@@ -345,12 +344,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
             line-height: 1.5;
-            max-height: calc(1.5em * 2); /* 2줄 높이로 제한 */
+            max-height: calc(1.5em * 2);
             word-break: break-all;
         }
         
         tbody tr:last-child td { border-bottom: none; }
-        /* --- 수정 끝 --- */
         
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
         tbody tr:hover { 
@@ -1118,7 +1116,7 @@
                 if (selectedHotNew.length > 0) {
                     const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
                     let isNew = false;
-                    if (course.lastUpdated && course.lastUpdated.getTime()) {
+                    if (course.lastUpdated && !isNaN(course.lastUpdated.getTime())) {
                         const thresholdDate = new Date();
                         thresholdDate.setMonth(thresholdDate.getMonth() - NEW_COURSE_THRESHOLD_MONTHS);
                         isNew = course.lastUpdated > thresholdDate;

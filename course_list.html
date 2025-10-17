@@ -20,7 +20,7 @@
             --shadow-soft: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
             --backdrop-blur: blur(16px);
-            --header-height: 125px; /* 스티키 헤더의 top 위치를 결정 */
+            --header-height: 0; /* 스티키 헤더의 top 위치를 결정 */
         }
 
         body::before {
@@ -87,12 +87,14 @@
         
         .app-header-wrapper {
             position: sticky;
-            top: -2rem; 
+            top: 0;
             z-index: 100;
-            padding-top: 2rem;
-            margin: -2rem -2rem 0;
+            /* 상단 여백과 마진을 제거하여 헤더가 문서 흐름에 맞게 붙도록 함 */
+            padding-top: 0;
+            margin: 0;
             animation: fadeInDown 0.5s ease;
         }
+
         .app-header {
             text-align: center;
             padding: 1rem 2rem;

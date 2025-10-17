@@ -403,7 +403,7 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.016 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.017 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
     <p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p>
 </footer>
 
@@ -492,7 +492,7 @@
         const backendApiEndpoint = '/api/gemini'; 
 
         // --- 아래는 백엔드가 없어도 테스트할 수 있도록 만든 목업(mock-up) 로직입니다. ---
-        // --- 실제 백엔드를 구축한 후에는 이 부분을 삭제하고 위의 fetch 로직을 사용하세요. ---
+        // --- 실제 백엔드를 구축한 후에는 이 부분을 삭제하고 아래의 fetch 로직을 사용하세요. ---
         console.log("Mock AI API called with payload:", payload);
         await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400));
         
@@ -509,6 +509,7 @@
             ];
             return { summary: summaryPoints, recommendedFor: recommendedForPoints };
         }
+        return null; // 목업 로직에서 처리되지 않은 경우
         // --- 여기까지 목업 로직 ---
 
 
@@ -527,7 +528,6 @@
             return await response.json();
         } catch (error) {
             console.error("Error calling AI API:", error);
-            // 에러 상황에 맞는 기본값 또는 메시지를 반환합니다.
             if (payload.type === 'summarize') {
                 return { 
                     summary: ["AI 요약 중 오류가 발생했습니다."], 
@@ -537,7 +537,6 @@
             return null;
         }
         */
-       return null; // 목업 로직에서 처리되지 않은 경우
     }
 
     async function loadCourseData() {
@@ -930,7 +929,6 @@
 
         currentPage = 1;
         handleFilters();
-        document.getElementById('ai-recommendations-container').style.display = 'none';
     }
 
     function downloadCSV() {
@@ -979,7 +977,11 @@
                 
                 let matchesPractice = true;
                 if (selectedPractices.length > 0) {
-                    matchesPractice = selectedPractices.every(val => (val === 'QUIZ' && course.quiz) || (val === 'ROLEPLAY' && course.roleplay));
+                    matchesPractice = selectedPractices.every(val => {
+                        if (val === 'QUIZ') return course.quiz;
+                        if (val === 'ROLEPLAY') return course.roleplay;
+                        return false;
+                    });
                 }
 
                 return matchesSearch && matchesRating && matchesCategory && matchesDifficulty && matchesLanguage && matchesSubtitle && matchesHotNew && matchesPractice;
@@ -989,9 +991,15 @@
 
             filteredCourses.sort((a, b) => {
                 switch (sortOrder) {
-                    case 'latest': return (b.lastUpdated || 0) - (a.lastUpdated || 0);
-                    case 'alphabetical': return (a.title || '').localeCompare(b.title || '');
-                    case 'popularity': default: return b.enrollments - a.enrollments;
+                    case 'latest':
+                        const dateA = a.lastUpdated ? a.lastUpdated.getTime() : 0;
+                        const dateB = b.lastUpdated ? b.lastUpdated.getTime() : 0;
+                        return dateB - dateA;
+                    case 'alphabetical':
+                        return (a.title || '').localeCompare(b.title || '');
+                    case 'popularity':
+                    default:
+                        return b.enrollments - a.enrollments;
                 }
             });
             
@@ -1000,6 +1008,7 @@
             if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
             const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
             const paginatedCourses = filteredCourses.slice(start, end);
 
             const tableBody = document.getElementById('course-table-body');

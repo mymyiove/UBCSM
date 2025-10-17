@@ -313,7 +313,21 @@
             width: 100%;
             border-collapse: collapse;
             min-width: 1400px; 
+            table-layout: fixed; /* 👈 이 한 줄만 추가하면 됩니다! */
         }
+
+        /* 이 부분은 위치를 아주 잘 잡으셨습니다! */
+        thead th:nth-child(1) { width: 13%; } /* 카테고리 */
+        thead th:nth-child(2) { width: 15%; } /* 강의 주제 */
+        thead th:nth-child(3) { width: 25%; } /* 강의명 */
+        thead th:nth-child(4) { width: 4%; }  /* 상세 */
+        thead th:nth-child(5) { width: 6%; }  /* 언어 */
+        thead th:nth-child(6) { width: 12%; } /* 자막 */
+        thead th:nth-child(7) { width: 7%; }  /* 난이도 */
+        thead th:nth-child(8) { width: 5%; }  /* 평점 */
+        thead th:nth-child(9) { width: 10%; } /* 강사명 */
+        thead th:nth-child(10){ width: 5%; }  /* 속성 */
+        
         thead {
             position: sticky;
             top: var(--header-height);

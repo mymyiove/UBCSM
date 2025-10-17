@@ -80,6 +80,7 @@
             width: 100%; box-shadow: var(--shadow-md);
         }
         .input-group input { flex-grow: 1; background: transparent; border: none; color: var(--text-color); font-size: 1.1rem; padding: 0.75rem; outline: none; }
+        .input-group input:focus { box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.4); border-radius: 4px; }
         .input-group button {
             display: flex; align-items: center; gap: 0.5rem; background-image: linear-gradient(to right, var(--primary-color), #c4b5fd);
             color: #1a1a2e; border: none; padding: 0.75rem 1.75rem; border-radius: 8px; cursor: pointer;
@@ -103,7 +104,13 @@
             border-bottom: 1px solid var(--border-color);
             background-color: var(--bg-color);
         }
-        .app-header h1 { font-size: 1.8rem; margin: 0; color: #fff; white-space: nowrap; }
+        .app-header h1 { 
+            font-size: 1.8rem; margin: 0; color: #fff; white-space: nowrap;
+            background-image: linear-gradient(45deg, var(--primary-hover-color), var(--primary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
         @keyframes rocket-bob {
             0% { transform: translateY(0); }
             50% { transform: translateY(-3px); }
@@ -168,7 +175,7 @@
         
         .filters-container {
             display: grid;
-            grid-template-columns: 1.5fr repeat(6, 1fr);
+            grid-template-columns: 2fr 1.5fr repeat(5, 1fr);
             gap: 1rem;
             transition: all 0.3s ease-in-out;
             max-height: 1000px;
@@ -183,11 +190,12 @@
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
-        .search-group { grid-column: 1 / span 2; }
-        .fg-mode { grid-column: 3 / span 1; }
-        .fg-sort { grid-column: 4 / span 1; }
-        .fg-rows { grid-column: 5 / span 1; }
-        .actions-group { grid-column: 6 / span 2; }
+        .search-group { grid-column: 1 / span 3; }
+        .fg-mode { grid-column: 4 / span 1; }
+        .fg-sort { grid-column: 5 / span 1; }
+        .fg-rows { grid-column: 6 / span 1; }
+        .actions-group { grid-column: 7 / span 1; }
+        .actions-group .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
         
         .custom-select-wrapper { position: relative; } 
         .custom-select-button {
@@ -221,7 +229,7 @@
         .action-item { flex: 1; }
         .action-item button {
             width: 100%; height: 50px; padding: 0.75rem; background-color: transparent; border: 1px solid var(--border-color);
-            color: var(--text-muted-color); font-size: 1rem; border-radius: 8px; cursor: pointer;
+            color: var(--text-muted-color); font-size: 0.9rem; border-radius: 8px; cursor: pointer;
             transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
         }
         .action-item button:hover { background-color: var(--border-color); color: var(--text-color); }
@@ -340,7 +348,12 @@
         #download-ai-csv:hover { background-color: var(--border-color); color: var(--text-color); }
         #download-ai-csv:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .modal-filters { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+        .modal-filters { 
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem; 
+            margin-bottom: 1rem; 
+        }
         .modal-filters .filter-group { flex: 1 1 200px; }
         .modal-filters select {
             width: 100%; height: 40px; padding: 0 0.75rem;
@@ -363,6 +376,7 @@
             border: 1px solid var(--border-color); border-radius: 8px;
             color: var(--text-color); font-size: 1rem;
         }
+        #ai-recommend-modal-input input:focus { box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.4); }
         #ai-recommend-modal-input button {
             background-color: var(--primary-color); color: #1a1a2e; font-weight: 700; border: none;
             padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;
@@ -430,7 +444,7 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.022 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.023 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
     <p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p>
 </footer>
 
@@ -723,7 +737,7 @@
                             </div>
                             <div class="filter-group search-group">
                                 <label for="search">🔍 검색</label>
-                                <div class="search-container"><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
+                                <div class="search-container"><input type="text" id="search" placeholder="키워드로 검색해주세요 (자유로운 검색은 AI 확장 검색 이용)"></div>
                             </div>
                             <div class="filter-group fg-mode">
                                 <label for="search-mode">🤖 검색 모드</label>
@@ -840,10 +854,10 @@
     }
     
     function initializeMultiSelectFilters(container = document) {
-        populateMultiSelect(container.querySelector('[data-filter-id="category-filter"]'), 'category', true, true);
+        populateMultiSelect(container.querySelector('[data-filter-id="category-filter"]'), 'category', true, true, uniqueCategories);
         populateMultiSelect(container.querySelector('[data-filter-id="difficulty-filter"]'), 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
-        populateMultiSelect(container.querySelector('[data-filter-id="language-filter"]'), null, false, false, uniqueLanguages);
-        populateMultiSelect(container.querySelector('[data-filter-id="subtitles-filter"]'), null, true, false, uniqueSubtitles);
+        populateMultiSelect(container.querySelector('[data-filter-id="language-filter"]'), 'language', false, false, uniqueLanguages);
+        populateMultiSelect(container.querySelector('[data-filter-id="subtitles-filter"]'), 'subtitles', true, false, uniqueSubtitles);
         populateMultiSelect(container.querySelector('[data-filter-id="hot-new-filter"]'), null, false, false, [
           { value: 'HOT', label: '🔥 HOT' },
           { value: 'NEW', label: '✨ NEW' }
@@ -859,7 +873,7 @@
                 button.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const panel = button.nextElementSibling;
-                    const allPanels = (container === document ? document : container).querySelectorAll('.custom-select-panel');
+                    const allPanels = (container === document ? document : container.closest('#modal-content')).querySelectorAll('.custom-select-panel');
                     allPanels.forEach(p => { if (p !== panel) p.classList.remove('visible'); });
                     panel.classList.toggle('visible');
                 });
@@ -899,12 +913,15 @@
             return `<div class="checkbox-item"><label><input type="checkbox" value="${value}"><span>${text}</span></label></div>`;
         }).join('');
 
-        if (wrapper.closest('#modal-content') === null) {
-             panel.addEventListener('change', () => {
+        const isModalFilter = wrapper.closest('#modal-content') !== null;
+        const eventHandler = isModalFilter 
+            ? () => updateMultiSelectButton(filterId, document.getElementById('modal-content'))
+            : () => {
                 updateMultiSelectButton(filterId);
                 handleFilters();
-            });
-        }
+            };
+
+        panel.addEventListener('change', eventHandler);
     }
 
     function updateMultiSelectButton(filterId, container = document) {
@@ -938,8 +955,8 @@
         document.getElementById('rows-per-page').value = '15';
         document.getElementById('sort-order').value = 'relevance';
         
-        document.querySelectorAll('.custom-select-panel input:checked').forEach(cb => cb.checked = false);
-        document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => updateMultiSelectButton(wrapper.dataset.filterId));
+        document.querySelectorAll('.filters-container .custom-select-panel input:checked').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.filters-container .custom-select-wrapper').forEach(wrapper => updateMultiSelectButton(wrapper.dataset.filterId));
 
         currentPage = 1;
         handleFilters();

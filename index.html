@@ -116,7 +116,13 @@
             50% { transform: translateY(-3px); }
             100% { transform: translateY(0); }
         }
-        .app-header h1 .rocket { display: inline-block; animation: rocket-bob 1.5s ease-in-out infinite; }
+        .app-header h1 .rocket { 
+            display: inline-block; 
+            animation: rocket-bob 1.5s ease-in-out infinite; 
+            color: initial;
+            -webkit-background-clip: initial;
+            background-clip: initial;
+        }
         #welcome-message {
             font-size: 1.2rem; margin: 0.5rem 0 0.5rem 0;
             color: var(--text-muted-color); font-weight: 300;
@@ -445,7 +451,7 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.023 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.23 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
     <p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p>
 </footer>
 
@@ -858,7 +864,7 @@
         populateMultiSelect(container.querySelector('[data-filter-id="category-filter"]'), 'category', true, true, uniqueCategories);
         populateMultiSelect(container.querySelector('[data-filter-id="difficulty-filter"]'), 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
         populateMultiSelect(container.querySelector('[data-filter-id="language-filter"]'), null, false, false, uniqueLanguages);
-        populateMultiSelect(container.querySelector('[data-filter-id="subtitles-filter"]'), null, true, false, uniqueSubtitles);
+        populateMultiSelect(container.querySelector('[data-filter-id="subtitles-filter"]'), 'subtitles', true, false, uniqueSubtitles);
         populateMultiSelect(container.querySelector('[data-filter-id="hot-new-filter"]'), null, false, false, [
           { value: 'HOT', label: '🔥 HOT' },
           { value: 'NEW', label: '✨ NEW' }
@@ -921,8 +927,10 @@
                 updateMultiSelectButton(filterId);
                 handleFilters();
             };
-
-        panel.addEventListener('change', eventHandler);
+        
+        // 이전에 등록된 이벤트 리스너가 있다면 제거 (중복 방지)
+        panel.replaceWith(panel.cloneNode(true));
+        wrapper.querySelector('.custom-select-panel').addEventListener('change', eventHandler);
     }
 
     function updateMultiSelectButton(filterId, container = document) {

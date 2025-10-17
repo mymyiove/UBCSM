@@ -521,31 +521,6 @@
 }
 
 
-        /*
-        // --- 실제 백엔드 연동 시 사용할 코드 ---
-        try {
-            const response = await fetch(backendApiEndpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.statusText}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error("Error calling AI API:", error);
-            if (payload.type === 'summarize') {
-                return { 
-                    summary: ["AI 요약 중 오류가 발생했습니다."], 
-                    recommendedFor: ["AI 추천 대상 분석 중 오류가 발생했습니다."]
-                };
-            }
-            return null;
-        }
-        */
-    }
 
     async function loadCourseData() {
         return new Promise((resolve, reject) => {

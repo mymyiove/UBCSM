@@ -168,7 +168,7 @@
         
         .filters-container {
             display: grid;
-            grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr 1fr;
+            grid-template-columns: 1.5fr repeat(6, 1fr);
             gap: 1rem;
             transition: all 0.3s ease-in-out;
             max-height: 1000px;
@@ -968,11 +968,174 @@
     }
 
     async function renderTable() {
-        // ... (이전과 동일, 변경 없음)
+        const loader = document.getElementById('table-loader');
+        loader.classList.add('is-loading');
+
+        const searchMode = document.getElementById('search-mode').value;
+        const sortOrderSelect = document.getElementById('sort-order');
+        if (searchMode === 'extended') {
+            sortOrderSelect.value = 'relevance';
+            sortOrderSelect.disabled = true;
+        } else {
+            sortOrderSelect.disabled = false;
+        }
+
+        const searchTerm = document.getElementById('search').value.toLowerCase();
+        const minRating = parseFloat(document.getElementById('rating-filter').value) || 0;
+        const sortOrder = sortOrderSelect.value;
+
+        const selectedCategories = Array.from(document.querySelectorAll('.filters-container [data-filter-id="category-filter"] input:checked')).map(cb => cb.value);
+        const selectedDifficulties = Array.from(document.querySelectorAll('.filters-container [data-filter-id="difficulty-filter"] input:checked')).map(cb => cb.value);
+        const selectedLanguages = Array.from(document.querySelectorAll('.filters-container [data-filter-id="language-filter"] input:checked')).map(cb => cb.value);
+        const selectedSubtitles = Array.from(document.querySelectorAll('.filters-container [data-filter-id="subtitles-filter"] input:checked')).map(cb => cb.value);
+        const selectedHotNew = Array.from(document.querySelectorAll('.filters-container [data-filter-id="hot-new-filter"] input:checked')).map(cb => cb.value);
+        const selectedPractices = Array.from(document.querySelectorAll('.filters-container [data-filter-id="practice-filter"] input:checked')).map(cb => cb.value);
+
+        let baseCourses = [...originalData];
+
+        if (searchMode === 'extended' && searchTerm) {
+            const keywords = await callGeminiAPI({ type: 'extended_search', prompt: searchTerm });
+            
+            if (keywords && Array.isArray(keywords) && keywords.length > 0) {
+                const lowerCaseKeywords = keywords.map(k => k.toLowerCase());
+                const allSearchTerms = [searchTerm, ...lowerCaseKeywords];
+
+                baseCourses = originalData.map(course => {
+                    const searchCorpus = Object.values(course).join(' ').toLowerCase();
+                    let score = 0;
+                    allSearchTerms.forEach(term => {
+                        if (searchCorpus.includes(term)) score++;
+                    });
+                    return { ...course, relevanceScore: score };
+                }).filter(course => course.relevanceScore > 0)
+                  .sort((a, b) => b.relevanceScore - a.relevanceScore);
+            } else {
+                baseCourses = [];
+            }
+        }
+
+        filteredCourses = baseCourses.filter(course => {
+            const searchCorpus = Object.values(course).join(' ').toLowerCase();
+            const matchesSearch = searchMode === 'extended' || searchTerm === '' || searchCorpus.includes(searchTerm);
+            
+            const matchesRating = course.rating >= minRating;
+            const matchesCategory = selectedCategories.length === 0 || selectedCategories.some(cat => course.category?.includes(cat));
+            const matchesDifficulty = selectedDifficulties.length === 0 || selectedDifficulties.includes(course.difficulty);
+            const matchesLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(course.language);
+            const matchesSubtitle = selectedSubtitles.length === 0 || (course.subtitles && selectedSubtitles.some(sub => course.subtitles.includes(sub)));
+
+            let matchesHotNew = true;
+            if (selectedHotNew.length > 0) {
+                const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
+                const isNew = course.lastUpdated && (new Date() - course.lastUpdated) < (NEW_COURSE_THRESHOLD_MONTHS * 30 * 24 * 60 * 60 * 1000);
+                matchesHotNew = selectedHotNew.some(val => (val === 'HOT' && isHot) || (val === 'NEW' && isNew));
+            }
+            
+            let matchesPractice = true;
+            if (selectedPractices.length > 0) {
+                matchesPractice = selectedPractices.every(val => {
+                    if (val === 'QUIZ') return course.quiz;
+                    if (val === 'ROLEPLAY') return course.roleplay;
+                    return false;
+                });
+            }
+
+            return matchesSearch && matchesRating && matchesCategory && matchesDifficulty && matchesLanguage && matchesSubtitle && matchesHotNew && matchesPractice;
+        });
+
+        document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
+
+        if (searchMode !== 'extended') {
+            filteredCourses.sort((a, b) => {
+                switch (sortOrder) {
+                    case 'latest':
+                        return (b.lastUpdated?.getTime() || 0) - (a.lastUpdated?.getTime() || 0);
+                    case 'alphabetical':
+                        return (a.title || '').localeCompare(b.title || '');
+                    case 'popularity':
+                        return b.enrollments - a.enrollments;
+                    case 'relevance':
+                    default:
+                        const calculateScore = (course) => {
+                            let score = 0;
+                            const title = course.title?.toLowerCase() || '';
+                            const topic = course.topic?.toLowerCase() || '';
+                            const category = course.category?.toLowerCase() || '';
+                            const headline = course.headline?.toLowerCase() || '';
+                            const objectives = course.objectives?.toLowerCase() || '';
+
+                            if (title.includes(searchTerm)) score += 20;
+                            if (topic.includes(searchTerm)) score += 10;
+                            if (category.includes(searchTerm)) score += 5;
+                            if (headline.includes(searchTerm) || objectives.includes(searchTerm)) score += 1;
+                            return score;
+                        };
+                        const scoreDiff = calculateScore(b) - calculateScore(a);
+                        if (scoreDiff !== 0) return scoreDiff;
+                        return b.enrollments - a.enrollments;
+                }
+            });
+        }
+        
+        rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
+        const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
+        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedCourses = filteredCourses.slice(start, end);
+
+        const tableBody = document.getElementById('course-table-body');
+        if (paginatedCourses.length === 0) {
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="11"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><p>😥 일치하는 강의를 찾을 수 없습니다.</p></td></tr>`;
+        } else {
+            tableBody.innerHTML = paginatedCourses.map((course, index) => {
+                const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
+                const isNew = course.lastUpdated && (new Date() - course.lastUpdated) < (NEW_COURSE_THRESHOLD_MONTHS * 30 * 24 * 60 * 60 * 1000);
+                const tooltip = `${isHot ? 'HOT' : ''}${isHot && isNew ? ' / ' : ''}${isNew ? 'NEW' : ''}`.trim();
+                const attrDisplay = `${isHot ? '🔥' : ''}${isHot && isNew ? ' ' : ''}${isNew ? '✨' : ''}`.trim();
+                const practiceTooltip = `${course.quiz ? '퀴즈' : ''}${course.quiz && course.roleplay ? ' / ' : ''}${course.roleplay ? '롤플레이' : ''}`.trim();
+                const practiceDisplay = `${course.quiz ? '📝' : ''}${course.quiz && course.roleplay ? ' ' : ''}${course.roleplay ? '🗣️' : ''}`.trim();
+                return `<tr style="animation-delay: ${index * 30}ms">
+                    <td title="${course.category || ''}"><div class="line-clamp-2">${getCategoryEmoji(course.category)} ${course.category || ''}</div></td>
+                    <td title="${course.topic || ''}"><div class="line-clamp-2">${course.topic || ''}</div></td>
+                    <td title="${course.title}"><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}"><div class="line-clamp-2">${course.title}</div></a></td>
+                    <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
+                    <td>${course.language || 'N/A'}</td>
+                    <td title="${course.subtitles || ''}"><div class="line-clamp-2">${course.subtitles || '없음'}</div></td>
+                    <td>${course.difficulty || ''}</td>
+                    <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
+                    <td title="${course.instructor || ''}"><div class="line-clamp-2">${course.instructor || ''}</div></td>
+                    <td title="${tooltip}">${attrDisplay || ''}</td>
+                    <td title="${practiceTooltip}">${practiceDisplay || ''}</td>
+                </tr>`;
+            }).join('');
+        }
+        renderPagination(totalPages);
+        loader.classList.remove('is-loading');
     }
 
     async function showCourseDetails(course) {
-        // ... (이전과 동일, 변경 없음)
+        const modalBody = document.getElementById('modal-body');
+        document.getElementById('modal-title').textContent = course.title;
+        
+        const objectivesHtml = course.objectives ? `<ul>${course.objectives.replace(/["\[\]]/g, '').split('\n').filter(line => line.trim()).map(line => `<li>${line.trim().replace(/^•\s*/, '')}</li>`).join('')}</ul>` : '<p>정보 없음</p>';
+        
+        modalBody.innerHTML = `
+            <div class="modal-section" id="ai-summary-section"><h3>✨ AI 핵심 요약</h3><div class="spinner-container"><div class="spinner"></div><p>AI가 요약 중입니다...</p></div></div>
+            <div class="modal-section" id="ai-recommend-for-section"><h3>🎯 이런 분들께 추천해요</h3><div class="spinner-container"><div class="spinner"></div><p>AI가 분석 중입니다...</p></div></div>
+            <div class="modal-section"><h3>📜 강의 소개</h3><p>${course.headline || '정보 없음'}</p></div>
+            <div class="modal-section"><h3>🎯 강의 내용 및 학습 목표</h3>${objectivesHtml}</div>`;
+        modalOverlay.style.display = 'flex';
+
+        const aiData = await callGeminiAPI({ type: 'summarize', context: course });
+        if(aiData && aiData.summary) {
+            const summaryList = `<ul>${aiData.summary.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}</ul>`;
+            document.getElementById('ai-summary-section').innerHTML = `<h3>✨ AI 핵심 요약</h3>${summaryList}`;
+
+            const recommendForList = `<ul>${aiData.recommendedFor.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}</ul>`;
+            document.getElementById('ai-recommend-for-section').innerHTML = `<h3>🎯 이런 분들께 추천해요</h3>${recommendForList}`;
+        }
     }
 
     function showAIRecommendationModal() {
@@ -1020,7 +1183,6 @@
         
         const modalContent = document.getElementById('modal-content');
         
-        // 모달 내 다중 선택 필터 초기화
         initializeMultiSelectFilters(modalContent);
 
         modalOverlay.style.display = 'flex';
@@ -1031,7 +1193,59 @@
     }
 
     async function handleAIRecommendationRequest() {
-        // ... (이전과 동일, 변경 없음)
+        aiRecommendedCourses = [];
+        const downloadBtn = document.getElementById('download-ai-csv');
+        downloadBtn.disabled = true;
+        
+        const modalContent = document.getElementById('modal-content');
+        const category = document.getElementById('ai-category-filter').value;
+        const difficulty = document.getElementById('ai-difficulty-filter').value;
+        const selectedLanguages = Array.from(modalContent.querySelectorAll('[data-filter-id="ai-language-filter"] input:checked')).map(cb => cb.value);
+        const selectedSubtitles = Array.from(modalContent.querySelectorAll('[data-filter-id="ai-subtitles-filter"] input:checked')).map(cb => cb.value);
+        const prompt = document.getElementById('ai-prompt').value;
+        
+        if (!category || !difficulty) {
+            alert("카테고리와 난이도는 반드시 선택해야 합니다.");
+            return;
+        }
+        if (!prompt) {
+            alert('학습 목표를 입력해주세요.');
+            return;
+        }
+
+        const resultsContainer = document.getElementById('ai-modal-results');
+        resultsContainer.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
+        
+        const candidateCourses = originalData.filter(course => {
+            const matchCategory = course.category && course.category.includes(category);
+            const matchDifficulty = course.difficulty === difficulty;
+            const matchLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(course.language);
+            const matchSubtitles = selectedSubtitles.length === 0 || (course.subtitles && selectedSubtitles.some(sub => course.subtitles.includes(sub)));
+            return matchCategory && matchDifficulty && matchLanguage && matchSubtitles;
+        });
+        
+        if (candidateCourses.length === 0) {
+            resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">선택한 조건에 맞는 강의가 없어요. 다른 조건으로 시도해보세요.</p>';
+            return;
+        }
+        
+        const courseTitles = candidateCourses.map(c => ({ id: c.id, title: c.title }));
+        const recommendedIds = await callGeminiAPI({ type: 'recommend', prompt: prompt, courses: courseTitles });
+        
+        if (recommendedIds && Array.isArray(recommendedIds) && recommendedIds.length > 0) {
+            aiRecommendedCourses = recommendedIds.map(id => originalData.find(course => course.id === id)).filter(Boolean);
+            
+            resultsContainer.innerHTML = aiRecommendedCourses.map(course => `
+                <div class="recommendation-card">
+                    <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
+                    <p>${generateRecommendation(course)}</p>
+                     <div class="card-footer"><span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span></div>
+                </div>`).join('');
+            
+            downloadBtn.disabled = false;
+        } else {
+            resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 강의를 찾지 못했어요. 다른 키워드로 시도해보세요.</p>';
+        }
     }
 
     function closeModal() { modalOverlay.style.display = 'none'; }

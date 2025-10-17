@@ -18,7 +18,8 @@ module.exports = async (req, res) => {
     } else if (type === 'recommend') {
         aiPrompt = `다음은 전체 강의 목록(id, title)입니다: ${JSON.stringify(courses)}\n\n위 목록 중에서, 다음 사용자의 요청에 가장 적합한 강의를 최대 10개까지 골라줘. 반드시 JSON 형식의 강의 ID 배열로만 응답해줘. 다른 설명은 절대 추가하지 마. 예시: ["123456", "789012"]\n\n사용자 요청: "${prompt}"`;
     } else if (type === 'extended_search') {
-        aiPrompt = `너는 똑똑한 Udemy 강의 검색 엔진이야. 다음은 검색 대상이 되는 전체 강의 목록이야: ${JSON.stringify(courses)}\n\n위 목록 중에서, 다음 사용자의 검색어와 의미적으로 가장 관련성이 높은 강의들을 순서대로 골라줘. 최대 20개까지 추천할 수 있어. 반드시 JSON 형식의 강의 ID 배열로만 응답해야 해. 다른 부가 설명은 절대 넣지 마.\n\n사용자 검색어: "${prompt}"`;
+        // AI에게 관련 검색 키워드를 생성해달라고 요청합니다.
+        aiPrompt = `사용자가 검색한 "'${prompt}'" 라는 문장의 핵심 의도를 파악해서, 관련성이 높은 검색 키워드를 최대 5개까지 생성해줘. 반드시 JSON 형식의 키워드 배열로만 응답해야 해. 다른 부가 설명은 절대 넣지 마. 예시: ["키워드1", "키워드2"]`;
     } else {
         throw new Error('알 수 없는 요청 타입입니다.');
     }

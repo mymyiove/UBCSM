@@ -221,22 +221,25 @@
         .controls-header.collapsed .toggle-icon {
             transform: rotate(-90deg);
         }
-        .filters-row-1, .filters-row-2 { display: flex; gap: 1rem; }
         
-        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .filter-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.5rem;
+            flex: 1 1 180px; /* 기본 크기, 줄바꿈 허용 */
+            min-width: 160px;
+        }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
-        /* 필터 그룹 크기 설정 */
-        .fg-large { flex: 0 0 260px; }
-        .fg-medium { flex: 1 1 140px; }
-        .fg-small { flex: 0 0 120px; }
-        .search-group { flex: 1 1 300px; }
-        
-        .actions-group {
-            flex: 0 0 440px; /* fg-medium 3개 + gap 2개 너비와 동일 */
-        }
-        
+        .search-group { flex: 3 1 400px; /* 검색창은 더 넓게 */ }
+        .actions-group { flex: 2 1 300px; /* 기능 버튼 그룹 */ }
+
         .custom-select-wrapper { position: relative; } 
         .custom-select-button {
             width: 100%; height: 50px; padding: 0 0.75rem; background-color: var(--bg-color);
@@ -289,11 +292,23 @@
             border: 1px solid var(--border-color);
         }
 
-        .list-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 1rem;}
+        .list-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: baseline; 
+            margin-bottom: 0.5rem; 
+            flex-wrap: wrap; 
+            gap: 1rem;
+        }
         .list-header h2 { margin: 0; font-size: 1.5rem; color: var(--primary-color); }
-        .results-summary { color: var(--text-muted-color); font-size: 0.9rem; }
+        .results-summary { 
+            width: 100%;
+            color: var(--text-muted-color); 
+            font-size: 0.9rem; 
+            margin-top: 0.5rem;
+        }
         .results-summary b { color: var(--primary-color); font-weight: 700; }
-        .badge-info { font-size: 0.8rem; margin-bottom: 1rem; color: var(--text-muted-color); }
+        .badge-info { font-size: 0.8rem; color: var(--text-muted-color); }
 
         .table-wrapper { position: relative; }
         .table-loader {
@@ -325,7 +340,7 @@
         thead th:nth-child(3) { width: 25%; } /* 강의명 */
         thead th:nth-child(4) { width: 4%; }  /* 상세 */
         thead th:nth-child(5) { width: 6%; }  /* 언어 */
-        thead th:nth-child(6) { width: 8%; } /* 자막 */
+        thead th:nth-child(6) { width: 8%; }  /* 자막 */
         thead th:nth-child(7) { width: 7%; }  /* 난이도 */
         thead th:nth-child(8) { width: 5%; }  /* 평점 */
         thead th:nth-child(9) { width: 9%; }  /* 강사명 */
@@ -348,7 +363,6 @@
             color: var(--text-muted-color);
             font-size: 0.8rem;
             letter-spacing: 0.5px;
-            cursor: pointer;
             user-select: none;
             border-bottom: 2px solid var(--border-color);
             white-space: nowrap;
@@ -521,7 +535,8 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.014 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.015 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p>
 </footer>
 
 <script>
@@ -531,8 +546,6 @@
     let filteredCourses = [];
     let currentPage = 1;
     let rowsPerPage = 15;
-    let sortColumn = 'popularity';
-    let sortDirection = 'desc';
     let originalData = [];
     let debounceTimer;
 
@@ -627,7 +640,6 @@
         }
 
         if (type === 'recommend' && context) {
-            // ... (기존 추천 로직 유지)
             return [];
         }
         return null;
@@ -674,12 +686,11 @@
                 
                     const enrollments = processedData.map(c => c.enrollments).sort((a, b) => b - a);
                     if (enrollments.length > 0) {
-                        const thresholdIndex = Math.floor(enrollments.length * 0.05);
-                        hotEnrollmentThreshold = enrollments[thresholdIndex];
+                        const thresholdIndex = Math.max(0, Math.floor(enrollments.length * 0.05) -1);
+                        hotEnrollmentThreshold = enrollments[thresholdIndex] || 0;
                     } else {
                         hotEnrollmentThreshold = 0;
                     }
-                    console.log('hotEnrollmentThreshold computed', hotEnrollmentThreshold);
                     
                     resolve(processedData);
 
@@ -747,7 +758,7 @@
             appContainer.innerHTML = `
                 <div class="app-header-wrapper">
                     <header class="app-header">
-                        <h1><span class="rocket">🚀</span> Udemy Business Course Explorer</h1>
+                        <h1><span class="rocket">🚀</span> Udemy Business Course Explorer (beta)</h1>
                         <h2 id="welcome-message"><strong>${companyName}</strong> 학습자님 어서오세요! Udemy와 즐겁게 성장해보세요.</h2>
                         <div id="last-updated">데이터 업데이트: 2025-10-17</div>
                     </header>
@@ -767,43 +778,50 @@
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="filters-container">
-                            <div class="filters-row-1">
-                                <div class="filter-group fg-large">
+                            <div class="filters-row">
+                                <div class="filter-group">
                                     <label>🗂️ 카테고리</label>
                                     <div class="custom-select-wrapper" data-filter-id="category-filter">
                                         <button class="custom-select-button">모든 카테고리</button>
                                         <div class="custom-select-panel"></div>
                                     </div>
                                 </div>
-                                <div class="filter-group fg-small">
-                                    <label>🔥 속성</label>
-                                    <div class="custom-select-wrapper" data-filter-id="hot-new-filter">
-                                        <button class="custom-select-button">모든 강의</button>
-                                        <div class="custom-select-panel"></div>
-                                    </div>
-                                </div>
-                                <div class="filter-group fg-medium">
+                                <div class="filter-group">
                                     <label>📊 난이도</label>
                                     <div class="custom-select-wrapper" data-filter-id="difficulty-filter">
                                         <button class="custom-select-button">모든 난이도</button>
                                         <div class="custom-select-panel"></div>
                                     </div>
                                 </div>
-                                <div class="filter-group fg-medium">
+                                <div class="filter-group">
                                     <label>🌐 언어</label>
                                     <div class="custom-select-wrapper" data-filter-id="language-filter">
                                         <button class="custom-select-button">모든 언어</button>
                                         <div class="custom-select-panel"></div>
                                     </div>
                                 </div>
-                                <div class="filter-group fg-medium">
+                                <div class="filter-group">
                                     <label>💬 자막</label>
                                     <div class="custom-select-wrapper" data-filter-id="subtitles-filter">
                                         <button class="custom-select-button">모든 자막</button>
                                         <div class="custom-select-panel"></div>
                                     </div>
                                 </div>
-                                <div class="filter-group fg-small">
+                                 <div class="filter-group">
+                                    <label>🔥 속성</label>
+                                    <div class="custom-select-wrapper" data-filter-id="hot-new-filter">
+                                        <button class="custom-select-button">모든 강의</button>
+                                        <div class="custom-select-panel"></div>
+                                    </div>
+                                </div>
+                                <div class="filter-group">
+                                    <label>📝 퀴즈/롤플레이</label>
+                                    <div class="custom-select-wrapper" data-filter-id="practice-filter">
+                                        <button class="custom-select-button">모든 방식</button>
+                                        <div class="custom-select-panel"></div>
+                                    </div>
+                                </div>
+                                <div class="filter-group">
                                     <label for="rating-filter">⭐ 평점</label>
                                     <select id="rating-filter">
                                         <option value="">모든 평점</option>
@@ -812,21 +830,22 @@
                                         <option value="3.5">3.5점 이상</option>
                                     </select>
                                 </div>
-                            </div>
-                             <div class="filters-row-2">
-                                <div class="filter-group fg-large">
-                                    <label>📝 학습 방식</label>
-                                    <div class="custom-select-wrapper" data-filter-id="practice-filter">
-                                        <button class="custom-select-button">모든 방식</button>
-                                        <div class="custom-select-panel"></div>
-                                    </div>
+                                <div class="filter-group">
+                                    <label for="sort-order">📈 정렬 순서</label>
+                                    <select id="sort-order">
+                                        <option value="popularity">인기순</option>
+                                        <option value="latest">최신순</option>
+                                        <option value="alphabetical">가나다순</option>
+                                    </select>
                                 </div>
-                                <div class="filter-group fg-small">
-                                    <label for="rows-per-page">👀 표시 개수</label>
+                                 <div class="filter-group">
+                                     <label for="rows-per-page">👀 표시 개수</label>
                                     <select id="rows-per-page"><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
                                 </div>
+                            </div>
+                             <div class="filters-row">
                                 <div class="filter-group search-group">
-                                    <label for="search">🔍 검색 (AI 확장 모드 추천)</label>
+                                    <label for="search">🔍 검색</label>
                                     <div class="search-container"><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
                                 </div>
                                 <div class="filter-group actions-group">
@@ -844,29 +863,29 @@
                     <div class="list-container">
                         <div class="list-header">
                             <h2>📖 탐험 목록</h2>
-                            <div class="results-summary" id="results-summary"></div>
+                            <div class="badge-info">
+                                <span>🔥 HOT: 3개월간 수강신청 수 상위 5%</span> | 
+                                <span>✨ NEW: 3개월 내 업데이트</span> |
+                                <span>📝 퀴즈 포함</span> |
+                                <span>🗣️ 롤플레이 포함</span>
+                            </div>
                         </div>
-                         <div class="badge-info">
-                            <span>🔥 HOT: 3개월간 수강신청 수 상위 5%</span> | 
-                            <span>✨ NEW: 3개월 내 업데이트</span> |
-                            <span>📝 퀴즈 포함</span> |
-                            <span>🗣️ 롤플레이 포함</span>
-                        </div>
+                        <div class="results-summary" id="results-summary"></div>
                         <div class="table-wrapper">
                             <div class="table-container">
                                 <table>
                                     <thead><tr>
-                                        <th data-sort="category">🗂️ 카테고리</th>
-                                        <th data-sort="topic">💡 강의 주제</th>
-                                        <th data-sort="title">📖 강의명</th>
+                                        <th>🗂️ 카테고리</th>
+                                        <th>💡 강의 주제</th>
+                                        <th>📖 강의명</th>
                                         <th>ℹ️ 상세</th>
-                                        <th data-sort="language">🌐 언어</th>
-                                        <th data-sort="subtitles">💬 자막</th>
-                                        <th data-sort="difficulty">📊 난이도</th>
-                                        <th data-sort="rating">⭐ 평점</th>
-                                        <th data-sort="instructor">👩‍🏫 강사명</th>
-                                        <th>🔥/✨ 인기/신규</th>
-                                        <th>📝/🗣️ 퀴즈/실습</th>
+                                        <th>🌐 언어</th>
+                                        <th>💬 자막</th>
+                                        <th>📊 난이도</th>
+                                        <th>⭐ 평점</th>
+                                        <th>👩‍🏫 강사명</th>
+                                        <th>🔥/✨</th>
+                                        <th>📝/🗣️</th>
                                     </tr></thead>
                                     <tbody id="course-table-body"></tbody>
                                 </table>
@@ -906,21 +925,15 @@
                 grid.classList.toggle('collapsed');
             });
 
-
             document.getElementById('search').addEventListener('input', handleFilters);
             document.getElementById('rating-filter').addEventListener('change', handleFilters);
             document.getElementById('rows-per-page').addEventListener('change', handleFilters);
+            document.getElementById('sort-order').addEventListener('change', handleFilters);
             
             document.getElementById('reset-filters').addEventListener('click', resetAllFilters);
             document.getElementById('download-csv').addEventListener('click', downloadCSV);
             document.getElementById('ai-recommend-btn').addEventListener('click', showAIRecommendationModal);
             
-            document.querySelector('thead').addEventListener('click', (e) => {
-                const header = e.target.closest('th');
-                if (header && header.dataset.sort) {
-                    handleSort(header.dataset.sort);
-                }
-            });
             document.getElementById('course-table-body').addEventListener('click', (e) => {
                 const detailsButton = e.target.closest('.details-btn');
                 if (detailsButton) {
@@ -1043,6 +1056,7 @@
         document.getElementById('search').value = '';
         document.getElementById('rating-filter').value = '';
         document.getElementById('rows-per-page').value = '15';
+        document.getElementById('sort-order').value = 'popularity';
         
         document.querySelectorAll('.custom-select-panel').forEach(panel => {
             panel.querySelectorAll('input:checked').forEach(cb => cb.checked = false);
@@ -1051,7 +1065,7 @@
             updateMultiSelectButton(wrapper.dataset.filterId);
         });
 
-        sortColumn = 'enrollments'; sortDirection = 'desc'; currentPage = 1;
+        currentPage = 1;
         handleFilters();
         document.getElementById('ai-recommendations-container').style.display = 'none';
     }
@@ -1109,6 +1123,7 @@
         setTimeout(() => {
             const searchTerm = document.getElementById('search').value;
             const minRating = parseFloat(document.getElementById('rating-filter').value) || 0;
+            const sortOrder = document.getElementById('sort-order').value;
 
             const selectedCategories = Array.from(document.querySelectorAll('[data-filter-id="category-filter"] input:checked')).map(cb => cb.value);
             const selectedDifficulties = Array.from(document.querySelectorAll('[data-filter-id="difficulty-filter"] input:checked')).map(cb => cb.value);
@@ -1117,7 +1132,9 @@
             const selectedHotNew = Array.from(document.querySelectorAll('[data-filter-id="hot-new-filter"] input:checked')).map(cb => cb.value);
             const selectedPractices = Array.from(document.querySelectorAll('[data-filter-id="practice-filter"] input:checked')).map(cb => cb.value);
 
-            filteredCourses = originalData.filter(course => {
+            let coursesToFilter = [...originalData];
+
+            filteredCourses = coursesToFilter.filter(course => {
                 const searchCorpus = Object.values(course).join(' ').toLowerCase();
                 const matchesSearch = searchTerm === '' || searchCorpus.includes(searchTerm.toLowerCase());
                 
@@ -1156,14 +1173,16 @@
             document.getElementById('results-summary').innerHTML = `2021년 이후 업데이트 된 총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
 
             filteredCourses.sort((a, b) => {
-                let valA = a[sortColumn] || ''; 
-                let valB = b[sortColumn] || '';
-                if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
-                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-                return 0;
+                switch (sortOrder) {
+                    case 'latest':
+                        return (b.lastUpdated || 0) - (a.lastUpdated || 0);
+                    case 'alphabetical':
+                        return (a.title || '').localeCompare(b.title || '');
+                    case 'popularity':
+                    default:
+                        return b.enrollments - a.enrollments;
+                }
             });
-            updateSortIndicators();
             
             rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
             const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
@@ -1373,27 +1392,6 @@
              container.querySelector('h2').textContent = `✨ AI 스마트 추천`;
              grid.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 다른 강의를 찾지 못했어요.</p>';
         }
-    }
-
-    function handleSort(column) {
-        if (sortColumn === column) {
-            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            sortColumn = column;
-            sortDirection = 'asc';
-        }
-        currentPage = 1;
-        renderTable();
-    }
-    
-    function updateSortIndicators() {
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-            let currentText = th.textContent.replace(' ▲', '').replace(' ▼', '');
-            th.innerHTML = currentText;
-            if (th.dataset.sort === sortColumn) {
-                th.innerHTML += sortDirection === 'asc' ? ' ▲' : ' ▼';
-            }
-        });
     }
 
     function renderPagination(totalPages) {

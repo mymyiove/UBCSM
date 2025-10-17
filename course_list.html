@@ -651,10 +651,24 @@
                     }).filter(row => row.id && row.title);
                     
                     const enrollments = processedData.map(c => c.enrollments).sort((a, b) => b - a);
-                    const top5PercentIndex = Math.floor(enrollments.length * 0.05);
-                    hotEnrollmentThreshold = enrollments[top5PercentIndex] || 0;
-
+// 안전한 enrollments 배열 생성 (쉼표 및 공백 포함 숫자 처리)
+                    const enrollments = processedData.map(c => {
+                      const n = Number(String(c.enrollments).replace(/[, ]+/g, '')) || 0;
+                      return n;
+                    }).sort((a, b) => b - a);
+                    
+                    // 안전한 상위 5% 인덱스 계산
+                    if (enrollments.length === 0) {
+                      hotEnrollmentThreshold = 0;
+                    } else {
+                      const idx = Math.max(0, Math.floor(enrollments.length * 0.05) - 1);
+                      // 최소 임계값 또는 계산값 중 큰 값을 사용 (필요시 최소값 제거 가능)
+                      hotEnrollmentThreshold = enrollments[idx] || enrollments[0] || 0;
+                    }
+                    console.log('hotEnrollmentThreshold computed', hotEnrollmentThreshold);
+                    
                     resolve(processedData);
+
                 },
                 error: (err) => {
                     alert("강의 데이터(CSV)를 불러오는 데 실패했습니다.");

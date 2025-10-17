@@ -958,7 +958,6 @@
         const loader = document.getElementById('table-loader');
         loader.classList.add('is-loading');
 
-        // AI 확장 검색 시 정렬 순서를 '관련도순'으로 강제
         const searchMode = document.getElementById('search-mode').value;
         const sortOrderSelect = document.getElementById('sort-order');
         if (searchMode === 'extended') {
@@ -982,21 +981,31 @@
         let baseCourses = [...originalData];
 
         if (searchMode === 'extended' && searchTerm) {
-            const courseTitles = originalData.map(c => ({ id: c.id, title: c.title }));
-            const relevantIds = await callGeminiAPI({ type: 'extended_search', prompt: searchTerm, courses: courseTitles });
+            const keywords = await callGeminiAPI({ type: 'extended_search', prompt: searchTerm });
             
-            if (relevantIds && Array.isArray(relevantIds) && relevantIds.length > 0) {
-                // AI가 반환한 ID 순서대로 baseCourses를 정렬
-                const idMap = new Map(originalData.map(course => [course.id, course]));
-                baseCourses = relevantIds.map(id => idMap.get(id)).filter(Boolean);
+            if (keywords && Array.isArray(keywords) && keywords.length > 0) {
+                const lowerCaseKeywords = keywords.map(k => k.toLowerCase());
+                // AI가 생성한 키워드와 원래 검색어를 합쳐서 검색
+                const allSearchTerms = [searchTerm, ...lowerCaseKeywords];
+
+                baseCourses = originalData.map(course => {
+                    const searchCorpus = Object.values(course).join(' ').toLowerCase();
+                    let score = 0;
+                    allSearchTerms.forEach(term => {
+                        if (searchCorpus.includes(term)) {
+                            score++;
+                        }
+                    });
+                    return { ...course, relevanceScore: score };
+                }).filter(course => course.relevanceScore > 0)
+                  .sort((a, b) => b.relevanceScore - a.relevanceScore);
             } else {
-                baseCourses = []; // AI가 결과를 못 찾으면 빈 배열 처리
+                baseCourses = []; // AI가 키워드를 못 찾으면 빈 배열 처리
             }
         }
 
         filteredCourses = baseCourses.filter(course => {
             const searchCorpus = Object.values(course).join(' ').toLowerCase();
-            // AI 확장 검색 시에는 이미 AI가 1차 필터링을 했으므로, 검색어 필터링은 건너뛴다.
             const matchesSearch = searchMode === 'extended' || searchTerm === '' || searchCorpus.includes(searchTerm);
             
             const matchesRating = course.rating >= minRating;
@@ -1026,19 +1035,13 @@
 
         document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
 
-        // AI 확장 검색이 아닐 경우에만 정렬 적용
         if (searchMode !== 'extended') {
             filteredCourses.sort((a, b) => {
                 switch (sortOrder) {
-                    case 'latest':
-                        return (b.lastUpdated?.getTime() || 0) - (a.lastUpdated?.getTime() || 0);
-                    case 'alphabetical':
-                        return (a.title || '').localeCompare(b.title || '');
-                    case 'popularity':
-                        return b.enrollments - a.enrollments;
-                    case 'relevance': // 일반 검색 시 관련도순은 인기순으로 처리
-                    default:
-                        return b.enrollments - a.enrollments;
+                    case 'latest': return (b.lastUpdated?.getTime() || 0) - (a.lastUpdated?.getTime() || 0);
+                    case 'alphabetical': return (a.title || '').localeCompare(b.title || '');
+                    case 'popularity': return b.enrollments - a.enrollments;
+                    case 'relevance': default: return b.enrollments - a.enrollments;
                 }
             });
         }

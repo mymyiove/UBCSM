@@ -520,27 +520,6 @@
     }
 }
 
-        // --- 아래는 백엔드가 없어도 테스트할 수 있도록 만든 목업(mock-up) 로직입니다. ---
-        // --- 실제 백엔드를 구축한 후에는 이 부분을 삭제하고 아래의 fetch 로직을 사용하세요. ---
-        console.log("Mock AI API called with payload:", payload);
-        await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400));
-        
-        if (payload.type === 'summarize' && payload.context) {
-            const { context } = payload;
-            const summaryPoints = [
-                `이 강의는 **${(context.category || '').split(',')[0]}** 분야의 핵심 기술을 다룹니다.`,
-                `**'${context.headline}'**을(를) 목표로 하며, 수강생은 구체적인 결과물을 만들 수 있습니다.`,
-                `학습 목표 중 하나는 **'${(context.objectives || 'N/A').split('\n')[1] || '실무 능력 향상'}'** 입니다.`
-            ];
-            const recommendedForPoints = [
-                `**${context.difficulty || '모든 수준의'}** 학습자에게 적합합니다.`,
-                `**${(context.topic || '관련 분야').split(',')[0]}**에 대한 이해를 높이고 싶은 분께 추천합니다.`
-            ];
-            return { summary: summaryPoints, recommendedFor: recommendedForPoints };
-        }
-        return null; // 목업 로직에서 처리되지 않은 경우
-        // --- 여기까지 목업 로직 ---
-
 
         /*
         // --- 실제 백엔드 연동 시 사용할 코드 ---

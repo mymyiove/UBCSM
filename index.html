@@ -175,7 +175,7 @@
         
         .filters-container {
             display: grid;
-            grid-template-columns: 2fr 1.5fr repeat(5, 1fr);
+            grid-template-columns: repeat(8, 1fr);
             gap: 1rem;
             transition: all 0.3s ease-in-out;
             max-height: 1000px;
@@ -190,11 +190,12 @@
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
+        .fg-category { grid-column: span 2; }
         .search-group { grid-column: 1 / span 3; }
         .fg-mode { grid-column: 4 / span 1; }
         .fg-sort { grid-column: 5 / span 1; }
         .fg-rows { grid-column: 6 / span 1; }
-        .actions-group { grid-column: 7 / span 1; }
+        .actions-group { grid-column: 7 / span 2; }
         .actions-group .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
         
         .custom-select-wrapper { position: relative; } 
@@ -354,7 +355,7 @@
             gap: 1rem; 
             margin-bottom: 1rem; 
         }
-        .modal-filters .filter-group { flex: 1 1 200px; }
+        .modal-filters .filter-group { flex: 1 1 auto; }
         .modal-filters select {
             width: 100%; height: 40px; padding: 0 0.75rem;
             background-color: var(--bg-color); border: 1px solid var(--border-color);
@@ -684,7 +685,7 @@
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="filters-container">
-                            <div class="filter-group">
+                            <div class="filter-group fg-category">
                                 <label>🗂️ 카테고리</label>
                                 <div class="custom-select-wrapper" data-filter-id="category-filter">
                                     <button class="custom-select-button">모든 카테고리</button>
@@ -856,8 +857,8 @@
     function initializeMultiSelectFilters(container = document) {
         populateMultiSelect(container.querySelector('[data-filter-id="category-filter"]'), 'category', true, true, uniqueCategories);
         populateMultiSelect(container.querySelector('[data-filter-id="difficulty-filter"]'), 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
-        populateMultiSelect(container.querySelector('[data-filter-id="language-filter"]'), 'language', false, false, uniqueLanguages);
-        populateMultiSelect(container.querySelector('[data-filter-id="subtitles-filter"]'), 'subtitles', true, false, uniqueSubtitles);
+        populateMultiSelect(container.querySelector('[data-filter-id="language-filter"]'), null, false, false, uniqueLanguages);
+        populateMultiSelect(container.querySelector('[data-filter-id="subtitles-filter"]'), null, true, false, uniqueSubtitles);
         populateMultiSelect(container.querySelector('[data-filter-id="hot-new-filter"]'), null, false, false, [
           { value: 'HOT', label: '🔥 HOT' },
           { value: 'NEW', label: '✨ NEW' }

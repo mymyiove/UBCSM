@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
 
     // 4. 손님(index.html)이 보낸 주문서(payload) 내용을 확인합니다.
     const { type, context, prompt } = req.body;
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // 최신 모델 사용!
 
     let aiPrompt = '';
     // 주문서 유형에 따라 AI에게 다른 지시를 내립니다.
@@ -32,8 +32,11 @@ module.exports = async (req, res) => {
     const result = await model.generateContent(aiPrompt);
     const response = await result.response;
     const text = response.text();
+    
+    // 6. AI가 보낸 '선물 포장(Markdown)'을 뜯어냅니다. (✅ 이 부분이 추가되었습니다!)
+    const cleanedText = text.replace(/^```json\s*/, '').replace(/```$/, '');
 
-    // 6. 완성된 요리(AI의 답변)를 손님에게 전달합니다.
+    // 7. 깨끗한 내용물만 손님에게 전달합니다.
     res.status(200).json(JSON.parse(cleanedText));
 
   } catch (error) {

@@ -554,7 +554,7 @@
         '강의 난이도': 'difficulty', '카테고리 목록': 'category', '강의 주제 목록': 'topic',
         '평점': 'rating', '강의 헤드라인 / 소개 문구': 'headline', '학습 목표 / 배울 내용': 'objectives',
         '강의 설명': 'description', '강의 언어': 'language', '강의 자막 언어 목록': 'subtitles',
-        '3개월 간 수강신청 수': 'enrollments', '최근 업데이트 날짜': 'lastUpdated'
+        '3개월 간 수강신청 수': 'enrollments', '최종 업데이트 날짜': 'lastUpdated'
     };
     
     const categoryEmojis = {
@@ -636,9 +636,12 @@
                             }
                         }
                         newRow.rating = parseFloat(newRow.rating) || 0;
-                        newRow.enrollments = parseInt(newRow.enrollments, 10) || 0;
                         
-                        const dateValue = row['최근 업데이트 날짜'];
+                        // '3개월 간 수강신청 수'를 쉼표(,)가 있어도 숫자로 변환하도록 수정
+                        newRow.enrollments = Number(String(newRow.enrollments).replace(/,/g, '')) || 0;
+                        
+                        // '최종 업데이트 날짜'를 Date 객체로 변환하도록 수정
+                        const dateValue = newRow.lastUpdated; // 매핑된 키를 사용
                         newRow.lastUpdated = dateValue ? new Date(dateValue.replace(/\./g, '-')) : null;
                         
                         newRow.language = newRow.language ? mapLanguageCode(newRow.language.split('_')[0]) : 'N/A';

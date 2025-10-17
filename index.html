@@ -181,10 +181,11 @@
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
-        .fg-category { flex-basis: 240px; }
-        .fg-sort, .fg-rows { flex-basis: 150px; flex-grow: 0; }
-        .search-group { flex-basis: 300px; }
-        .actions-group { flex-basis: 300px; flex-grow: 0; }
+        /* 필터 레이아웃 조정 */
+        .search-group { flex: 2 1 400px; min-width: 300px; }
+        .fg-mode, .fg-sort, .fg-rows { flex: 1 1 150px; min-width: 140px; }
+        .actions-group { flex: 2 1 300px; min-width: 280px; }
+        
 
         .custom-select-wrapper { position: relative; } 
         .custom-select-button {
@@ -317,10 +318,28 @@
             max-height: 80vh; overflow-y: auto;
         }
         @keyframes slideUp { from { transform: translateY(30px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-        #modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        #modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem; }
         #modal-title { font-size: 1.5rem; font-weight: 700; color: #fff; }
         #modal-close-btn { background: none; border: none; color: var(--text-muted-color); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
         #modal-close-btn:hover { color: #fff; }
+        
+        .modal-body-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-body-header p {
+            margin: 0;
+            color: var(--text-muted-color);
+        }
+        #download-ai-csv {
+            background: none; border: 1px solid var(--border-color); color: var(--text-muted-color);
+            padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;
+        }
+        #download-ai-csv:hover { background-color: var(--border-color); color: var(--text-color); }
+        #download-ai-csv:disabled { opacity: 0.5; cursor: not-allowed; }
         
         .modal-section h3 { font-size: 1.1rem; font-weight: 500; color: var(--primary-color); margin-bottom: 0.75rem; border-left: 3px solid var(--primary-color); padding-left: 0.75rem; }
         .modal-section p, .modal-section ul { color: var(--text-color); margin: 0; padding: 0; font-size: 1rem; line-height: 1.7; word-break: keep-all; }
@@ -403,7 +422,7 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.017 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.019 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
     <p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p>
 </footer>
 
@@ -416,6 +435,7 @@
     let rowsPerPage = 15;
     let originalData = [];
     let debounceTimer;
+    let aiRecommendedCourses = [];
 
     // --- HOT/NEW 기준값 ---
     let hotEnrollmentThreshold = 0;
@@ -481,32 +501,21 @@
     };
     const mapLanguageCode = (code) => languageMap[code] || code;
     
-    /**
-     * 실제 AI API와 연동하기 위한 함수입니다.
-     * @param {object} payload - AI 모델에 전달할 데이터 (예: { type: 'summarize', context: course })
-     * @returns {Promise<object|null>} AI 모델의 응답 또는 에러 시 null
-     */
     async function callGeminiAPI(payload) {
-        // 실제 운영 시에는 '/api/gemini'와 같이 백엔드 서버의 API 엔드포인트 주소를 사용해야 합니다.
-        // 이 주소는 API 키를 안전하게 관리하고 Google AI API를 호출하는 역할을 합니다.
-        const backendApiEndpoint = '/api/gemini'; // 💥 문제의 원인: 'backendApiEndpoint'로 선언하고
+        const backendApiEndpoint = '/api/gemini'; 
 
         try {
-            // 주방에 주문서를 POST 방식으로 전달합니다.
-            // ✅ 해결: 변수 이름을 'backendApiEndpoint'로 통일했습니다.
-            const response = await fetch(backendApiEndpoint, { // 💥 'apiEndpoint'라는 다른 이름으로 사용했습니다.
+            const response = await fetch(backendApiEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            // 주방에서 문제가 생겼는지 확인합니다.
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || `서버 오류: ${response.statusText}`);
             }
 
-            // 완성된 요리(결과)를 받아서 손님에게 보여줍니다.
             return await response.json();
 
         } catch (error) {
@@ -520,7 +529,6 @@
             return null;
         }
     }
-
 
     async function loadCourseData() {
         return new Promise((resolve, reject) => {
@@ -647,7 +655,7 @@
                         </div>
                         <div class="filters-container">
                             <div class="filters-row">
-                                <div class="filter-group fg-category">
+                                <div class="filter-group">
                                     <label>🗂️ 카테고리</label>
                                     <div class="custom-select-wrapper" data-filter-id="category-filter">
                                         <button class="custom-select-button">모든 카테고리</button>
@@ -704,9 +712,17 @@
                                     <label for="search">🔍 검색</label>
                                     <div class="search-container"><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
                                 </div>
+                                <div class="filter-group fg-mode">
+                                    <label for="search-mode">🤖 검색 모드</label>
+                                    <select id="search-mode">
+                                        <option value="standard">일반 검색</option>
+                                        <option value="extended">AI 확장 검색</option>
+                                    </select>
+                                </div>
                                 <div class="filter-group fg-sort">
                                     <label for="sort-order">📈 정렬 순서</label>
                                     <select id="sort-order">
+                                        <option value="relevance">관련도순</option>
                                         <option value="popularity">인기순</option>
                                         <option value="latest">최신순</option>
                                         <option value="alphabetical">가나다순</option>
@@ -794,12 +810,13 @@
             });
 
             document.getElementById('search').addEventListener('input', handleFilters);
+            document.getElementById('search-mode').addEventListener('change', handleFilters);
             document.getElementById('rating-filter').addEventListener('change', handleFilters);
             document.getElementById('rows-per-page').addEventListener('change', handleFilters);
             document.getElementById('sort-order').addEventListener('change', handleFilters);
             
             document.getElementById('reset-filters').addEventListener('click', resetAllFilters);
-            document.getElementById('download-csv').addEventListener('click', downloadCSV);
+            document.getElementById('download-csv').addEventListener('click', downloadMainCSV);
             document.getElementById('ai-recommend-btn').addEventListener('click', showAIRecommendationModal);
             
             document.getElementById('course-table-body').addEventListener('click', (e) => {
@@ -903,9 +920,10 @@
 
     function resetAllFilters() {
         document.getElementById('search').value = '';
+        document.getElementById('search-mode').value = 'standard';
         document.getElementById('rating-filter').value = '';
         document.getElementById('rows-per-page').value = '15';
-        document.getElementById('sort-order').value = 'popularity';
+        document.getElementById('sort-order').value = 'relevance';
         
         document.querySelectorAll('.custom-select-panel input:checked').forEach(cb => cb.checked = false);
         document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => updateMultiSelectButton(wrapper.dataset.filterId));
@@ -914,115 +932,153 @@
         handleFilters();
     }
 
-    function downloadCSV() {
-        if (filteredCourses.length === 0) { alert("다운로드할 데이터가 없습니다."); return; }
+    function downloadCSV(data, filename) {
+        if (!data || data.length === 0) { alert("다운로드할 데이터가 없습니다."); return; }
         
-        const filename = `Udemy_Course_List_${companyName}.csv`;
-        const csv = Papa.unparse(filteredCourses);
+        const csv = Papa.unparse(data);
         const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = filename;
         link.click();
     }
+    
+    function downloadMainCSV() {
+        const filename = `Udemy_Course_List_${companyName}.csv`;
+        downloadCSV(filteredCourses, filename);
+    }
 
-    function renderTable() {
+    function downloadAIRecommendationsCSV() {
+        const searchTerm = document.getElementById('ai-prompt').value.trim();
+        const filename = `Udemy Business Course List_AI Pick_${searchTerm}.csv`;
+        downloadCSV(aiRecommendedCourses, filename);
+    }
+
+    async function renderTable() {
         const loader = document.getElementById('table-loader');
         loader.classList.add('is-loading');
 
-        setTimeout(() => {
-            const searchTerm = document.getElementById('search').value.toLowerCase();
-            const minRating = parseFloat(document.getElementById('rating-filter').value) || 0;
-            const sortOrder = document.getElementById('sort-order').value;
+        // AI 확장 검색 시 정렬 순서를 '관련도순'으로 강제
+        const searchMode = document.getElementById('search-mode').value;
+        const sortOrderSelect = document.getElementById('sort-order');
+        if (searchMode === 'extended') {
+            sortOrderSelect.value = 'relevance';
+            sortOrderSelect.disabled = true;
+        } else {
+            sortOrderSelect.disabled = false;
+        }
 
-            const selectedCategories = Array.from(document.querySelectorAll('[data-filter-id="category-filter"] input:checked')).map(cb => cb.value);
-            const selectedDifficulties = Array.from(document.querySelectorAll('[data-filter-id="difficulty-filter"] input:checked')).map(cb => cb.value);
-            const selectedLanguages = Array.from(document.querySelectorAll('[data-filter-id="language-filter"] input:checked')).map(cb => cb.value);
-            const selectedSubtitles = Array.from(document.querySelectorAll('[data-filter-id="subtitles-filter"] input:checked')).map(cb => cb.value);
-            const selectedHotNew = Array.from(document.querySelectorAll('[data-filter-id="hot-new-filter"] input:checked')).map(cb => cb.value);
-            const selectedPractices = Array.from(document.querySelectorAll('[data-filter-id="practice-filter"] input:checked')).map(cb => cb.value);
+        const searchTerm = document.getElementById('search').value.toLowerCase();
+        const minRating = parseFloat(document.getElementById('rating-filter').value) || 0;
+        const sortOrder = sortOrderSelect.value;
 
-            filteredCourses = originalData.filter(course => {
-                const searchCorpus = Object.values(course).join(' ').toLowerCase();
-                const matchesSearch = searchTerm === '' || searchCorpus.includes(searchTerm);
-                const matchesRating = course.rating >= minRating;
-                const matchesCategory = selectedCategories.length === 0 || selectedCategories.some(cat => course.category?.includes(cat));
-                const matchesDifficulty = selectedDifficulties.length === 0 || selectedDifficulties.includes(course.difficulty);
-                const matchesLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(course.language);
-                const matchesSubtitle = selectedSubtitles.length === 0 || selectedSubtitles.some(sub => course.subtitles?.includes(sub));
+        const selectedCategories = Array.from(document.querySelectorAll('[data-filter-id="category-filter"] input:checked')).map(cb => cb.value);
+        const selectedDifficulties = Array.from(document.querySelectorAll('[data-filter-id="difficulty-filter"] input:checked')).map(cb => cb.value);
+        const selectedLanguages = Array.from(document.querySelectorAll('[data-filter-id="language-filter"] input:checked')).map(cb => cb.value);
+        const selectedSubtitles = Array.from(document.querySelectorAll('[data-filter-id="subtitles-filter"] input:checked')).map(cb => cb.value);
+        const selectedHotNew = Array.from(document.querySelectorAll('[data-filter-id="hot-new-filter"] input:checked')).map(cb => cb.value);
+        const selectedPractices = Array.from(document.querySelectorAll('[data-filter-id="practice-filter"] input:checked')).map(cb => cb.value);
 
-                let matchesHotNew = true;
-                if (selectedHotNew.length > 0) {
-                    const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
-                    const isNew = course.lastUpdated && (new Date() - course.lastUpdated) < (NEW_COURSE_THRESHOLD_MONTHS * 30 * 24 * 60 * 60 * 1000);
-                    matchesHotNew = selectedHotNew.some(val => (val === 'HOT' && isHot) || (val === 'NEW' && isNew));
-                }
-                
-                let matchesPractice = true;
-                if (selectedPractices.length > 0) {
-                    matchesPractice = selectedPractices.every(val => {
-                        if (val === 'QUIZ') return course.quiz;
-                        if (val === 'ROLEPLAY') return course.roleplay;
-                        return false;
-                    });
-                }
+        let baseCourses = [...originalData];
 
-                return matchesSearch && matchesRating && matchesCategory && matchesDifficulty && matchesLanguage && matchesSubtitle && matchesHotNew && matchesPractice;
-            });
+        if (searchMode === 'extended' && searchTerm) {
+            const courseTitles = originalData.map(c => ({ id: c.id, title: c.title }));
+            const relevantIds = await callGeminiAPI({ type: 'extended_search', prompt: searchTerm, courses: courseTitles });
+            
+            if (relevantIds && Array.isArray(relevantIds) && relevantIds.length > 0) {
+                // AI가 반환한 ID 순서대로 baseCourses를 정렬
+                const idMap = new Map(originalData.map(course => [course.id, course]));
+                baseCourses = relevantIds.map(id => idMap.get(id)).filter(Boolean);
+            } else {
+                baseCourses = []; // AI가 결과를 못 찾으면 빈 배열 처리
+            }
+        }
 
-            document.getElementById('results-summary').innerHTML = `2021년 이후 업데이트 된 총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
+        filteredCourses = baseCourses.filter(course => {
+            const searchCorpus = Object.values(course).join(' ').toLowerCase();
+            // AI 확장 검색 시에는 이미 AI가 1차 필터링을 했으므로, 검색어 필터링은 건너뛴다.
+            const matchesSearch = searchMode === 'extended' || searchTerm === '' || searchCorpus.includes(searchTerm);
+            
+            const matchesRating = course.rating >= minRating;
+            const matchesCategory = selectedCategories.length === 0 || selectedCategories.some(cat => course.category?.includes(cat));
+            const matchesDifficulty = selectedDifficulties.length === 0 || selectedDifficulties.includes(course.difficulty);
+            const matchesLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(course.language);
+            const matchesSubtitle = selectedSubtitles.length === 0 || selectedSubtitles.some(sub => course.subtitles?.includes(sub));
 
+            let matchesHotNew = true;
+            if (selectedHotNew.length > 0) {
+                const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
+                const isNew = course.lastUpdated && (new Date() - course.lastUpdated) < (NEW_COURSE_THRESHOLD_MONTHS * 30 * 24 * 60 * 60 * 1000);
+                matchesHotNew = selectedHotNew.some(val => (val === 'HOT' && isHot) || (val === 'NEW' && isNew));
+            }
+            
+            let matchesPractice = true;
+            if (selectedPractices.length > 0) {
+                matchesPractice = selectedPractices.every(val => {
+                    if (val === 'QUIZ') return course.quiz;
+                    if (val === 'ROLEPLAY') return course.roleplay;
+                    return false;
+                });
+            }
+
+            return matchesSearch && matchesRating && matchesCategory && matchesDifficulty && matchesLanguage && matchesSubtitle && matchesHotNew && matchesPractice;
+        });
+
+        document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
+
+        // AI 확장 검색이 아닐 경우에만 정렬 적용
+        if (searchMode !== 'extended') {
             filteredCourses.sort((a, b) => {
                 switch (sortOrder) {
                     case 'latest':
-                        const dateA = a.lastUpdated ? a.lastUpdated.getTime() : 0;
-                        const dateB = b.lastUpdated ? b.lastUpdated.getTime() : 0;
-                        return dateB - dateA;
+                        return (b.lastUpdated?.getTime() || 0) - (a.lastUpdated?.getTime() || 0);
                     case 'alphabetical':
                         return (a.title || '').localeCompare(b.title || '');
                     case 'popularity':
+                        return b.enrollments - a.enrollments;
+                    case 'relevance': // 일반 검색 시 관련도순은 인기순으로 처리
                     default:
                         return b.enrollments - a.enrollments;
                 }
             });
-            
-            rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
-            const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
-            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+        }
+        
+        rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
+        const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
+        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const paginatedCourses = filteredCourses.slice(start, end);
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedCourses = filteredCourses.slice(start, end);
 
-            const tableBody = document.getElementById('course-table-body');
-            if (paginatedCourses.length === 0) {
-                tableBody.innerHTML = `<tr class="empty-row"><td colspan="11"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><p>😥 일치하는 강의를 찾을 수 없습니다.</p></td></tr>`;
-            } else {
-                tableBody.innerHTML = paginatedCourses.map((course, index) => {
-                    const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
-                    const isNew = course.lastUpdated && (new Date() - course.lastUpdated) < (NEW_COURSE_THRESHOLD_MONTHS * 30 * 24 * 60 * 60 * 1000);
-                    const tooltip = `${isHot ? 'HOT' : ''}${isHot && isNew ? ' / ' : ''}${isNew ? 'NEW' : ''}`.trim();
-                    const attrDisplay = `${isHot ? '🔥' : ''}${isHot && isNew ? ' ' : ''}${isNew ? '✨' : ''}`.trim();
-                    const practiceTooltip = `${course.quiz ? '퀴즈' : ''}${course.quiz && course.roleplay ? ' / ' : ''}${course.roleplay ? '롤플레이' : ''}`.trim();
-                    const practiceDisplay = `${course.quiz ? '📝' : ''}${course.quiz && course.roleplay ? ' ' : ''}${course.roleplay ? '🗣️' : ''}`.trim();
-                    return `<tr style="animation-delay: ${index * 30}ms">
-                        <td title="${course.category || ''}"><div class="line-clamp-2">${getCategoryEmoji(course.category)} ${course.category || ''}</div></td>
-                        <td title="${course.topic || ''}"><div class="line-clamp-2">${course.topic || ''}</div></td>
-                        <td title="${course.title}"><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}"><div class="line-clamp-2">${course.title}</div></a></td>
-                        <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
-                        <td>${course.language || 'N/A'}</td>
-                        <td title="${course.subtitles || ''}"><div class="line-clamp-2">${course.subtitles || '없음'}</div></td>
-                        <td>${course.difficulty || ''}</td>
-                        <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
-                        <td title="${course.instructor || ''}"><div class="line-clamp-2">${course.instructor || ''}</div></td>
-                        <td title="${tooltip}">${attrDisplay || ''}</td>
-                        <td title="${practiceTooltip}">${practiceDisplay || ''}</td>
-                    </tr>`;
-                }).join('');
-            }
-            renderPagination(totalPages);
-            loader.classList.remove('is-loading');
-        }, 100);
+        const tableBody = document.getElementById('course-table-body');
+        if (paginatedCourses.length === 0) {
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="11"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><p>😥 일치하는 강의를 찾을 수 없습니다.</p></td></tr>`;
+        } else {
+            tableBody.innerHTML = paginatedCourses.map((course, index) => {
+                const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
+                const isNew = course.lastUpdated && (new Date() - course.lastUpdated) < (NEW_COURSE_THRESHOLD_MONTHS * 30 * 24 * 60 * 60 * 1000);
+                const tooltip = `${isHot ? 'HOT' : ''}${isHot && isNew ? ' / ' : ''}${isNew ? 'NEW' : ''}`.trim();
+                const attrDisplay = `${isHot ? '🔥' : ''}${isHot && isNew ? ' ' : ''}${isNew ? '✨' : ''}`.trim();
+                const practiceTooltip = `${course.quiz ? '퀴즈' : ''}${course.quiz && course.roleplay ? ' / ' : ''}${course.roleplay ? '롤플레이' : ''}`.trim();
+                const practiceDisplay = `${course.quiz ? '📝' : ''}${course.quiz && course.roleplay ? ' ' : ''}${course.roleplay ? '🗣️' : ''}`.trim();
+                return `<tr style="animation-delay: ${index * 30}ms">
+                    <td title="${course.category || ''}"><div class="line-clamp-2">${getCategoryEmoji(course.category)} ${course.category || ''}</div></td>
+                    <td title="${course.topic || ''}"><div class="line-clamp-2">${course.topic || ''}</div></td>
+                    <td title="${course.title}"><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}"><div class="line-clamp-2">${course.title}</div></a></td>
+                    <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
+                    <td>${course.language || 'N/A'}</td>
+                    <td title="${course.subtitles || ''}"><div class="line-clamp-2">${course.subtitles || '없음'}</div></td>
+                    <td>${course.difficulty || ''}</td>
+                    <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
+                    <td title="${course.instructor || ''}"><div class="line-clamp-2">${course.instructor || ''}</div></td>
+                    <td title="${tooltip}">${attrDisplay || ''}</td>
+                    <td title="${practiceTooltip}">${practiceDisplay || ''}</td>
+                </tr>`;
+            }).join('');
+        }
+        renderPagination(totalPages);
+        loader.classList.remove('is-loading');
     }
 
     async function showCourseDetails(course) {
@@ -1053,7 +1109,10 @@
         document.getElementById('modal-title').textContent = '🤖 AI 맞춤 강의 추천';
         
         modalBody.innerHTML = `
-            <p>학습하고 싶은 분야나 기술, 목표를 자유롭게 입력해보세요. AI가 최적의 강의를 찾아드릴게요!</p>
+            <div class="modal-body-header">
+                <p>학습하고 싶은 분야나 기술, 목표를 자유롭게 입력해보세요.</p>
+                <button id="download-ai-csv" disabled>💾 AI 추천 목록 저장</button>
+            </div>
             <div id="ai-recommend-modal-input">
                 <input type="text" id="ai-prompt" placeholder="예: 파이썬 데이터 분석, 신입사원을 위한 엑셀 스킬">
                 <button id="get-ai-recs">추천 받기</button>
@@ -1063,23 +1122,36 @@
 
         document.getElementById('get-ai-recs').addEventListener('click', handleAIRecommendationRequest);
         document.getElementById('ai-prompt').addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAIRecommendationRequest(); });
+        document.getElementById('download-ai-csv').addEventListener('click', downloadAIRecommendationsCSV);
     }
 
     async function handleAIRecommendationRequest() {
+        aiRecommendedCourses = [];
+        const downloadBtn = document.getElementById('download-ai-csv');
+        downloadBtn.disabled = true;
+
         const prompt = document.getElementById('ai-prompt').value;
-        if (!prompt) { alert('키워드를 입력해주세요.'); return; }
+        if (!prompt) {
+            alert('키워드를 입력해주세요.');
+            return;
+        }
         const resultsContainer = document.getElementById('ai-modal-results');
         resultsContainer.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
         
-        const recommendations = await callGeminiAPI({ type: 'recommend', prompt: prompt });
+        const courseTitles = originalData.map(c => ({ id: c.id, title: c.title }));
+        const recommendedIds = await callGeminiAPI({ type: 'recommend', prompt: prompt, courses: courseTitles });
         
-        if (recommendations && recommendations.length > 0) {
-            resultsContainer.innerHTML = recommendations.map(course => `
+        if (recommendedIds && Array.isArray(recommendedIds) && recommendedIds.length > 0) {
+            aiRecommendedCourses = recommendedIds.map(id => originalData.find(course => course.id === id)).filter(Boolean);
+            
+            resultsContainer.innerHTML = aiRecommendedCourses.map(course => `
                 <div class="recommendation-card">
                     <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
                     <p>${generateRecommendation(course)}</p>
                      <div class="card-footer"><span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span></div>
                 </div>`).join('');
+            
+            downloadBtn.disabled = false;
         } else {
             resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 강의를 찾지 못했어요. 다른 키워드로 시도해보세요.</p>';
         }
@@ -1089,7 +1161,10 @@
     
     function handleFilters() {
         currentPage = 1;
-        renderTable();
+        // renderTable()을 비동기로 처리
+        (async () => {
+            await renderTable();
+        })();
     }
 
     function renderPagination(totalPages) {
@@ -1100,7 +1175,12 @@
         const createButton = (text, page) => {
             const button = document.createElement('button');
             button.textContent = text;
-            button.addEventListener('click', () => { currentPage = page; renderTable(); });
+            button.addEventListener('click', () => { 
+                currentPage = page; 
+                (async () => {
+                    await renderTable();
+                })();
+            });
             if (page === currentPage) button.classList.add('active');
             return button;
         };

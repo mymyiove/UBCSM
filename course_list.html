@@ -491,6 +491,35 @@
         // 이 주소는 API 키를 안전하게 관리하고 Google AI API를 호출하는 역할을 합니다.
         const backendApiEndpoint = '/api/gemini'; 
 
+        try {
+        // 주방에 주문서를 POST 방식으로 전달합니다.
+        const response = await fetch(apiEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        // 주방에서 문제가 생겼는지 확인합니다.
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `서버 오류: ${response.statusText}`);
+        }
+
+        // 완성된 요리(결과)를 받아서 손님에게 보여줍니다.
+        return await response.json();
+
+    } catch (error) {
+        console.error("AI API 호출 중 오류 발생:", error);
+        if (payload.type === 'summarize') {
+            return { 
+                summary: ["AI 요약 중 오류가 발생했습니다."], 
+                recommendedFor: ["AI 추천 대상 분석 중 오류가 발생했습니다."]
+            };
+        }
+        return null;
+    }
+}
+
         // --- 아래는 백엔드가 없어도 테스트할 수 있도록 만든 목업(mock-up) 로직입니다. ---
         // --- 실제 백엔드를 구축한 후에는 이 부분을 삭제하고 아래의 fetch 로직을 사용하세요. ---
         console.log("Mock AI API called with payload:", payload);

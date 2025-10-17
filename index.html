@@ -1038,10 +1038,34 @@
         if (searchMode !== 'extended') {
             filteredCourses.sort((a, b) => {
                 switch (sortOrder) {
-                    case 'latest': return (b.lastUpdated?.getTime() || 0) - (a.lastUpdated?.getTime() || 0);
-                    case 'alphabetical': return (a.title || '').localeCompare(b.title || '');
-                    case 'popularity': return b.enrollments - a.enrollments;
-                    case 'relevance': default: return b.enrollments - a.enrollments;
+                    case 'latest':
+                        return (b.lastUpdated?.getTime() || 0) - (a.lastUpdated?.getTime() || 0);
+                    case 'alphabetical':
+                        return (a.title || '').localeCompare(b.title || '');
+                    case 'popularity':
+                        return b.enrollments - a.enrollments;
+                    case 'relevance':
+                    default:
+                        // 제목 > 주제 > 카테고리 > 내용 순으로 점수를 매기는 새로운 로직
+                        const calculateScore = (course) => {
+                            let score = 0;
+                            const title = course.title?.toLowerCase() || '';
+                            const topic = course.topic?.toLowerCase() || '';
+                            const category = course.category?.toLowerCase() || '';
+                            const headline = course.headline?.toLowerCase() || '';
+                            const objectives = course.objectives?.toLowerCase() || '';
+        
+                            if (title.includes(searchTerm)) score += 20;    // 1순위: 제목
+                            if (topic.includes(searchTerm)) score += 10;    // 2순위: 주제
+                            if (category.includes(searchTerm)) score += 5;     // 3순위: 카테고리
+                            if (headline.includes(searchTerm) || objectives.includes(searchTerm)) score += 1; // 4순위: 소개 및 내용
+                            return score;
+                        };
+        
+                        // 점수가 높은 순으로 정렬, 점수가 같으면 인기순으로 2차 정렬
+                        const scoreDiff = calculateScore(b) - calculateScore(a);
+                        if (scoreDiff !== 0) return scoreDiff;
+                        return b.enrollments - a.enrollments;
                 }
             });
         }

@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
 
     // 4. 손님(index.html)이 보낸 주문서(payload) 내용을 확인합니다.
     const { type, context, prompt } = req.body;
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     let aiPrompt = '';
     // 주문서 유형에 따라 AI에게 다른 지시를 내립니다.

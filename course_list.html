@@ -229,7 +229,7 @@
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
-        .custom-select-wrapper { position: relative; }
+        .custom-select-wrapper { position: relative; } 
         .custom-select-button {
             width: 100%; height: 50px; padding: 0 0.75rem; background-color: var(--bg-color);
             border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color);
@@ -923,13 +923,18 @@
         }, 500);
     }
     
+<script>
+    // --- initializeMultiSelectFilters 및 관련 함수들 (파트1에 이어서) ---
     function initializeMultiSelectFilters() {
         populateMultiSelect('category-filter', 'category', true, true);
         populateMultiSelect('difficulty-filter', 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
         populateMultiSelect('language-filter', 'language', false, false);
         populateMultiSelect('subtitles-filter', 'subtitles', true, false);
-        populateMultiSelect('hot-new-filter', null, false, false, ['🔥 HOT', '✨ NEW']);
-
+        // HOT / NEW: value는 'HOT' / 'NEW' 로 고정, 라벨에 이모지 포함
+        populateMultiSelect('hot-new-filter', null, false, false, [
+            { value: 'HOT', label: '🔥 HOT' },
+            { value: 'NEW', label: '✨ NEW' }
+        ]);
 
         document.querySelectorAll('.custom-select-button').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -950,24 +955,38 @@
 
     function populateMultiSelect(filterId, dataKey, split, showEmoji, predefinedItems = null) {
         const wrapper = document.querySelector(`[data-filter-id="${filterId}"]`);
+        if (!wrapper) return;
         const panel = wrapper.querySelector('.custom-select-panel');
         
         let items;
         if (predefinedItems) {
-            items = new Set(predefinedItems);
+            // 허용: 객체 배열({value,label}) 또는 단순 문자열 배열
+            if (Array.isArray(predefinedItems) && typeof predefinedItems[0] === 'object' && predefinedItems[0] !== null) {
+                items = predefinedItems.slice();
+            } else {
+                items = new Set(predefinedItems);
+            }
         } else if (split) {
             items = new Set(originalData.flatMap(c => c[dataKey] && c[dataKey] !== '없음' ? c[dataKey].split(',').map(item => item.trim()) : []));
         } else {
             items = new Set(originalData.map(c => c[dataKey]).filter(Boolean));
         }
         
-        panel.innerHTML = [...items].sort().map(item => {
-            if (!item || item === 'N/A') return '';
-            const text = showEmoji ? `${getCategoryEmoji(item)} ${item}` : item;
+        const list = Array.isArray(items) ? items : [...items].sort();
+        panel.innerHTML = list.map(item => {
+            let value, text;
+            if (typeof item === 'object' && item !== null) {
+                value = item.value;
+                text = item.label;
+            } else {
+                value = item;
+                text = showEmoji ? `${getCategoryEmoji(item)} ${item}` : item;
+            }
+            if (!value || value === 'N/A') return '';
             return `
                 <div class="checkbox-item">
                     <label>
-                        <input type="checkbox" value="${item}">
+                        <input type="checkbox" value="${value}">
                         <span>${text}</span>
                     </label>
                 </div>
@@ -982,21 +1001,28 @@
 
     function updateMultiSelectButton(filterId) {
         const wrapper = document.querySelector(`[data-filter-id="${filterId}"]`);
+        if (!wrapper) return;
         const button = wrapper.querySelector('.custom-select-button');
         const panel = wrapper.querySelector('.custom-select-panel');
-        const checkedCount = panel.querySelectorAll('input:checked').length;
+        const checked = panel.querySelectorAll('input:checked');
+        const checkedCount = checked.length;
         const defaultText = {
             'category-filter': '모든 카테고리',
             'difficulty-filter': '모든 난이도',
             'language-filter': '모든 언어',
             'subtitles-filter': '모든 자막',
             'hot-new-filter': '모든 강의'
-        }[filterId];
+        }[filterId] || '선택';
 
         if (checkedCount === 0) {
             button.textContent = defaultText;
         } else {
-            button.textContent = `${checkedCount}개 선택됨`;
+            if (filterId === 'hot-new-filter') {
+                const labels = Array.from(checked).map(cb => cb.parentElement.querySelector('span').textContent.trim());
+                button.textContent = labels.join(', ');
+            } else {
+                button.textContent = `${checkedCount}개 선택됨`;
+            }
         }
     }
 
@@ -1018,7 +1044,7 @@
         handleFilters();
         document.getElementById('ai-recommendations-container').style.display = 'none';
     }
-    
+
     function downloadCSV() {
         if (filteredCourses.length === 0) { alert("다운로드할 데이터가 없습니다."); return; }
         
@@ -1046,7 +1072,7 @@
         link.click();
         document.body.removeChild(link);
     }
-    
+
     function getSearchTerms(input) {
         const term = input.toLowerCase();
         if (term === '') return [''];
@@ -1064,7 +1090,6 @@
         }
         return terms;
     }
-
 
     function renderTable() {
         const loader = document.getElementById('table-loader');
@@ -1124,7 +1149,7 @@
                         isNew = course.lastUpdated > thresholdDate;
                     }
                     matchesHotNew = selectedHotNew.some(val => {
-                        return (val === '🔥 HOT' && isHot) || (val === '✨ NEW' && isNew);
+                        return (val === 'HOT' && isHot) || (val === 'NEW' && isNew);
                     });
                 }
 
@@ -1165,7 +1190,7 @@
             const tableBody = document.getElementById('course-table-body');
             if (paginatedCourses.length === 0) {
                 tableBody.innerHTML = `<tr class="empty-row"><td colspan="10">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <p>😥 일치하는 강의를 찾을 수 없습니다.</p>
                 </td></tr>`;
             } else {
@@ -1179,6 +1204,9 @@
                         isNew = course.lastUpdated > thresholdDate;
                     }
                     
+                    const tooltip = `${isHot ? 'HOT' : ''}${isHot && isNew ? ' / ' : ''}${isNew ? 'NEW' : ''}`.trim();
+                    const attrDisplay = `${isHot ? '🔥' : ''}${isHot && isNew ? ' ' : ''}${isNew ? '✨' : ''}`.trim();
+
                     return `
                     <tr>
                         <td title="${course.category || ''}"><div class="line-clamp-2">${getCategoryEmoji(course.category)} ${course.category || ''}</div></td>
@@ -1194,7 +1222,7 @@
                         <td>${course.difficulty || ''}</td>
                         <td class="rating">${course.rating > 0 ? `⭐ ${course.rating.toFixed(1)}` : 'N/A'}</td>
                         <td title="${course.instructor || ''}"><div class="line-clamp-2">${course.instructor || ''}</div></td>
-                        <td>${isHot ? '🔥' : ''} ${isNew ? '✨' : ''}</td>
+                        <td title="${tooltip}">${attrDisplay || ''}</td>
                     </tr>`;
                 }).join('');
             }
@@ -1202,7 +1230,7 @@
             loader.classList.remove('is-loading');
         }, 100);
     }
-    
+
     async function showCourseDetails(course) {
         const modalBody = document.getElementById('modal-body');
         document.getElementById('modal-title').textContent = course.title;
@@ -1234,7 +1262,7 @@
             document.getElementById('ai-recommend-for-section').innerHTML = `<h3>🎯 이런 분들께 추천해요</h3>${recommendForList}`;
         }
     }
-    
+
     function extractKeywordsFromPrompt(prompt) {
         const text = prompt.toLowerCase();
         let keywords = [];
@@ -1260,7 +1288,6 @@
 
         return { searchTerm: keywords.join(' '), difficulty };
     }
-
 
     function showAIRecommendationModal() {
         const modalBody = document.getElementById('modal-body');
@@ -1312,7 +1339,6 @@
             resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 강의를 찾지 못했어요. 다른 키워드로 시도해보세요.</p>';
         }
     }
-
 
     function closeModal() { modalOverlay.style.display = 'none'; }
     
@@ -1417,6 +1443,5 @@
         paginationContainer.appendChild(nextButton);
     }
 </script>
-
 </body>
 </html>

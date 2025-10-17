@@ -489,37 +489,37 @@
     async function callGeminiAPI(payload) {
         // 실제 운영 시에는 '/api/gemini'와 같이 백엔드 서버의 API 엔드포인트 주소를 사용해야 합니다.
         // 이 주소는 API 키를 안전하게 관리하고 Google AI API를 호출하는 역할을 합니다.
-        const backendApiEndpoint = '/api/gemini'; 
+        const backendApiEndpoint = '/api/gemini'; // 💥 문제의 원인: 'backendApiEndpoint'로 선언하고
 
         try {
-        // 주방에 주문서를 POST 방식으로 전달합니다.
-        const response = await fetch(apiEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+            // 주방에 주문서를 POST 방식으로 전달합니다.
+            // ✅ 해결: 변수 이름을 'backendApiEndpoint'로 통일했습니다.
+            const response = await fetch(backendApiEndpoint, { // 💥 'apiEndpoint'라는 다른 이름으로 사용했습니다.
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-        // 주방에서 문제가 생겼는지 확인합니다.
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `서버 오류: ${response.statusText}`);
+            // 주방에서 문제가 생겼는지 확인합니다.
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `서버 오류: ${response.statusText}`);
+            }
+
+            // 완성된 요리(결과)를 받아서 손님에게 보여줍니다.
+            return await response.json();
+
+        } catch (error) {
+            console.error("AI API 호출 중 오류 발생:", error);
+            if (payload.type === 'summarize') {
+                return { 
+                    summary: ["AI 요약 중 오류가 발생했습니다."], 
+                    recommendedFor: ["AI 추천 대상 분석 중 오류가 발생했습니다."]
+                };
+            }
+            return null;
         }
-
-        // 완성된 요리(결과)를 받아서 손님에게 보여줍니다.
-        return await response.json();
-
-    } catch (error) {
-        console.error("AI API 호출 중 오류 발생:", error);
-        if (payload.type === 'summarize') {
-            return { 
-                summary: ["AI 요약 중 오류가 발생했습니다."], 
-                recommendedFor: ["AI 추천 대상 분석 중 오류가 발생했습니다."]
-            };
-        }
-        return null;
     }
-}
-
 
 
     async function loadCourseData() {

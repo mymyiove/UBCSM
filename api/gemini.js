@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
     const text = response.text();
 
     // 6. 완성된 요리(AI의 답변)를 손님에게 전달합니다.
-    res.status(200).json(JSON.parse(text));
+    res.status(200).json(JSON.parse(cleanedText));
 
   } catch (error) {
     console.error('AI API 처리 중 오류 발생:', error);

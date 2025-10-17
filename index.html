@@ -181,12 +181,10 @@
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
-        /* 필터 레이아웃 조정 */
         .search-group { flex: 2 1 400px; min-width: 300px; }
         .fg-mode, .fg-sort, .fg-rows { flex: 1 1 150px; min-width: 140px; }
         .actions-group { flex: 2 1 300px; min-width: 280px; }
         
-
         .custom-select-wrapper { position: relative; } 
         .custom-select-button {
             width: 100%; height: 50px; padding: 0 0.75rem; background-color: var(--bg-color);
@@ -341,6 +339,25 @@
         #download-ai-csv:hover { background-color: var(--border-color); color: var(--text-color); }
         #download-ai-csv:disabled { opacity: 0.5; cursor: not-allowed; }
         
+        .modal-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-filters .filter-group {
+            flex: 1;
+        }
+        .modal-filters select {
+            width: 100%;
+            height: 40px;
+            padding: 0 0.75rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        
         .modal-section h3 { font-size: 1.1rem; font-weight: 500; color: var(--primary-color); margin-bottom: 0.75rem; border-left: 3px solid var(--primary-color); padding-left: 0.75rem; }
         .modal-section p, .modal-section ul { color: var(--text-color); margin: 0; padding: 0; font-size: 1rem; line-height: 1.7; word-break: keep-all; }
         .modal-section ul { list-style-position: inside; }
@@ -422,7 +439,7 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.019 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.020 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
     <p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p>
 </footer>
 
@@ -714,7 +731,7 @@
                                 </div>
                                 <div class="filter-group fg-mode">
                                     <label for="search-mode">🤖 검색 모드</label>
-                                    <select id="search-mode">
+                                    <select id="search-mode" title="일반 검색: 키워드와 정확히 일치하는 결과를 찾습니다.\nAI 확장 검색: AI가 검색어의 의도를 파악하여 관련 강의를 추천합니다.">
                                         <option value="standard">일반 검색</option>
                                         <option value="extended">AI 확장 검색</option>
                                     </select>
@@ -779,11 +796,6 @@
                             </div>
                         </div>
                         <div class="pagination" id="pagination"></div>
-                    </div>
-                    
-                    <div id="ai-recommendations-container" class="recommendation-container">
-                         <h2>✨ AI 스마트 추천</h2>
-                         <div class="recommendation-grid"></div>
                     </div>
                 </div>
             `;
@@ -985,22 +997,19 @@
             
             if (keywords && Array.isArray(keywords) && keywords.length > 0) {
                 const lowerCaseKeywords = keywords.map(k => k.toLowerCase());
-                // AI가 생성한 키워드와 원래 검색어를 합쳐서 검색
                 const allSearchTerms = [searchTerm, ...lowerCaseKeywords];
 
                 baseCourses = originalData.map(course => {
                     const searchCorpus = Object.values(course).join(' ').toLowerCase();
                     let score = 0;
                     allSearchTerms.forEach(term => {
-                        if (searchCorpus.includes(term)) {
-                            score++;
-                        }
+                        if (searchCorpus.includes(term)) score++;
                     });
                     return { ...course, relevanceScore: score };
                 }).filter(course => course.relevanceScore > 0)
                   .sort((a, b) => b.relevanceScore - a.relevanceScore);
             } else {
-                baseCourses = []; // AI가 키워드를 못 찾으면 빈 배열 처리
+                baseCourses = [];
             }
         }
 
@@ -1046,7 +1055,6 @@
                         return b.enrollments - a.enrollments;
                     case 'relevance':
                     default:
-                        // 제목 > 주제 > 카테고리 > 내용 순으로 점수를 매기는 새로운 로직
                         const calculateScore = (course) => {
                             let score = 0;
                             const title = course.title?.toLowerCase() || '';
@@ -1054,15 +1062,13 @@
                             const category = course.category?.toLowerCase() || '';
                             const headline = course.headline?.toLowerCase() || '';
                             const objectives = course.objectives?.toLowerCase() || '';
-        
-                            if (title.includes(searchTerm)) score += 20;    // 1순위: 제목
-                            if (topic.includes(searchTerm)) score += 10;    // 2순위: 주제
-                            if (category.includes(searchTerm)) score += 5;     // 3순위: 카테고리
-                            if (headline.includes(searchTerm) || objectives.includes(searchTerm)) score += 1; // 4순위: 소개 및 내용
+
+                            if (title.includes(searchTerm)) score += 20;
+                            if (topic.includes(searchTerm)) score += 10;
+                            if (category.includes(searchTerm)) score += 5;
+                            if (headline.includes(searchTerm) || objectives.includes(searchTerm)) score += 1;
                             return score;
                         };
-        
-                        // 점수가 높은 순으로 정렬, 점수가 같으면 인기순으로 2차 정렬
                         const scoreDiff = calculateScore(b) - calculateScore(a);
                         if (scoreDiff !== 0) return scoreDiff;
                         return b.enrollments - a.enrollments;
@@ -1135,10 +1141,27 @@
         const modalBody = document.getElementById('modal-body');
         document.getElementById('modal-title').textContent = '🤖 AI 맞춤 강의 추천';
         
+        const categories = [...new Set(originalData.flatMap(c => c.category ? c.category.split(',').map(item => item.trim()) : []))].sort();
+        const difficulties = ['All Levels', 'Beginner', 'Intermediate', 'Expert'];
+
         modalBody.innerHTML = `
             <div class="modal-body-header">
-                <p>학습하고 싶은 분야나 기술, 목표를 자유롭게 입력해보세요.</p>
+                <p>카테고리와 난이도를 선택 후, 학습 목표를 입력해보세요.</p>
                 <button id="download-ai-csv" disabled>💾 AI 추천 목록 저장</button>
+            </div>
+            <div class="modal-filters">
+                <div class="filter-group">
+                    <select id="ai-category-filter">
+                        <option value="">모든 카테고리</option>
+                        ${categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="ai-difficulty-filter">
+                        <option value="">모든 난이도</option>
+                        ${difficulties.map(diff => `<option value="${diff}">${diff}</option>`).join('')}
+                    </select>
+                </div>
             </div>
             <div id="ai-recommend-modal-input">
                 <input type="text" id="ai-prompt" placeholder="예: 파이썬 데이터 분석, 신입사원을 위한 엑셀 스킬">
@@ -1157,7 +1180,10 @@
         const downloadBtn = document.getElementById('download-ai-csv');
         downloadBtn.disabled = true;
 
+        const category = document.getElementById('ai-category-filter').value;
+        const difficulty = document.getElementById('ai-difficulty-filter').value;
         const prompt = document.getElementById('ai-prompt').value;
+
         if (!prompt) {
             alert('키워드를 입력해주세요.');
             return;
@@ -1165,7 +1191,19 @@
         const resultsContainer = document.getElementById('ai-modal-results');
         resultsContainer.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
         
-        const courseTitles = originalData.map(c => ({ id: c.id, title: c.title }));
+        // 1. 프론트엔드에서 1차 필터링
+        const candidateCourses = originalData.filter(course => {
+            const matchCategory = !category || (course.category && course.category.includes(category));
+            const matchDifficulty = !difficulty || course.difficulty === difficulty;
+            return matchCategory && matchDifficulty;
+        });
+        
+        if (candidateCourses.length === 0) {
+            resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">선택한 조건에 맞는 강의가 없어요. 다른 조건으로 시도해보세요.</p>';
+            return;
+        }
+        
+        const courseTitles = candidateCourses.map(c => ({ id: c.id, title: c.title }));
         const recommendedIds = await callGeminiAPI({ type: 'recommend', prompt: prompt, courses: courseTitles });
         
         if (recommendedIds && Array.isArray(recommendedIds) && recommendedIds.length > 0) {
@@ -1188,7 +1226,6 @@
     
     function handleFilters() {
         currentPage = 1;
-        // renderTable()을 비동기로 처리
         (async () => {
             await renderTable();
         })();

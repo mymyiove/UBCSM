@@ -20,7 +20,7 @@
             --shadow-soft: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
             --backdrop-blur: blur(16px);
-            --header-height: 0; /* 스티키 헤더의 top 위치를 결정 */
+            --header-height: 0;
         }
 
         body::before {
@@ -47,6 +47,17 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(167, 139, 250, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); }
+        }
 
         #initial-screen {
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -60,10 +71,7 @@
         .gate-info ul { padding-left: 20px; margin-bottom: 0; }
         
         .input-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            width: 100%; display: flex; flex-direction: column; gap: 0.5rem;
             animation: fadeInFromBottom 0.6s 0.6s ease-out both;
         }
         .input-group {
@@ -86,17 +94,12 @@
         #app-container { display: none; opacity: 0; transition: opacity 0.5s ease-in; max-width: 1600px; margin: 0 auto; }
         
         .app-header-wrapper {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding-top: 0;
-            margin: 0;
+            position: sticky; top: 0; z-index: 100;
+            padding-top: 0; margin: 0;
             animation: fadeInDown 0.5s ease;
         }
-
         .app-header {
-            text-align: center;
-            padding: 1rem 2rem;
+            text-align: center; padding: 1rem 2rem;
             border-bottom: 1px solid var(--border-color);
             background-color: var(--bg-color);
         }
@@ -108,94 +111,51 @@
         }
         .app-header h1 .rocket { display: inline-block; animation: rocket-bob 1.5s ease-in-out infinite; }
         #welcome-message {
-            font-size: 1.2rem;
-            margin: 0.5rem 0 0.5rem 0;
-            color: var(--text-muted-color);
-            font-weight: 300;
+            font-size: 1.2rem; margin: 0.5rem 0 0.5rem 0;
+            color: var(--text-muted-color); font-weight: 300;
         }
-        #welcome-message strong {
-             color: var(--primary-hover-color);
-             font-weight: 700;
-        }
+        #welcome-message strong { color: var(--primary-hover-color); font-weight: 700; }
         #last-updated { font-size: 0.85rem; color: var(--text-muted-color); }
-        .main-content {
-            padding-top: 2.5rem;
-        }
+        .main-content { padding-top: 2.5rem; }
 
         .recommendation-container {
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
-            border: 1px solid var(--border-color);
-            padding-top: 2rem;
+            border: 1px solid var(--border-color); padding-top: 2rem;
         }
         .recommendation-header {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
+            display: flex; justify-content: flex-start; align-items: center;
+            cursor: pointer; user-select: none;
         }
-        .recommendation-header h2 {
-            margin: 0;
-            color: var(--primary-color);
-            font-size: 1.5rem;
-        }
-        .toggle-icon {
-            margin-left: 1rem;
-            font-size: 1.2rem;
-            transition: transform 0.3s ease;
-        }
+        .recommendation-header h2 { margin: 0; color: var(--primary-color); font-size: 1.5rem; }
+        .toggle-icon { margin-left: 1rem; font-size: 1.2rem; transition: transform 0.3s ease; }
         .recommendation-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-            padding-top: 0.5rem;
-            transition: all 0.3s ease-in-out;
-            max-height: 1000px;
-            overflow: visible;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem; margin-top: 1.5rem; padding-top: 0.5rem;
+            transition: all 0.3s ease-in-out; max-height: 1000px; overflow: visible;
         }
-        .recommendation-grid.collapsed {
-             max-height: 0;
-             margin-top: 0;
-             overflow: hidden;
-             opacity: 0;
-             padding: 0;
-        }
-        .recommendation-container.collapsed .toggle-icon {
-             transform: rotate(-90deg);
-        }
+        .recommendation-grid.collapsed { max-height: 0; margin-top: 0; overflow: hidden; opacity: 0; padding: 0; }
+        .recommendation-container.collapsed .toggle-icon { transform: rotate(-90deg); }
+        
         .recommendation-card {
             background-color: var(--bg-color); border: 1px solid var(--border-color);
-            border-radius: 8px; padding: 1rem; transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            position: relative;
+            border-radius: 8px; padding: 1rem; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex; flex-direction: column; position: relative;
         }
         .recommendation-card:hover {
-            transform: translateY(-5px); 
+            transform: translateY(-8px); 
             border-color: var(--primary-color);
-            box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+            box-shadow: 0 8px 30px rgba(167, 139, 250, 0.25);
             z-index: 101;
         }
-        .recommendation-card h3 {
-            font-size: 1.1rem; margin: 0 0 0.5rem 0; color: var(--text-color);
-        }
+        .recommendation-card h3 { font-size: 1.1rem; margin: 0 0 0.5rem 0; color: var(--text-color); }
         .recommendation-card h3 a { color: inherit; text-decoration: none; }
         .recommendation-card h3 .rank { color: var(--primary-color); margin-right: 0.5rem; }
         .recommendation-card p { font-size: 0.9rem; color: var(--text-muted-color); margin: 0; line-height: 1.5; flex-grow: 1;}
-        .card-footer {
-            margin-top: 1rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid var(--border-color);
-        }
+        .card-footer { margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color); }
         .category-badge {
-            background-color: var(--surface-color);
-            color: var(--text-muted-color);
-            font-size: 0.8rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
+            background-color: var(--surface-color); color: var(--text-muted-color); font-size: 0.8rem;
+            padding: 0.25rem 0.6rem; border-radius: 12px; border: 1px solid var(--border-color);
         }
         
         #ai-recommendations-container { display: none; }
@@ -203,42 +163,28 @@
         .controls-header {
             background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
-            border: 1px solid var(--border-color);
-            position: relative;
-            z-index: 50;
+            border: 1px solid var(--border-color); position: relative; z-index: 50;
         }
         
         .filters-container {
             display: flex; flex-direction: column; gap: 1rem; transition: all 0.3s ease-in-out; max-height: 1000px;
             margin-top: 1.5rem;
         }
-        .filters-container.collapsed {
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            margin-top: 0;
-        }
-        .controls-header.collapsed .toggle-icon {
-            transform: rotate(-90deg);
-        }
+        .filters-container.collapsed { max-height: 0; overflow: hidden; opacity: 0; margin-top: 0; }
+        .controls-header.collapsed .toggle-icon { transform: rotate(-90deg); }
         
-        .filters-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
+        .filters-row { display: flex; flex-wrap: wrap; gap: 1rem; }
         .filter-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 0.5rem;
-            flex: 1 1 180px; /* 기본 크기, 줄바꿈 허용 */
-            min-width: 160px;
+            display: flex; flex-direction: column; gap: 0.5rem;
+            flex-grow: 1; flex-shrink: 1;
         }
         .filter-group label { font-size: 0.9rem; color: var(--text-muted-color); font-weight: 500; }
         .filter-group select { height: 50px; padding: 0 0.75rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; cursor: pointer; }
         
-        .search-group { flex: 3 1 400px; /* 검색창은 더 넓게 */ }
-        .actions-group { flex: 2 1 300px; /* 기능 버튼 그룹 */ }
+        .fg-category { flex-basis: 240px; }
+        .fg-sort, .fg-rows { flex-basis: 150px; flex-grow: 0; }
+        .search-group { flex-basis: 300px; }
+        .actions-group { flex-basis: 300px; flex-grow: 0; }
 
         .custom-select-wrapper { position: relative; } 
         .custom-select-button {
@@ -251,16 +197,11 @@
         .custom-select-panel {
             display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 101;
             background-color: var(--bg-color); border: 1px solid var(--border-color);
-            border-radius: 8px; margin-top: 0.5rem; max-height: 250px; overflow-y: auto;
-            padding: 0.5rem;
+            border-radius: 8px; margin-top: 0.5rem; max-height: 250px; overflow-y: auto; padding: 0.5rem;
             opacity: 0; transform: translateY(-10px); transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        .custom-select-panel.visible { 
-            display: block; opacity: 1; transform: translateY(0);
-        }
-        .custom-select-panel .checkbox-item {
-            display: block; padding: 0.5rem 0.75rem; border-radius: 4px;
-        }
+        .custom-select-panel.visible { display: block; opacity: 1; transform: translateY(0); }
+        .custom-select-panel .checkbox-item { display: block; padding: 0.5rem 0.75rem; border-radius: 4px; }
         .custom-select-panel .checkbox-item:hover { background-color: var(--border-color); }
         .custom-select-panel .checkbox-item label { display: flex; align-items: center; width: 100%; cursor: pointer; }
         .custom-select-panel .checkbox-item input { margin-right: 0.75rem; }
@@ -282,57 +223,34 @@
         }
         .action-item button:hover { background-color: var(--border-color); color: var(--text-color); }
         .action-item button:active { transform: scale(0.95); }
-        
-        .list-container {
-            background-color: var(--surface-color);
-            backdrop-filter: var(--backdrop-blur);
-            padding: 1.5rem 2rem;
-            border-radius: var(--border-radius-md);
-            margin-top: 1rem;
-            border: 1px solid var(--border-color);
-        }
+        .action-item #ai-recommend-btn { animation: pulse 2s infinite; }
 
+        .list-container {
+            background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur);
+            padding: 1.5rem 2rem; border-radius: var(--border-radius-md);
+            margin-top: 1rem; border: 1px solid var(--border-color);
+        }
         .list-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: baseline; 
-            margin-bottom: 0.5rem; 
-            flex-wrap: wrap; 
-            gap: 1rem;
+            display: flex; justify-content: space-between; align-items: baseline; 
+            margin-bottom: 0.5rem; flex-wrap: wrap; gap: 1rem;
         }
         .list-header h2 { margin: 0; font-size: 1.5rem; color: var(--primary-color); }
-        .results-summary { 
-            width: 100%;
-            color: var(--text-muted-color); 
-            font-size: 0.9rem; 
-            margin-top: 0.5rem;
-        }
+        .results-summary { width: 100%; color: var(--text-muted-color); font-size: 0.9rem; margin-top: 0.5rem; order: 1; }
         .results-summary b { color: var(--primary-color); font-weight: 700; }
         .badge-info { font-size: 0.8rem; color: var(--text-muted-color); }
 
         .table-wrapper { position: relative; }
         .table-loader {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(2px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 15;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s, visibility 0.2s;
+            background-color: rgba(26, 26, 46, 0.8); backdrop-filter: blur(2px);
+            display: flex; justify-content: center; align-items: center; z-index: 15;
+            opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s;
         }
-        .table-loader.is-loading {
-            opacity: 1;
-            visibility: visible;
-        }
+        .table-loader.is-loading { opacity: 1; visibility: visible; }
         
-        .table-container {
-            overflow-x: auto;
-        }
+        .table-container { overflow-x: auto; }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1400px; 
+            width: 100%; border-collapse: collapse; min-width: 1400px; 
             table-layout: fixed;
         }
         thead th:nth-child(1) { width: 13%; } /* 카테고리 */
@@ -346,43 +264,22 @@
         thead th:nth-child(9) { width: 9%; }  /* 강사명 */
         thead th:nth-child(10){ width: 5%; }  /* 인기/신규 */
         thead th:nth-child(11){ width: 5%; }  /* 퀴즈/실습 */
-        thead {
-            position: sticky;
-            top: var(--header-height);
-            z-index: 10;
-        }
-        th, td {
-            padding: 0.8rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
-        }
+        thead { position: sticky; top: var(--header-height); z-index: 10; }
+        th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: top; }
         th {
-            background-color: var(--bg-color);
-            font-weight: 500;
-            color: var(--text-muted-color);
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-            user-select: none;
-            border-bottom: 2px solid var(--border-color);
-            white-space: nowrap;
+            background-color: var(--bg-color); font-weight: 500; color: var(--text-muted-color);
+            font-size: 0.8rem; letter-spacing: 0.5px; user-select: none;
+            border-bottom: 2px solid var(--border-color); white-space: nowrap;
         }
-        td {
-            font-size: 0.9rem;
-        }
+        td { font-size: 0.9rem; }
         .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.5;
-            max-height: calc(1.5em * 2);
-            word-break: break-all;
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+            overflow: hidden; text-overflow: ellipsis; line-height: 1.5;
+            max-height: calc(1.5em * 2); word-break: break-all;
         }
         
+        tbody tr { animation: slideInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
         tbody tr:last-child td { border-bottom: none; }
-        
         tbody tr { transition: background-color 0.2s, transform 0.2s; }
         tbody tr:hover { 
             background-color: rgba(167, 139, 250, 0.1); 
@@ -430,16 +327,10 @@
         .modal-section ul { list-style-position: inside; }
         .modal-section ul li { margin-bottom: 0.5rem; }
         
-        .modal-section + .modal-section {
-            border-top: 1px solid var(--border-color);
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-        }
+        .modal-section + .modal-section { border-top: 1px solid var(--border-color); margin-top: 1.5rem; padding-top: 1.5rem; }
         .spinner-container { display: flex; align-items: center; gap: 1rem; color: var(--text-muted-color); }
         
-        #ai-recommend-modal-input {
-             display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
-        }
+        #ai-recommend-modal-input { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
         #ai-recommend-modal-input input {
             flex-grow: 1; padding: 0.75rem; background-color: var(--bg-color);
             border: 1px solid var(--border-color); border-radius: 8px;
@@ -451,33 +342,14 @@
         }
         
         #scroll-to-top {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 50px;
-            height: 50px;
-            background-color: var(--primary-color);
-            color: #1a1a2e;
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: var(--shadow-md);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
-            z-index: 999;
+            position: fixed; bottom: 2rem; right: 2rem; width: 50px; height: 50px;
+            background-color: var(--primary-color); color: #1a1a2e; border: none; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: bold; cursor: pointer; box-shadow: var(--shadow-md);
+            opacity: 0; visibility: hidden; transform: translateY(20px);
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s; z-index: 999;
         }
-        #scroll-to-top.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
+        #scroll-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
 
         .spinner {
             width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
@@ -486,12 +358,8 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         
         .app-footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-muted-color);
-            font-size: 0.9rem;
+            text-align: center; margin-top: 3rem; padding-top: 2rem;
+            border-top: 1px solid var(--border-color); color: var(--text-muted-color); font-size: 0.9rem;
         }
     </style>
 </head>
@@ -535,7 +403,7 @@
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 
 <footer class="app-footer">
-    <p>ver 0.015 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.016 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
     <p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p>
 </footer>
 
@@ -604,7 +472,6 @@
         return '📁';
     };
 
-
     const formatNumber = (num) => num.toLocaleString('ko-KR');
 
     const languageMap = {
@@ -614,18 +481,23 @@
     };
     const mapLanguageCode = (code) => languageMap[code] || code;
     
-    const searchSynonyms = {
-        '영업': 'sales', '마케팅': 'marketing', '개발': 'develop', '데이터': 'data',
-        '분석': 'analysis', '보안': 'security', '클라우드': 'cloud', '파이썬': 'python',
-        '자바': 'java', '엑셀': 'excel', '리액트': 'react', '디자인': 'design'
-    };
+    /**
+     * 실제 AI API와 연동하기 위한 함수입니다.
+     * @param {object} payload - AI 모델에 전달할 데이터 (예: { type: 'summarize', context: course })
+     * @returns {Promise<object|null>} AI 모델의 응답 또는 에러 시 null
+     */
+    async function callGeminiAPI(payload) {
+        // 실제 운영 시에는 '/api/gemini'와 같이 백엔드 서버의 API 엔드포인트 주소를 사용해야 합니다.
+        // 이 주소는 API 키를 안전하게 관리하고 Google AI API를 호출하는 역할을 합니다.
+        const backendApiEndpoint = '/api/gemini'; 
 
-    async function callGeminiAPI(prompt, type, context) {
-        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
-
-        if (type === 'summarize' && context) {
-            const textToSummarize = `${context.headline}\n${context.objectives}\n${context.description}`;
-            
+        // --- 아래는 백엔드가 없어도 테스트할 수 있도록 만든 목업(mock-up) 로직입니다. ---
+        // --- 실제 백엔드를 구축한 후에는 이 부분을 삭제하고 위의 fetch 로직을 사용하세요. ---
+        console.log("Mock AI API called with payload:", payload);
+        await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400));
+        
+        if (payload.type === 'summarize' && payload.context) {
+            const { context } = payload;
             const summaryPoints = [
                 `이 강의는 **${(context.category || '').split(',')[0]}** 분야의 핵심 기술을 다룹니다.`,
                 `**'${context.headline}'**을(를) 목표로 하며, 수강생은 구체적인 결과물을 만들 수 있습니다.`,
@@ -635,22 +507,43 @@
                 `**${context.difficulty || '모든 수준의'}** 학습자에게 적합합니다.`,
                 `**${(context.topic || '관련 분야').split(',')[0]}**에 대한 이해를 높이고 싶은 분께 추천합니다.`
             ];
-            
             return { summary: summaryPoints, recommendedFor: recommendedForPoints };
         }
+        // --- 여기까지 목업 로직 ---
 
-        if (type === 'recommend' && context) {
-            return [];
+
+        /*
+        // --- 실제 백엔드 연동 시 사용할 코드 ---
+        try {
+            const response = await fetch(backendApiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.statusText}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error calling AI API:", error);
+            // 에러 상황에 맞는 기본값 또는 메시지를 반환합니다.
+            if (payload.type === 'summarize') {
+                return { 
+                    summary: ["AI 요약 중 오류가 발생했습니다."], 
+                    recommendedFor: ["AI 추천 대상 분석 중 오류가 발생했습니다."]
+                };
+            }
+            return null;
         }
-        return null;
+        */
+       return null; // 목업 로직에서 처리되지 않은 경우
     }
 
     async function loadCourseData() {
         return new Promise((resolve, reject) => {
             Papa.parse('courses_web.csv', {
-                download: true, 
-                header: true, 
-                skipEmptyLines: true,
+                download: true, header: true, skipEmptyLines: true,
                 complete: (results) => {
                     if (results.errors.length > 0) {
                         alert("CSV 파일을 분석하는 중 오류가 발생했습니다.");
@@ -661,19 +554,14 @@
                     const processedData = results.data.map(row => {
                         const newRow = {};
                         for (const key in columnMapping) {
-                            if (row[key] !== undefined) {
-                                newRow[columnMapping[key]] = row[key];
-                            }
+                            if (row[key] !== undefined) newRow[columnMapping[key]] = row[key];
                         }
                         newRow.rating = parseFloat(newRow.rating) || 0;
                         newRow.enrollments = Number(String(newRow.enrollments).replace(/,/g, '')) || 0;
-                        
                         newRow.quiz = newRow.quiz === 'Yes';
                         newRow.roleplay = newRow.roleplay === 'Yes';
-
                         const dateValue = newRow.lastUpdated;
                         newRow.lastUpdated = dateValue ? new Date(dateValue.replace(/\./g, '-')) : null;
-                        
                         newRow.language = newRow.language ? mapLanguageCode(newRow.language.split('_')[0]) : 'N/A';
                         if (newRow.subtitles && newRow.subtitles !== 'null' && newRow.subtitles.trim() !== '') {
                             newRow.subtitles = newRow.subtitles.split(',').map(s => s.trim()).map(mapLanguageCode).join(', ');
@@ -683,7 +571,6 @@
                         return newRow;
                     }).filter(row => row.id && row.title);
                     
-                
                     const enrollments = processedData.map(c => c.enrollments).sort((a, b) => b - a);
                     if (enrollments.length > 0) {
                         const thresholdIndex = Math.max(0, Math.floor(enrollments.length * 0.05) -1);
@@ -693,7 +580,6 @@
                     }
                     
                     resolve(processedData);
-
                 },
                 error: (err) => {
                     alert("강의 데이터(CSV)를 불러오는 데 실패했습니다.");
@@ -779,7 +665,7 @@
                         </div>
                         <div class="filters-container">
                             <div class="filters-row">
-                                <div class="filter-group">
+                                <div class="filter-group fg-category">
                                     <label>🗂️ 카테고리</label>
                                     <div class="custom-select-wrapper" data-filter-id="category-filter">
                                         <button class="custom-select-button">모든 카테고리</button>
@@ -830,7 +716,13 @@
                                         <option value="3.5">3.5점 이상</option>
                                     </select>
                                 </div>
-                                <div class="filter-group">
+                            </div>
+                             <div class="filters-row">
+                                <div class="filter-group search-group">
+                                    <label for="search">🔍 검색</label>
+                                    <div class="search-container"><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
+                                </div>
+                                <div class="filter-group fg-sort">
                                     <label for="sort-order">📈 정렬 순서</label>
                                     <select id="sort-order">
                                         <option value="popularity">인기순</option>
@@ -838,15 +730,9 @@
                                         <option value="alphabetical">가나다순</option>
                                     </select>
                                 </div>
-                                 <div class="filter-group">
+                                <div class="filter-group fg-rows">
                                      <label for="rows-per-page">👀 표시 개수</label>
                                     <select id="rows-per-page"><option value="15">15개</option><option value="25">25개</option><option value="50">50개</option></select>
-                                </div>
-                            </div>
-                             <div class="filters-row">
-                                <div class="filter-group search-group">
-                                    <label for="search">🔍 검색</label>
-                                    <div class="search-container"><input type="text" id="search" placeholder="자유롭게 검색하세요..."></div>
                                 </div>
                                 <div class="filter-group actions-group">
                                     <label>⚙️ 기능</label>
@@ -947,7 +833,6 @@
         }, 500);
     }
     
-
     function initializeMultiSelectFilters() {
         populateMultiSelect('category-filter', 'category', true, true);
         populateMultiSelect('difficulty-filter', 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
@@ -967,9 +852,7 @@
                 e.stopPropagation();
                 const panel = button.nextElementSibling;
                 const allPanels = document.querySelectorAll('.custom-select-panel');
-                allPanels.forEach(p => {
-                    if (p !== panel) p.classList.remove('visible');
-                });
+                allPanels.forEach(p => { if (p !== panel) p.classList.remove('visible'); });
                 panel.classList.toggle('visible');
             });
         });
@@ -988,9 +871,7 @@
         if (predefinedItems) {
             if (Array.isArray(predefinedItems) && typeof predefinedItems[0] === 'object' && predefinedItems[0] !== null) {
                 items = predefinedItems.slice();
-            } else {
-                items = new Set(predefinedItems);
-            }
+            } else { items = new Set(predefinedItems); }
         } else if (split) {
             items = new Set(originalData.flatMap(c => c[dataKey] && c[dataKey] !== '없음' ? c[dataKey].split(',').map(item => item.trim()) : []));
         } else {
@@ -1001,21 +882,12 @@
         panel.innerHTML = list.map(item => {
             let value, text;
             if (typeof item === 'object' && item !== null) {
-                value = item.value;
-                text = item.label;
+                value = item.value; text = item.label;
             } else {
-                value = item;
-                text = showEmoji ? `${getCategoryEmoji(item)} ${item}` : item;
+                value = item; text = showEmoji ? `${getCategoryEmoji(item)} ${item}` : item;
             }
             if (!value || value === 'N/A') return '';
-            return `
-                <div class="checkbox-item">
-                    <label>
-                        <input type="checkbox" value="${value}">
-                        <span>${text}</span>
-                    </label>
-                </div>
-            `;
+            return `<div class="checkbox-item"><label><input type="checkbox" value="${value}"><span>${text}</span></label></div>`;
         }).join('');
 
         panel.addEventListener('change', () => {
@@ -1028,24 +900,19 @@
         const wrapper = document.querySelector(`[data-filter-id="${filterId}"]`);
         if (!wrapper) return;
         const button = wrapper.querySelector('.custom-select-button');
-        const panel = wrapper.querySelector('.custom-select-panel');
-        const checked = panel.querySelectorAll('input:checked');
+        const checked = wrapper.querySelectorAll('input:checked');
         const checkedCount = checked.length;
         const defaultText = {
-            'category-filter': '모든 카테고리',
-            'difficulty-filter': '모든 난이도',
-            'language-filter': '모든 언어',
-            'subtitles-filter': '모든 자막',
-            'hot-new-filter': '모든 강의',
-            'practice-filter': '모든 방식'
+            'category-filter': '모든 카테고리', 'difficulty-filter': '모든 난이도',
+            'language-filter': '모든 언어', 'subtitles-filter': '모든 자막',
+            'hot-new-filter': '모든 강의', 'practice-filter': '모든 방식'
         }[filterId] || '선택';
 
         if (checkedCount === 0) {
             button.textContent = defaultText;
         } else {
             if (filterId === 'hot-new-filter' || filterId === 'practice-filter') {
-                const labels = Array.from(checked).map(cb => cb.parentElement.querySelector('span').textContent.trim());
-                button.textContent = labels.join(', ');
+                button.textContent = Array.from(checked).map(cb => cb.parentElement.querySelector('span').textContent.trim()).join(', ');
             } else {
                 button.textContent = `${checkedCount}개 선택됨`;
             }
@@ -1058,12 +925,8 @@
         document.getElementById('rows-per-page').value = '15';
         document.getElementById('sort-order').value = 'popularity';
         
-        document.querySelectorAll('.custom-select-panel').forEach(panel => {
-            panel.querySelectorAll('input:checked').forEach(cb => cb.checked = false);
-        });
-        document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
-            updateMultiSelectButton(wrapper.dataset.filterId);
-        });
+        document.querySelectorAll('.custom-select-panel input:checked').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => updateMultiSelectButton(wrapper.dataset.filterId));
 
         currentPage = 1;
         handleFilters();
@@ -1073,47 +936,13 @@
     function downloadCSV() {
         if (filteredCourses.length === 0) { alert("다운로드할 데이터가 없습니다."); return; }
         
-        const filters = {
-            category: Array.from(document.querySelectorAll('[data-filter-id="category-filter"] input:checked')).map(cb => cb.value).join('&'),
-            difficulty: Array.from(document.querySelectorAll('[data-filter-id="difficulty-filter"] input:checked')).map(cb => cb.value).join('&'),
-            language: Array.from(document.querySelectorAll('[data-filter-id="language-filter"] input:checked')).map(cb => cb.value).join('&'),
-            subtitles: Array.from(document.querySelectorAll('[data-filter-id="subtitles-filter"] input:checked')).map(cb => cb.value).join('&'),
-        };
-        const filterNames = Object.values(filters).filter(Boolean).join('_').replace(/[\s,&]/g, '');
-        const filename = `Udemy Business course_${companyName}${filterNames ? '_' + filterNames : ''}.csv`;
-
-        const dataForExport = filteredCourses.map(course => {
-            const { enrollments, ...rest } = course;
-            return rest;
-        });
-
-        const csv = Papa.unparse(dataForExport);
+        const filename = `Udemy_Course_List_${companyName}.csv`;
+        const csv = Papa.unparse(filteredCourses);
         const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
         link.click();
-        document.body.removeChild(link);
-    }
-
-    function getSearchTerms(input) {
-        const term = input.toLowerCase();
-        if (term === '') return [''];
-        
-        let terms = [term];
-        const synonym = searchSynonyms[term];
-        if (synonym) {
-            terms.push(synonym);
-        }
-        for (const kor in searchSynonyms) {
-            if (searchSynonyms[kor] === term) {
-                terms.push(kor);
-                break;
-            }
-        }
-        return terms;
     }
 
     function renderTable() {
@@ -1121,7 +950,7 @@
         loader.classList.add('is-loading');
 
         setTimeout(() => {
-            const searchTerm = document.getElementById('search').value;
+            const searchTerm = document.getElementById('search').value.toLowerCase();
             const minRating = parseFloat(document.getElementById('rating-filter').value) || 0;
             const sortOrder = document.getElementById('sort-order').value;
 
@@ -1132,39 +961,25 @@
             const selectedHotNew = Array.from(document.querySelectorAll('[data-filter-id="hot-new-filter"] input:checked')).map(cb => cb.value);
             const selectedPractices = Array.from(document.querySelectorAll('[data-filter-id="practice-filter"] input:checked')).map(cb => cb.value);
 
-            let coursesToFilter = [...originalData];
-
-            filteredCourses = coursesToFilter.filter(course => {
+            filteredCourses = originalData.filter(course => {
                 const searchCorpus = Object.values(course).join(' ').toLowerCase();
-                const matchesSearch = searchTerm === '' || searchCorpus.includes(searchTerm.toLowerCase());
-                
+                const matchesSearch = searchTerm === '' || searchCorpus.includes(searchTerm);
                 const matchesRating = course.rating >= minRating;
-                const matchesCategory = selectedCategories.length === 0 || selectedCategories.some(cat => course.category && course.category.includes(cat));
+                const matchesCategory = selectedCategories.length === 0 || selectedCategories.some(cat => course.category?.includes(cat));
                 const matchesDifficulty = selectedDifficulties.length === 0 || selectedDifficulties.includes(course.difficulty);
                 const matchesLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(course.language);
-                const matchesSubtitle = selectedSubtitles.length === 0 || selectedSubtitles.some(sub => course.subtitles && course.subtitles.includes(sub));
+                const matchesSubtitle = selectedSubtitles.length === 0 || selectedSubtitles.some(sub => course.subtitles?.includes(sub));
 
                 let matchesHotNew = true;
                 if (selectedHotNew.length > 0) {
                     const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
-                    let isNew = false;
-                    if (course.lastUpdated && !isNaN(course.lastUpdated.getTime())) {
-                        const thresholdDate = new Date();
-                        thresholdDate.setMonth(thresholdDate.getMonth() - NEW_COURSE_THRESHOLD_MONTHS);
-                        isNew = course.lastUpdated > thresholdDate;
-                    }
-                    matchesHotNew = selectedHotNew.some(val => {
-                        return (val === 'HOT' && isHot) || (val === 'NEW' && isNew);
-                    });
+                    const isNew = course.lastUpdated && (new Date() - course.lastUpdated) < (NEW_COURSE_THRESHOLD_MONTHS * 30 * 24 * 60 * 60 * 1000);
+                    matchesHotNew = selectedHotNew.some(val => (val === 'HOT' && isHot) || (val === 'NEW' && isNew));
                 }
                 
                 let matchesPractice = true;
                 if (selectedPractices.length > 0) {
-                    matchesPractice = selectedPractices.every(val => {
-                        if (val === 'QUIZ') return course.quiz;
-                        if (val === 'ROLEPLAY') return course.roleplay;
-                        return false;
-                    });
+                    matchesPractice = selectedPractices.every(val => (val === 'QUIZ' && course.quiz) || (val === 'ROLEPLAY' && course.roleplay));
                 }
 
                 return matchesSearch && matchesRating && matchesCategory && matchesDifficulty && matchesLanguage && matchesSubtitle && matchesHotNew && matchesPractice;
@@ -1174,13 +989,9 @@
 
             filteredCourses.sort((a, b) => {
                 switch (sortOrder) {
-                    case 'latest':
-                        return (b.lastUpdated || 0) - (a.lastUpdated || 0);
-                    case 'alphabetical':
-                        return (a.title || '').localeCompare(b.title || '');
-                    case 'popularity':
-                    default:
-                        return b.enrollments - a.enrollments;
+                    case 'latest': return (b.lastUpdated || 0) - (a.lastUpdated || 0);
+                    case 'alphabetical': return (a.title || '').localeCompare(b.title || '');
+                    case 'popularity': default: return b.enrollments - a.enrollments;
                 }
             });
             
@@ -1189,41 +1000,23 @@
             if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
             const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
             const paginatedCourses = filteredCourses.slice(start, end);
 
             const tableBody = document.getElementById('course-table-body');
             if (paginatedCourses.length === 0) {
-                tableBody.innerHTML = `<tr class="empty-row"><td colspan="11">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <p>😥 일치하는 강의를 찾을 수 없습니다.</p>
-                </td></tr>`;
+                tableBody.innerHTML = `<tr class="empty-row"><td colspan="11"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><p>😥 일치하는 강의를 찾을 수 없습니다.</p></td></tr>`;
             } else {
-                tableBody.innerHTML = paginatedCourses.map(course => {
+                tableBody.innerHTML = paginatedCourses.map((course, index) => {
                     const isHot = course.enrollments >= hotEnrollmentThreshold && hotEnrollmentThreshold > 0;
-                    
-                    let isNew = false;
-                    if (course.lastUpdated && !isNaN(course.lastUpdated.getTime())) {
-                        const thresholdDate = new Date();
-                        thresholdDate.setMonth(thresholdDate.getMonth() - NEW_COURSE_THRESHOLD_MONTHS);
-                        isNew = course.lastUpdated > thresholdDate;
-                    }
-                    
+                    const isNew = course.lastUpdated && (new Date() - course.lastUpdated) < (NEW_COURSE_THRESHOLD_MONTHS * 30 * 24 * 60 * 60 * 1000);
                     const tooltip = `${isHot ? 'HOT' : ''}${isHot && isNew ? ' / ' : ''}${isNew ? 'NEW' : ''}`.trim();
                     const attrDisplay = `${isHot ? '🔥' : ''}${isHot && isNew ? ' ' : ''}${isNew ? '✨' : ''}`.trim();
-
                     const practiceTooltip = `${course.quiz ? '퀴즈' : ''}${course.quiz && course.roleplay ? ' / ' : ''}${course.roleplay ? '롤플레이' : ''}`.trim();
                     const practiceDisplay = `${course.quiz ? '📝' : ''}${course.quiz && course.roleplay ? ' ' : ''}${course.roleplay ? '🗣️' : ''}`.trim();
-
-                    return `
-                    <tr>
+                    return `<tr style="animation-delay: ${index * 30}ms">
                         <td title="${course.category || ''}"><div class="line-clamp-2">${getCategoryEmoji(course.category)} ${course.category || ''}</div></td>
                         <td title="${course.topic || ''}"><div class="line-clamp-2">${course.topic || ''}</div></td>
-                        <td title="${course.title}">
-                            <a href="${companyUrl}${course.id}" target="_blank" title="${course.title}">
-                                <div class="line-clamp-2">${course.title}</div>
-                            </a>
-                        </td>
+                        <td title="${course.title}"><a href="${companyUrl}${course.id}" target="_blank" title="${course.title}"><div class="line-clamp-2">${course.title}</div></a></td>
                         <td><button class="details-btn" data-id="${course.id}" aria-label="상세보기">ℹ️</button></td>
                         <td>${course.language || 'N/A'}</td>
                         <td title="${course.subtitles || ''}"><div class="line-clamp-2">${course.subtitles || '없음'}</div></td>
@@ -1244,58 +1037,23 @@
         const modalBody = document.getElementById('modal-body');
         document.getElementById('modal-title').textContent = course.title;
         
-        const objectivesHtml = course.objectives 
-            ? `<ul>${course.objectives.replace(/["\[\]]/g, '').split('\n').filter(line => line.trim()).map(line => `<li>${line.trim().replace(/^•\s*/, '')}</li>`).join('')}</ul>`
-            : '<p>정보 없음</p>';
+        const objectivesHtml = course.objectives ? `<ul>${course.objectives.replace(/["\[\]]/g, '').split('\n').filter(line => line.trim()).map(line => `<li>${line.trim().replace(/^•\s*/, '')}</li>`).join('')}</ul>` : '<p>정보 없음</p>';
         
         modalBody.innerHTML = `
-            <div class="modal-section" id="ai-summary-section">
-                <h3>✨ AI 핵심 요약</h3>
-                <div class="spinner-container"><div class="spinner"></div><p>AI가 요약 중입니다...</p></div>
-            </div>
-            <div class="modal-section" id="ai-recommend-for-section">
-                <h3>🎯 이런 분들께 추천해요</h3>
-                <div class="spinner-container"><div class="spinner"></div><p>AI가 분석 중입니다...</p></div>
-            </div>
-            <div class="modal-section"> <h3>📜 강의 소개</h3> <p>${course.headline || '정보 없음'}</p> </div>
-            <div class="modal-section"> <h3>🎯 강의 내용 및 학습 목표</h3> ${objectivesHtml} </div>
-        `;
+            <div class="modal-section" id="ai-summary-section"><h3>✨ AI 핵심 요약</h3><div class="spinner-container"><div class="spinner"></div><p>AI가 요약 중입니다...</p></div></div>
+            <div class="modal-section" id="ai-recommend-for-section"><h3>🎯 이런 분들께 추천해요</h3><div class="spinner-container"><div class="spinner"></div><p>AI가 분석 중입니다...</p></div></div>
+            <div class="modal-section"><h3>📜 강의 소개</h3><p>${course.headline || '정보 없음'}</p></div>
+            <div class="modal-section"><h3>🎯 강의 내용 및 학습 목표</h3>${objectivesHtml}</div>`;
         modalOverlay.style.display = 'flex';
 
-        const aiData = await callGeminiAPI('summarize course', 'summarize', course);
-        if(aiData) {
-            const summaryList = aiData.summary.length > 0 ? `<ul>${aiData.summary.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}</ul>` : '<p>요약할 내용이 충분하지 않습니다.</p>';
+        const aiData = await callGeminiAPI({ type: 'summarize', context: course });
+        if(aiData && aiData.summary) {
+            const summaryList = `<ul>${aiData.summary.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}</ul>`;
             document.getElementById('ai-summary-section').innerHTML = `<h3>✨ AI 핵심 요약</h3>${summaryList}`;
 
             const recommendForList = `<ul>${aiData.recommendedFor.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}</ul>`;
             document.getElementById('ai-recommend-for-section').innerHTML = `<h3>🎯 이런 분들께 추천해요</h3>${recommendForList}`;
         }
-    }
-
-    function extractKeywordsFromPrompt(prompt) {
-        const text = prompt.toLowerCase();
-        let keywords = [];
-        let difficulty = '';
-
-        const allSynonyms = {...searchSynonyms};
-        Object.values(searchSynonyms).forEach(val => {
-            for(const key in searchSynonyms) {
-                if(searchSynonyms[key] === val) allSynonyms[val] = key;
-            }
-        });
-        
-        const allKeywords = Object.keys(allSynonyms);
-        allKeywords.forEach(kw => {
-            if (text.includes(kw)) keywords.push(kw);
-        });
-
-        if (text.includes('초보') || text.includes('입문') || text.includes('beginner')) difficulty = 'Beginner';
-        else if (text.includes('중급') || text.includes('intermediate')) difficulty = 'Intermediate';
-        else if (text.includes('고급') || text.includes('전문가') || text.includes('expert')) difficulty = 'Expert';
-        
-        if (keywords.length === 0) keywords.push(text.replace(/추천|해줘|알려줘|나는|입니다/g, '').trim());
-
-        return { searchTerm: keywords.join(' '), difficulty };
     }
 
     function showAIRecommendationModal() {
@@ -1308,42 +1066,28 @@
                 <input type="text" id="ai-prompt" placeholder="예: 파이썬 데이터 분석, 신입사원을 위한 엑셀 스킬">
                 <button id="get-ai-recs">추천 받기</button>
             </div>
-            <div id="ai-modal-results" class="recommendation-grid"></div>
-        `;
+            <div id="ai-modal-results" class="recommendation-grid"></div>`;
         modalOverlay.style.display = 'flex';
 
         document.getElementById('get-ai-recs').addEventListener('click', handleAIRecommendationRequest);
-        document.getElementById('ai-prompt').addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') handleAIRecommendationRequest();
-        });
+        document.getElementById('ai-prompt').addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAIRecommendationRequest(); });
     }
 
     async function handleAIRecommendationRequest() {
         const prompt = document.getElementById('ai-prompt').value;
-        if (!prompt) {
-            alert('키워드를 입력해주세요.');
-            return;
-        }
+        if (!prompt) { alert('키워드를 입력해주세요.'); return; }
         const resultsContainer = document.getElementById('ai-modal-results');
         resultsContainer.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
-
-        const { searchTerm, difficulty } = extractKeywordsFromPrompt(prompt);
-        let recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, difficulty, basis: 'direct' });
         
-        if (recommendations && recommendations.length === 0 && difficulty) {
-            recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, basis: 'direct' });
-        }
-
+        const recommendations = await callGeminiAPI({ type: 'recommend', prompt: prompt });
+        
         if (recommendations && recommendations.length > 0) {
             resultsContainer.innerHTML = recommendations.map(course => `
                 <div class="recommendation-card">
                     <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
                     <p>${generateRecommendation(course)}</p>
-                     <div class="card-footer">
-                        <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
-                    </div>
-                </div>
-            `).join('');
+                     <div class="card-footer"><span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span></div>
+                </div>`).join('');
         } else {
             resultsContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 강의를 찾지 못했어요. 다른 키워드로 시도해보세요.</p>';
         }
@@ -1354,44 +1098,6 @@
     function handleFilters() {
         currentPage = 1;
         renderTable();
-        
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            updateAIRecommendations();
-        }, 500);
-    }
-
-    async function updateAIRecommendations() {
-        const container = document.getElementById('ai-recommendations-container');
-        const grid = container.querySelector('.recommendation-grid');
-        const searchTerm = document.getElementById('search').value.toLowerCase();
-        const selectedCategory = Array.from(document.querySelectorAll('[data-filter-id="category-filter"] input:checked')).map(cb => cb.value).join(', ');
-        
-        if (!searchTerm && !selectedCategory) {
-            container.style.display = 'none';
-            return;
-        }
-
-        container.style.display = 'block';
-        grid.innerHTML = '<div class="spinner-container" style="justify-content: center; padding: 2rem;"><div class="spinner"></div><p>AI가 맞춤 강의를 찾고 있습니다...</p></div>';
-
-        const recommendations = await callGeminiAPI('recommend courses', 'recommend', { searchTerm, category: selectedCategory, basis: 'contextual' });
-        
-        if (recommendations && recommendations.length > 0) {
-            container.querySelector('h2').textContent = `✨ "${searchTerm || selectedCategory}" 관련 AI 스마트 추천`;
-            grid.innerHTML = recommendations.map(course => `
-                <div class="recommendation-card">
-                    <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
-                    <p>${generateRecommendation(course)}</p>
-                     <div class="card-footer">
-                        <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-             container.querySelector('h2').textContent = `✨ AI 스마트 추천`;
-             grid.innerHTML = '<p style="text-align:center; color: var(--text-muted-color);">추천할 만한 다른 강의를 찾지 못했어요.</p>';
-        }
     }
 
     function renderPagination(totalPages) {

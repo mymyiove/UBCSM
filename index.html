@@ -874,6 +874,10 @@
             { value: 'ROLEPLAY', label: '🗣️ 롤플레이' }
         ]);
 
+
+        populateMultiSelect(container.querySelector('[data-filter-id="ai-language-filter"]'), null, false, false, uniqueLanguages);
+        populateMultiSelect(container.querySelector('[data-filter-id="ai-subtitles-filter"]'), 'subtitles', true, false, uniqueSubtitles);
+        
         container.querySelectorAll('.custom-select-button').forEach(button => {
             if(button.getAttribute('listener') !== 'true') {
                 button.setAttribute('listener', 'true');

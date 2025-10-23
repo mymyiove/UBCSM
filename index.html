@@ -96,6 +96,11 @@
         .top-courses-layout { display: flex; gap: 2rem; flex-wrap: wrap; /* 작은 화면에서 줄바꿈 */ }
         .top-courses-column { flex: 1; min-width: 300px; /* 최소 너비 보장 */ }
         .top-courses-column h3 { font-size: 1.3rem; color: var(--primary-hover-color); margin-bottom: 1rem; margin-top: 0; text-align: center; }
+        /* --- [신규] TOP 6 섹션 구분선 --- */
+        .top-courses-column:first-child {
+            padding-right: 2rem; /* 오른쪽 패딩 추가 (구분선과의 간격) */
+            border-right: 1px solid var(--border-color); /* 오른쪽 테두리 추가 (구분선) */
+        }
         .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .recommendation-card { background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; position: relative; }
         .recommendation-card:hover { transform: translateY(-8px); border-color: var(--primary-color); box-shadow: 0 8px 30px rgba(167, 139, 250, 0.25); z-index: 101; }

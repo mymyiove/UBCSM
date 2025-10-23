@@ -44,25 +44,11 @@
         }
 
         /* --- 애니메이션 --- */
-        @keyframes fadeInFromBottom {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse-bg {
-            0% { background-color: rgba(59, 59, 88, 0.5); }
-            50% { background-color: rgba(59, 59, 88, 0.8); }
-            100% { background-color: rgba(59, 59, 88, 0.5); }
-        }
-        /* [신규] 카드 등장 애니메이션 */
-        @keyframes cardFadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        @keyframes fadeInFromBottom { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-bg { 0% { background-color: rgba(59, 59, 88, 0.5); } 50% { background-color: rgba(59, 59, 88, 0.8); } 100% { background-color: rgba(59, 59, 88, 0.5); } }
+        @keyframes cardFadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes click-effect { 0% { transform: scale(1); } 50% { transform: scale(0.97); } 100% { transform: scale(1); } }
 
         /* --- 초기 게이트 화면 --- */
         #initial-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: calc(100vh - 4rem); text-align: center; transition: opacity 0.5s ease-out; max-width: 600px; margin: 0 auto; }
@@ -102,51 +88,58 @@
         .tab-panel { display: none; padding: 2.5rem 0; animation: fadeInFromBottom 0.5s ease; }
         .tab-panel.active { display: block; }
 
-        /* --- 추천 (TOP 10) --- */
+        /* --- [수정] TOP 6 섹션 --- */
         .recommendation-container { background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur); padding: 1.5rem 2rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color); padding-top: 2rem; }
-        .recommendation-header { display: flex; justify-content: flex-start; align-items: center; user-select: none; }
+        .recommendation-header { display: flex; justify-content: flex-start; align-items: center; user-select: none; margin-bottom: 1.5rem; /* 제목과 그리드 사이 간격 */ }
         .recommendation-header h2 { margin: 0; color: var(--primary-color); font-size: 1.5rem; }
-        .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; padding-top: 0.5rem; }
+        /* [신규] TOP 6 레이아웃 */
+        .top-courses-layout { display: flex; gap: 2rem; }
+        .top-courses-column { flex: 1; /* 양 컬럼이 공간을 동일하게 나눠가짐 */ }
+        .top-courses-column h3 { font-size: 1.3rem; color: var(--primary-hover-color); margin-bottom: 1rem; margin-top: 0; text-align: center; }
+        .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 카드 크기 약간 조정 */ gap: 1.5rem; /* padding-top 제거 */ }
         .recommendation-card { background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; position: relative; }
         .recommendation-card:hover { transform: translateY(-8px); border-color: var(--primary-color); box-shadow: 0 8px 30px rgba(167, 139, 250, 0.25); z-index: 101; }
         .recommendation-card h3 { font-size: 1.1rem; margin: 0 0 0.5rem 0; color: var(--text-color); }
         .recommendation-card h3 a { color: inherit; text-decoration: none; }
-        .recommendation-card h3 .rank { color: var(--primary-color); margin-right: 0.5rem; }
+        .recommendation-card h3 .rank { color: var(--primary-color); margin-right: 0.5rem; font-weight: 700; }
         .recommendation-card p { font-size: 0.9rem; color: var(--text-muted-color); margin: 0; line-height: 1.5; flex-grow: 1;}
         .card-footer { margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color); }
         .category-badge { background-color: var(--surface-color); color: var(--text-muted-color); font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 12px; border: 1px solid var(--border-color); }
 
-        /* --- [신규] 큐레이션 탭 레이아웃 --- */
+
+        /* --- 큐레이션 탭 레이아웃 --- */
         .curation-layout { display: flex; gap: 2rem; background-color: var(--surface-color); backdrop-filter: var(--backdrop-blur); padding: 1.5rem 2rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color); }
-        #curation-sidebar { flex: 0 0 200px; border-right: 1px solid var(--border-color); padding-right: 2rem; transition: width 0.3s ease, opacity 0.3s ease, padding 0.3s ease; }
-        #curation-sidebar.hidden { flex-basis: 0; width: 0; padding-right: 0; border-right: none; opacity: 0; overflow: hidden; } /* 검색 시 숨김 */
-        #curation-main-content { flex-grow: 1; }
+        #curation-sidebar { flex: 0 0 200px; border-right: 1px solid var(--border-color); padding-right: 2rem; transition: all 0.3s ease; opacity: 1; visibility: visible; }
+        #curation-sidebar.hidden { flex-basis: 0; width: 0; padding-right: 0; border-right: none; opacity: 0; visibility: hidden; }
+        #curation-main-content { flex-grow: 1; min-height: 400px; }
         #curation-sidebar h4 { font-size: 1.1rem; color: var(--primary-hover-color); margin-bottom: 1rem; margin-top: 0; }
-        .sidebar-links { display: flex; flex-direction: column; gap: 0.5rem; }
+        .sidebar-links { display: flex; flex-direction: column; gap: 0.5rem; max-height: calc(100vh - 350px); overflow-y: auto; padding-right: 0.5rem; }
         .sidebar-link { padding: 0.6rem 1rem; background: none; border: none; color: var(--text-muted-color); font-size: 1rem; text-align: left; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
         .sidebar-link:hover { background-color: var(--border-color); color: var(--text-color); }
         .sidebar-link.active { background-color: var(--primary-color); color: var(--bg-color); font-weight: 700; }
 
-        /* --- [신규] 큐레이션 직무 검색 --- */
+        /* --- 큐레이션 직무 검색 --- */
         .curation-search-container { margin-bottom: 1.5rem; position: relative; }
         .curation-search-container input { width: 100%; height: 45px; padding: 0 1rem 0 2.5rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1rem; }
         .curation-search-container::before { content: '🔍'; position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: 0.6; }
 
         /* --- 큐레이션 직급 선택 --- */
         .level-selector { margin-bottom: 2rem; }
-        .level-selector h4 { font-size: 1.3rem; color: var(--primary-hover-color); margin-bottom: 1rem; }
+        #curation-main-content > h4 { font-size: 1.3rem; color: var(--primary-hover-color); margin-bottom: 1rem; margin-top: 2rem; }
+        #curation-main-content > h4:first-of-type { margin-top: 0; }
         .level-options { display: flex; flex-wrap: wrap; gap: 0.75rem; }
         .level-options input[type="radio"] { display: none; }
         .level-options label { padding: 0.75rem 1.5rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; }
         .level-options label:hover { background-color: var(--border-color); border-color: var(--primary-color); }
         .level-options input[type="radio"]:checked + label { background-color: var(--primary-color); border-color: var(--primary-color); color: var(--bg-color); font-weight: 700; box-shadow: 0 4px 10px rgba(167, 139, 250, 0.3); }
 
-        /* --- 큐레이션 카드 (UI 개선) --- */
-        .curation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; align-items: stretch; /* 카드 높이 맞춤 */ }
-        .curation-card { background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; opacity: 0; animation: cardFadeInUp 0.5s ease forwards; }
+        /* --- 큐레이션 카드 --- */
+        .curation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; align-items: stretch; max-width: 1200px; }
+        .curation-card { background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; opacity: 0; animation: cardFadeInUp 0.4s ease forwards; }
         .curation-card:hover { background-color: var(--border-color); border-color: var(--primary-color); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .curation-card:active { animation: click-effect 0.2s ease; }
         .curation-card h4 { margin: 0 0 0.75rem 0; font-size: 1.1rem; color: var(--text-color); }
-        .curation-keywords { display: flex; flex-wrap: wrap; gap: 0.5rem; flex-grow: 1; /* 카드 높이 맞춤 */ }
+        .curation-keywords { display: flex; flex-wrap: wrap; gap: 0.5rem; flex-grow: 1; }
         .curation-card:hover .category-badge { background-color: var(--bg-color); color: var(--text-color); }
         #curation-main-content h3 { font-size: 1.3rem; color: var(--primary-hover-color); margin-bottom: 1rem; margin-top: 0;} /* 검색 결과 헤더 */
 
@@ -317,7 +310,7 @@
 
 <div id="app-container">
     <header class="app-header">
-        <h1><span class="rocket">🚀</span> Udemy Business Course Explorer (v0.6)</h1>
+        <h1><span class="rocket">🚀</span> Udemy Business Course Explorer (v0.7)</h1>
         <h2 id="welcome-message"><strong></strong> 학습자님 어서오세요! Udemy와 즐겁게 성장해보세요.</h2>
         <div id="last-updated">데이터 업데이트: 2025-10-17</div>
     </header>
@@ -325,8 +318,7 @@
     <nav class="tab-navigation">
         <button class="tab-button active" data-tab="explore">🧭 탐험하기</button>
         <button class="tab-button" data-tab="curation">🏢 직무별 큐레이션</button>
-        <button class="tab-button" data-tab="top10">⭐ TOP 10 (3개월)</button>
-    </nav>
+        <button class="tab-button" data-tab="top10">⭐ TOP 6 (3개월)</button> </nav>
 
     <div class="main-content">
         <div id="tab-panel-explore" class="tab-panel active">
@@ -368,15 +360,29 @@
                             <input type="radio" id="level-expert" name="curation-level" value="expert"><label for="level-expert">차부장급 (고급)</label>
                         </div>
                     </div>
-                    <h4 style="margin-top: 2rem;">2. 직무 선택</h4>
+                    <h4>2. 직무 선택</h4>
                     <div id="curation-grid" class="curation-grid"></div>
                 </div>
             </div>
         </div>
 
         <div id="tab-panel-top10" class="tab-panel">
-            <div id="top-courses-container" class="recommendation-container" style="margin-bottom: 0;"><div class="recommendation-header"><h2>⭐ 3개월간 가장 사랑받은 TOP 10 강의 (한국어 자막) ⭐</h2></div><div class="recommendation-grid"></div></div>
+            <div class="recommendation-container" style="margin-bottom: 0;">
+                <div class="recommendation-header" style="justify-content: center;"> <h2>🔥 3개월간 가장 사랑받은 TOP 6 강의 🔥</h2>
+                </div>
+                <div class="top-courses-layout">
+                    <div class="top-courses-column">
+                        <h3>⭐ 한글 자막</h3>
+                        <div id="top-courses-subtitle" class="recommendation-grid"></div>
+                    </div>
+                    <div class="top-courses-column">
+                        <h3>🎙️ 한국어 강의</h3>
+                        <div id="top-courses-korean" class="recommendation-grid"></div>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div> <div class="list-container">
         <div class="list-header"><h2>📖 탐험 목록</h2><div class="badge-info"><span>🔥 HOT: 3개월간 수강신청 수 상위 5%</span> | <span>✨ NEW: 3개월 내 업데이트</span> | <span>📝 퀴즈 포함</span> | <span>🗣️ 롤플레이 포함</span></div></div>
         <div id="active-filters-container"></div>
@@ -387,10 +393,10 @@
 </div> <div id="modal-overlay"><div id="modal-content"><div id="modal-header"><h2 id="modal-title"></h2><button id="modal-close-btn">&times;</button></div><div id="modal-body"></div></div></div>
 <button id="scroll-to-top" title="최상단으로 이동">↑</button>
 <div id="toast-container"></div>
-<footer class="app-footer"><p>ver 0.60 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p><p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p></footer>
+<footer class="app-footer"><p>ver 0.70 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p><p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p></footer>
 
 <script>
-    // --- [수정] 직무별 큐레이션 데이터 (한/영 OR 키워드 + 난이도 제거) ---
+    // --- 직무별 큐레이션 데이터 (한/영 OR 키워드 + 난이도 제거) ---
     const curationData = {
         "product": {
             "name": "🚀 제품 (Product)",
@@ -454,7 +460,7 @@
     // --- 전역 변수 및 상태 ---
     let companyName = ''; let companyUrl = ''; let filteredCourses = []; let currentPage = 1; let rowsPerPage = 15; let originalData = []; let debounceTimer; let aiRecommendedCourses = [];
     let uniqueCategories = []; let uniqueLanguages = []; let uniqueSubtitles = []; let hotEnrollmentThreshold = 0; const NEW_COURSE_THRESHOLD_MONTHS = 3;
-    let currentCurationFamily = Object.keys(curationData)[0]; // 현재 선택된 큐레이션 직군
+    let currentCurationFamily = Object.keys(curationData)[0];
 
     // --- DOM 요소 ---
     const initialScreen = document.getElementById('initial-screen'); const appContainer = document.getElementById('app-container'); const submitBtn = document.getElementById('submit-address'); const companyAddressInput = document.getElementById('company-address'); const modalOverlay = document.getElementById('modal-overlay'); const modalCloseBtn = document.getElementById('modal-close-btn'); const scrollToTopBtn = document.getElementById('scroll-to-top'); const toastContainer = document.getElementById('toast-container');
@@ -488,46 +494,15 @@
     async function callGeminiAPI(payload) {
         const backendApiEndpoint = '/api/gemini'; // 실제 백엔드 엔드포인트로 변경 필요
         try {
-            // // --- 로컬 테스트용 Mock ---
-            // console.log("AI Payload:", payload);
-            // if (payload.type === 'extended_search') {
-            //     await new Promise(resolve => setTimeout(resolve, 500)); // 0.5초 딜레이
-            //     return payload.prompt.split(' '); // 임시 키워드 반환
-            // }
-            // if (payload.type === 'summarize') {
-            //      await new Promise(resolve => setTimeout(resolve, 800)); // 0.8초 딜레이
-            //     return { summary: ["요약 1", "요약 2"], recommendedFor: ["대상 1", "대상 2"] };
-            // }
-            // if (payload.type === 'recommend') {
-            //      await new Promise(resolve => setTimeout(resolve, 1000)); // 1초 딜레이
-            //     return payload.courses.slice(0, 5).map(c => c.id); // 상위 5개 ID 반환
-            // }
-            // // --- Mock 끝 ---
-
-            const response = await fetch(backendApiEndpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `서버 오류: ${response.statusText}`);
-            }
+            const response = await fetch(backendApiEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error || `서버 오류: ${response.statusText}`); }
             return await response.json();
         } catch (error) {
-            console.error("AI API 호출 중 오류 발생:", error);
-            showToast("AI 호출 중 오류가 발생했습니다.", "error");
-            // API 호출 실패 시 Mock 데이터 또는 에러 처리
-            if (payload.type === 'summarize') {
-                return {
-                    summary: ["AI 요약 중 오류가 발생했습니다."],
-                    recommendedFor: ["AI 추천 대상 분석 중 오류가 발생했습니다."]
-                };
-            }
-            return null; // 다른 타입은 null 반환
+            console.error("AI API 호출 중 오류 발생:", error); showToast("AI 호출 중 오류가 발생했습니다.", "error");
+            if (payload.type === 'summarize') { return { summary: ["AI 요약 중 오류가 발생했습니다."], recommendedFor: ["AI 추천 대상 분석 중 오류가 발생했습니다."] }; }
+            return null;
         }
     }
-
 
     // --- CSV 데이터 로드 (한국어/영어 우선 정렬) ---
     async function loadCourseData() {
@@ -535,72 +510,45 @@
             Papa.parse('courses_web.csv', {
                 download: true, header: true, skipEmptyLines: true,
                 complete: (results) => {
-                    if (results.errors.length > 0) {
-                        alert("CSV 파일을 분석하는 중 오류가 발생했습니다.");
-                        console.error("CSV Parsing Errors:", results.errors);
-                        return reject(new Error("CSV 파싱 오류"));
-                    }
-
+                    if (results.errors.length > 0) { alert("CSV 파일을 분석하는 중 오류가 발생했습니다."); console.error("CSV Parsing Errors:", results.errors); return reject(new Error("CSV 파싱 오류")); }
                     const processedData = results.data.map(row => {
-                        const newRow = {};
-                        for (const key in columnMapping) {
-                            if (row[key] !== undefined) newRow[columnMapping[key]] = row[key];
-                        }
-                        newRow.rating = parseFloat(newRow.rating) || 0;
-                        newRow.enrollments = Number(String(newRow.enrollments).replace(/,/g, '')) || 0;
-                        newRow.quiz = newRow.quiz === 'Yes';
-                        newRow.roleplay = newRow.roleplay === 'Yes';
-                        const dateValue = newRow.lastUpdated;
-                        newRow.lastUpdated = dateValue ? new Date(dateValue.replace(/\./g, '-')) : null;
-                        newRow.language = newRow.language ? mapLanguageCode(newRow.language.split('_')[0]) : 'N/A';
-                        if (newRow.subtitles && newRow.subtitles !== 'null' && newRow.subtitles.trim() !== '') {
-                            newRow.subtitles = newRow.subtitles.split(',').map(s => s.trim()).map(mapLanguageCode).join(', ');
-                        } else {
-                            newRow.subtitles = '없음';
-                        }
+                        const newRow = {}; for (const key in columnMapping) { if (row[key] !== undefined) newRow[columnMapping[key]] = row[key]; }
+                        newRow.rating = parseFloat(newRow.rating) || 0; newRow.enrollments = Number(String(newRow.enrollments).replace(/,/g, '')) || 0; newRow.quiz = newRow.quiz === 'Yes'; newRow.roleplay = newRow.roleplay === 'Yes';
+                        const dateValue = newRow.lastUpdated; newRow.lastUpdated = dateValue ? new Date(dateValue.replace(/\./g, '-')) : null; newRow.language = newRow.language ? mapLanguageCode(newRow.language.split('_')[0]) : 'N/A';
+                        if (newRow.subtitles && newRow.subtitles !== 'null' && newRow.subtitles.trim() !== '') { newRow.subtitles = newRow.subtitles.split(',').map(s => s.trim()).map(mapLanguageCode).join(', '); } else { newRow.subtitles = '없음'; }
                         return newRow;
                     }).filter(row => row.id && row.title);
-
-                    const customSort = (a, b) => {
-                        if (a === '한국어') return -1;
-                        if (b === '한국어') return 1;
-                        if (a === 'English') return -1;
-                        if (b === 'English') return 1;
-                        return a.localeCompare(b);
-                    };
-
+                    const customSort = (a, b) => { if (a === '한국어') return -1; if (b === '한국어') return 1; if (a === 'English') return -1; if (b === 'English') return 1; return a.localeCompare(b); };
                     uniqueCategories = [...new Set(processedData.flatMap(c => c.category ? c.category.split(',').map(item => item.trim()) : []))].sort();
                     uniqueLanguages = [...new Set(processedData.map(c => c.language).filter(Boolean))].sort(customSort);
                     uniqueSubtitles = [...new Set(processedData.flatMap(c => c.subtitles && c.subtitles !== '없음' ? c.subtitles.split(',').map(item => item.trim()) : []))].sort(customSort);
-
                     const enrollments = processedData.map(c => c.enrollments).sort((a, b) => b - a);
-                    if (enrollments.length > 0) {
-                        const thresholdIndex = Math.max(0, Math.floor(enrollments.length * 0.05) -1);
-                        hotEnrollmentThreshold = enrollments[thresholdIndex] || 0;
-                    } else {
-                        hotEnrollmentThreshold = 0;
-                    }
-
+                    if (enrollments.length > 0) { const thresholdIndex = Math.max(0, Math.floor(enrollments.length * 0.05) - 1); hotEnrollmentThreshold = enrollments[thresholdIndex] || 0; } else { hotEnrollmentThreshold = 0; }
                     resolve(processedData);
                 },
-                error: (err) => {
-                    alert("강의 데이터(CSV)를 불러오는 데 실패했습니다.");
-                    console.error("CSV Loading Error:", err);
-                    reject(new Error("CSV 로드 실패"));
-                }
+                error: (err) => { alert("강의 데이터(CSV)를 불러오는 데 실패했습니다."); console.error("CSV Loading Error:", err); reject(new Error("CSV 로드 실패")); }
             });
         });
     }
 
-    // --- TOP 10 강의 표시 (Headline 사용) ---
+    // --- [수정] TOP 6 강의 표시 ---
     function displayTopCourses() {
-        const topCourses = [...originalData]
+        // 한글 자막 TOP 6
+        const topSubtitleCourses = [...originalData]
             .filter(course => course.subtitles && course.subtitles.includes('한국어'))
             .sort((a, b) => b.enrollments - a.enrollments)
-            .slice(0, 10);
+            .slice(0, 6);
 
-        const grid = document.querySelector('#tab-panel-top10 .recommendation-grid');
-        grid.innerHTML = topCourses.map((course, index) => `
+        // 한국어 강의 TOP 6
+        const topKoreanCourses = [...originalData]
+            .filter(course => course.language === '한국어')
+            .sort((a, b) => b.enrollments - a.enrollments)
+            .slice(0, 6);
+
+        const subtitleGrid = document.getElementById('top-courses-subtitle');
+        const koreanGrid = document.getElementById('top-courses-korean');
+
+        const generateCardHTML = (course, index) => `
             <div class="recommendation-card">
                 <div>
                     <h3>
@@ -612,186 +560,109 @@
                 <div class="card-footer">
                     <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+
+        subtitleGrid.innerHTML = topSubtitleCourses.map(generateCardHTML).join('');
+        koreanGrid.innerHTML = topKoreanCourses.map(generateCardHTML).join('');
     }
 
-    // --- 큐레이션 UI 렌더링 (사이드바 + 콘텐츠 분리) ---
+
+    // --- 큐레이션 UI 렌더링 ---
     function renderCurationUI() {
         curationSidebarLinks.innerHTML = Object.entries(curationData).map(([familyId, familyData]) => `
-            <button class="sidebar-link ${familyId === currentCurationFamily ? 'active' : ''}" data-family-id="${familyId}">
+            <button class="sidebar-link ${familyId === currentCurationFamily ? 'active' : ''}" data-family-id="${familyId}" aria-label="${familyData.name} 직군 선택">
                 ${familyData.name}
-            </button>
-        `).join('');
-
+            </button>`).join('');
         renderCurationRoles(currentCurationFamily);
-
-        curationSidebarLinks.querySelectorAll('.sidebar-link').forEach(link => {
-            link.addEventListener('click', () => {
-                const familyId = link.dataset.familyId;
-                selectCurationFamily(familyId);
-            });
-        });
+        curationSidebarLinks.querySelectorAll('.sidebar-link').forEach(link => { link.addEventListener('click', () => { selectCurationFamily(link.dataset.familyId); }); });
     }
 
-    // 특정 직군의 직무 카드 렌더링 (애니메이션 포함)
+    // 직무 카드 렌더링 (애니메이션 포함)
     function renderCurationRoles(familyId, rolesToRender = null) {
-        const roles = rolesToRender || (curationData[familyId] ? curationData[familyId].roles : []); // familyId 없을 경우 대비
-
+        const roles = rolesToRender || (curationData[familyId] ? curationData[familyId].roles : []);
         curationGrid.innerHTML = roles.map((role, index) => `
-            <div class="curation-card" data-role-id="${role.id}" style="animation-delay: ${index * 50}ms;">
+            <div class="curation-card" data-role-id="${role.id}" style="animation-delay: ${index * 30}ms;">
                 <h4>${role.name}</h4>
                 <div class="curation-keywords">
                     ${role.display_keywords.map(k => `<span class="category-badge">${k}</span>`).join('')}
                 </div>
-            </div>
-        `).join('');
-
+            </div>`).join('');
         curationGrid.querySelectorAll('.curation-card').forEach(card => {
             card.addEventListener('click', () => {
-                const roleId = card.dataset.roleId;
-                let roleToApply;
-                for (const family of Object.values(curationData)) {
-                    const foundRole = family.roles.find(r => r.id === roleId);
-                    if (foundRole) { roleToApply = foundRole; break; }
-                }
-                if (roleToApply) { applyCurationFilters(roleToApply); }
+                const roleId = card.dataset.roleId; let roleToApply;
+                for (const family of Object.values(curationData)) { const foundRole = family.roles.find(r => r.id === roleId); if (foundRole) { roleToApply = foundRole; break; } }
+                if (roleToApply) { card.style.animation = 'click-effect 0.2s ease'; setTimeout(() => applyCurationFilters(roleToApply), 100); }
             });
+            card.addEventListener('animationend', () => { card.style.animation = ''; });
         });
     }
 
     // 사이드바 직군 선택 처리
     function selectCurationFamily(familyId) {
         currentCurationFamily = familyId;
-        curationSidebarLinks.querySelectorAll('.sidebar-link').forEach(link => {
-            link.classList.toggle('active', link.dataset.familyId === familyId);
-        });
+        curationSidebarLinks.querySelectorAll('.sidebar-link').forEach(link => { link.classList.toggle('active', link.dataset.familyId === familyId); });
         renderCurationRoles(familyId);
         curationSearchInput.value = '';
         curationMainContent.querySelector('h3')?.remove();
-        curationSidebar.classList.remove('hidden'); // 사이드바 다시 보이게
+        curationSidebar.classList.remove('hidden');
     }
 
     // 큐레이션 검색 처리
     function handleCurationSearch() {
         const searchTerm = curationSearchInput.value.toLowerCase().trim();
-
-        if (searchTerm === '') {
-            selectCurationFamily(currentCurationFamily);
-            curationSidebar.classList.remove('hidden'); // 사이드바 보이기
-            return;
-        }
-
+        if (searchTerm === '') { selectCurationFamily(currentCurationFamily); curationSidebar.classList.remove('hidden'); return; }
         const matchedRoles = [];
-        for (const familyId in curationData) {
-            curationData[familyId].roles.forEach(role => {
-                const searchableText = `${role.name.toLowerCase()} ${role.display_keywords.join(' ').toLowerCase()} ${role.prompt.toLowerCase()}`;
-                if (searchableText.includes(searchTerm)) {
-                    matchedRoles.push(role);
-                }
-            });
-        }
-
-        curationSidebar.classList.add('hidden'); // 검색 중엔 사이드바 숨김
+        for (const familyId in curationData) { curationData[familyId].roles.forEach(role => { const searchableText = `${role.name.toLowerCase()} ${role.display_keywords.join(' ').toLowerCase()} ${role.prompt.toLowerCase()}`; if (searchableText.includes(searchTerm)) { matchedRoles.push(role); } }); }
+        curationSidebar.classList.add('hidden');
         curationMainContent.querySelector('h3')?.remove();
-        const resultsHeader = document.createElement('h3');
-        resultsHeader.textContent = `🔍 "${searchTerm}" 검색 결과 (${matchedRoles.length}개)`;
-        curationMainContent.insertBefore(resultsHeader, curationGrid);
-
+        const resultsHeader = document.createElement('h3'); resultsHeader.textContent = `🔍 "${searchTerm}" 검색 결과 (${matchedRoles.length}개)`; curationMainContent.insertBefore(resultsHeader, curationGrid);
         renderCurationRoles(null, matchedRoles);
     }
 
     // --- 큐레이션 필터 적용 (직급 + OR 검색) ---
     function applyCurationFilters(role) {
         resetAllFilters(false);
-
-        if (role.prompt) {
-            document.getElementById('search').value = role.prompt;
-            document.getElementById('search-mode').value = 'standard';
-        }
-
-        if (role.filters.category && role.filters.category.length > 0) {
-            setMultiSelectValues('category-filter', role.filters.category);
-        }
-
+        if (role.prompt) { document.getElementById('search').value = role.prompt; document.getElementById('search-mode').value = 'standard'; }
+        if (role.filters.category && role.filters.category.length > 0) { setMultiSelectValues('category-filter', role.filters.category); }
         const selectedLevel = document.querySelector('input[name="curation-level"]:checked').value;
         let difficultyValues = []; let levelName = "전체 직급";
-
         switch (selectedLevel) {
             case 'beginner': difficultyValues = ['Beginner', 'All Levels']; levelName = "사원/대리급"; break;
             case 'intermediate': difficultyValues = ['Intermediate']; levelName = "과장급"; break;
             case 'expert': difficultyValues = ['Expert']; levelName = "차부장급"; break;
             default: difficultyValues = []; break;
         }
-        if (difficultyValues.length > 0) {
-            setMultiSelectValues('difficulty-filter', difficultyValues);
-        }
-
-        switchTab('explore');
-        handleFilters();
+        if (difficultyValues.length > 0) { setMultiSelectValues('difficulty-filter', difficultyValues); }
+        switchTab('explore'); handleFilters();
         showToast(`🏢 "${levelName} - ${role.name}" 큐레이션을 적용합니다.`);
     }
 
     // --- 앱 초기화 ---
     async function initializeApp() {
-        companyName = companyAddressInput.value.trim();
-        if (!companyName) { alert('회사 주소를 입력해주세요.'); return; }
-        companyUrl = `https://${companyName}.udemy.com/course/`;
-        submitBtn.disabled = true; submitBtn.innerHTML = `<div class="spinner"></div> 데이터 로딩 중...`;
-
-        try { originalData = await loadCourseData(); }
-        catch (error) { submitBtn.disabled = false; submitBtn.innerHTML = '강의 목록 확인'; return; }
+        companyName = companyAddressInput.value.trim(); if (!companyName) { alert('회사 주소를 입력해주세요.'); return; }
+        companyUrl = `https://${companyName}.udemy.com/course/`; submitBtn.disabled = true; submitBtn.innerHTML = `<div class="spinner"></div> 데이터 로딩 중...`;
+        try { originalData = await loadCourseData(); } catch (error) { submitBtn.disabled = false; submitBtn.innerHTML = '강의 목록 확인'; return; }
         if (originalData.length === 0) { alert("로드된 강의 데이터가 없습니다."); submitBtn.disabled = false; submitBtn.innerHTML = '강의 목록 확인'; return; }
-
         initialScreen.style.opacity = '0';
         setTimeout(() => {
-            initialScreen.style.display = 'none';
-            document.getElementById('welcome-message').querySelector('strong').textContent = companyName;
-
-            appContainer.style.display = 'block';
-            setTimeout(() => appContainer.style.opacity = '1', 50);
-
-            displayTopCourses();
-            renderCurationUI(); // 큐레이션 UI 렌더링
-
+            initialScreen.style.display = 'none'; document.getElementById('welcome-message').querySelector('strong').textContent = companyName;
+            appContainer.style.display = 'block'; setTimeout(() => appContainer.style.opacity = '1', 50);
+            displayTopCourses(); renderCurationUI();
             document.querySelectorAll('.tab-button').forEach(button => { button.addEventListener('click', () => { switchTab(button.dataset.tab); }); });
-
-            // 탐험하기 탭 필터 이벤트
-            const exploreTab = document.getElementById('tab-panel-explore');
-            const filtersHeader = document.getElementById('filters-header');
+            const exploreTab = document.getElementById('tab-panel-explore'); const filtersHeader = document.getElementById('filters-header');
             filtersHeader.addEventListener('click', () => { filtersHeader.parentElement.classList.toggle('collapsed'); filtersHeader.parentElement.querySelector('.filters-container').classList.toggle('collapsed'); });
             exploreTab.querySelector('#search').addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(handleFilters, 300); });
-            exploreTab.querySelector('#search-mode').addEventListener('change', handleFilters);
-            exploreTab.querySelector('#rating-filter').addEventListener('change', handleFilters);
-            exploreTab.querySelector('#rows-per-page').addEventListener('change', handleFilters);
-            exploreTab.querySelector('#sort-order').addEventListener('change', handleFilters);
-            exploreTab.querySelector('#reset-filters').addEventListener('click', () => resetAllFilters(true));
-            exploreTab.querySelector('#download-csv').addEventListener('click', downloadMainCSV);
-            exploreTab.querySelector('#ai-recommend-btn').addEventListener('click', showAIRecommendationModal);
-
-            // 강의 목록 이벤트 (탭 밖)
-            document.getElementById('course-table-body').addEventListener('click', (e) => {
-                const detailsButton = e.target.closest('.details-btn'); if (detailsButton) { const course = originalData.find(c => c.id === detailsButton.dataset.id); if (course) showCourseDetails(course); }
-                const emptyResetBtn = e.target.closest('#empty-state-reset'); if (emptyResetBtn) { e.preventDefault(); resetAllFilters(true); }
-            });
+            exploreTab.querySelector('#search-mode').addEventListener('change', handleFilters); exploreTab.querySelector('#rating-filter').addEventListener('change', handleFilters); exploreTab.querySelector('#rows-per-page').addEventListener('change', handleFilters); exploreTab.querySelector('#sort-order').addEventListener('change', handleFilters);
+            exploreTab.querySelector('#reset-filters').addEventListener('click', () => resetAllFilters(true)); exploreTab.querySelector('#download-csv').addEventListener('click', downloadMainCSV); exploreTab.querySelector('#ai-recommend-btn').addEventListener('click', showAIRecommendationModal);
+            document.getElementById('course-table-body').addEventListener('click', (e) => { const detailsButton = e.target.closest('.details-btn'); if (detailsButton) { const course = originalData.find(c => c.id === detailsButton.dataset.id); if (course) showCourseDetails(course); } const emptyResetBtn = e.target.closest('#empty-state-reset'); if (emptyResetBtn) { e.preventDefault(); resetAllFilters(true); } });
             document.getElementById('active-filters-container').addEventListener('click', (e) => { const removeBtn = e.target.closest('.filter-tag-remove'); if (!removeBtn) return; removeActiveFilter(removeBtn.dataset.type, removeBtn.dataset.value); });
-
-            // 큐레이션 검색 이벤트
             curationSearchInput.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(handleCurationSearch, 300); });
-
-            initializeMultiSelectFilters();
-            handleFilters(); // 초기 테이블 로드
-
+            initializeMultiSelectFilters(); handleFilters();
         }, 500);
     }
 
     // --- 탭 스위칭 함수 ---
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-panel').forEach(panel => { panel.classList.remove('active'); });
-        document.querySelectorAll('.tab-button').forEach(button => { button.classList.remove('active'); });
-        document.getElementById(`tab-panel-${tabId}`).classList.add('active');
-        document.querySelector(`.tab-button[data-tab="${tabId}"]`).classList.add('active');
-    }
+    function switchTab(tabId) { document.querySelectorAll('.tab-panel').forEach(panel => { panel.classList.remove('active'); }); document.querySelectorAll('.tab-button').forEach(button => { button.classList.remove('active'); }); document.getElementById(`tab-panel-${tabId}`).classList.add('active'); document.querySelector(`.tab-button[data-tab="${tabId}"]`).classList.add('active'); }
 
     // --- 멀티 셀렉트 필터 초기화 ---
     function initializeMultiSelectFilters(container = document) {
@@ -827,6 +698,7 @@
         if (!panel) return;
         const filterId = wrapper.dataset.filterId;
         let items;
+        // 정렬은 loadCourseData에서 미리 수행됨
         if (predefinedItems) { items = Array.isArray(predefinedItems) && typeof predefinedItems[0] === 'object' ? predefinedItems.slice() : [...new Set(predefinedItems)]; }
         else if (split) { items = [...new Set(originalData.flatMap(c => c[dataKey] && c[dataKey] !== '없음' ? c[dataKey].split(',').map(item => item.trim()) : []))]; }
         else { items = [...new Set(originalData.map(c => c[dataKey]).filter(Boolean))]; }
@@ -841,9 +713,10 @@
 
         const isModalFilter = wrapper.closest('#modal-content') !== null;
         const eventHandler = isModalFilter ? () => updateMultiSelectButton(filterId, document.getElementById('modal-content')) : () => { updateMultiSelectButton(filterId); handleFilters(); };
-        panel.replaceWith(panel.cloneNode(true));
+        panel.replaceWith(panel.cloneNode(true)); // 이벤트 중복 방지
         wrapper.querySelector('.custom-select-panel').addEventListener('change', eventHandler);
     }
+
 
     // --- 멀티 셀렉트 버튼 텍스트 업데이트 ---
     function updateMultiSelectButton(filterId, container = document) {
@@ -895,9 +768,9 @@
     // --- 활성 필터 태그 렌더링 ---
     function renderActiveFilters(filters) {
         const container = document.getElementById('active-filters-container'); container.innerHTML = ''; let tagsHtml = '';
-        if (filters.searchTerm) { tagsHtml += `<div class="filter-tag">🔍 "${filters.searchTerm}" <button class="filter-tag-remove" data-type="search" title="검색어 제거">&times;</button></div>`; }
-        if (filters.minRating > 0) { tagsHtml += `<div class="filter-tag">⭐ ${filters.minRating}점 이상 <button class="filter-tag-remove" data-type="rating" title="평점 필터 제거">&times;</button></div>`; }
-        const createTag = (value, type, label) => `<div class="filter-tag">${label} <button class="filter-tag-remove" data-type="${type}" data-value="${value}" title="${label} 제거">&times;</button></div>`;
+        if (filters.searchTerm) { tagsHtml += `<div class="filter-tag">🔍 "${filters.searchTerm}" <button class="filter-tag-remove" data-type="search" title="검색어 제거" aria-label="검색어 ${filters.searchTerm} 제거">&times;</button></div>`; }
+        if (filters.minRating > 0) { tagsHtml += `<div class="filter-tag">⭐ ${filters.minRating}점 이상 <button class="filter-tag-remove" data-type="rating" title="평점 필터 제거" aria-label="평점 ${filters.minRating}점 이상 필터 제거">&times;</button></div>`; }
+        const createTag = (value, type, label) => `<div class="filter-tag">${label} <button class="filter-tag-remove" data-type="${type}" data-value="${value}" title="${label} 제거" aria-label="${label} 필터 제거">&times;</button></div>`;
         filters.selectedCategories.forEach(v => tagsHtml += createTag(v, 'category', `🗂️ ${v}`));
         filters.selectedDifficulties.forEach(v => tagsHtml += createTag(v, 'difficulty', `📊 ${v}`));
         filters.selectedLanguages.forEach(v => tagsHtml += createTag(v, 'language', `🌐 ${v}`));
@@ -917,7 +790,6 @@
     // --- 테이블 렌더링 (OR 검색 로직) ---
     async function renderTable() {
         renderSkeletonLoader(rowsPerPage);
-
         const searchMode = document.getElementById('search-mode').value;
         const sortOrderSelect = document.getElementById('sort-order');
         sortOrderSelect.disabled = searchMode === 'extended';
@@ -935,7 +807,6 @@
             selectedHotNew: Array.from(document.querySelectorAll('.filters-container [data-filter-id="hot-new-filter"] input:checked')).map(cb => cb.value),
             selectedPractices: Array.from(document.querySelectorAll('.filters-container [data-filter-id="practice-filter"] input:checked')).map(cb => cb.value)
         };
-
         renderActiveFilters(filters);
 
         let baseCourses = [...originalData];
@@ -944,17 +815,13 @@
             if (keywords && Array.isArray(keywords) && keywords.length > 0) {
                 const lowerCaseKeywords = keywords.map(k => k.toLowerCase());
                 const allSearchTerms = [filters.searchTerm, ...lowerCaseKeywords];
-                baseCourses = originalData.map(course => {
-                    const searchCorpus = Object.values(course).join(' ').toLowerCase(); let score = 0;
-                    allSearchTerms.forEach(term => { if (searchCorpus.includes(term)) score++; });
-                    return { ...course, relevanceScore: score };
-                }).filter(course => course.relevanceScore > 0).sort((a, b) => b.relevanceScore - a.relevanceScore);
+                baseCourses = originalData.map(course => { const searchCorpus = Object.values(course).join(' ').toLowerCase(); let score = 0; allSearchTerms.forEach(term => { if (searchCorpus.includes(term)) score++; }); return { ...course, relevanceScore: score }; }).filter(course => course.relevanceScore > 0).sort((a, b) => b.relevanceScore - a.relevanceScore);
             } else { baseCourses = []; }
         }
 
         filteredCourses = baseCourses.filter(course => {
             const searchCorpus = Object.values(course).join(' ').toLowerCase();
-            const matchesSearch = searchMode === 'extended' || filters.searchTerm === '' || filters.searchKeywords.some(key => searchCorpus.includes(key)); // OR 검색
+            const matchesSearch = searchMode === 'extended' || filters.searchTerm === '' || filters.searchKeywords.some(key => searchCorpus.includes(key));
             const matchesRating = course.rating >= filters.minRating;
             const matchesCategory = filters.selectedCategories.length === 0 || filters.selectedCategories.some(cat => course.category?.includes(cat));
             const matchesDifficulty = filters.selectedDifficulties.length === 0 || filters.selectedDifficulties.includes(course.difficulty);

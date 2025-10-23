@@ -100,7 +100,7 @@
         #welcome-message strong { color: var(--primary-hover-color); font-weight: 700; }
         #last-updated { font-size: 0.85rem; color: var(--text-muted-color); }
 
-        /* --- [신규] 탭 인터페이스 --- */
+        /* --- [수정] 탭 인터페이스 --- */
         .tab-navigation {
             display: flex; gap: 0.5rem;
             border-bottom: 1px solid var(--border-color);
@@ -125,6 +125,11 @@
             border-bottom-color: var(--primary-color);
             font-weight: 700;
         }
+        /* [수정] .main-content는 이제 탭 패널의 래퍼 */
+        .main-content {
+            /* 상단 패널과 하단 목록 사이의 간격 */
+            margin-bottom: 1rem;
+        }
         .tab-panel {
             display: none; /* 기본 숨김 */
             padding: 2.5rem 0;
@@ -138,7 +143,7 @@
         .recommendation-container, .curation-container {
             background-color: var(--surface-color);
             backdrop-filter: var(--backdrop-blur);
-            padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
+            padding: 1.5rem 2rem; border-radius: var(--border-radius-md);
             border: 1px solid var(--border-color); padding-top: 2rem;
         }
         .recommendation-header { display: flex; justify-content: flex-start; align-items: center; user-select: none; }
@@ -160,7 +165,7 @@
         .card-footer { margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color); }
         .category-badge { background-color: var(--surface-color); color: var(--text-muted-color); font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 12px; border: 1px solid var(--border-color); }
 
-        /* --- [신규] 큐레이션 카드 --- */
+        /* --- [신규] 큐레이션 카드 (UI 개선) --- */
         .curation-job-family { margin-bottom: 2rem; }
         .curation-job-family h3 {
             font-size: 1.3rem; color: var(--primary-hover-color);
@@ -168,27 +173,38 @@
             padding-bottom: 0.75rem; margin-bottom: 1rem;
         }
         .curation-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1rem;
         }
         .curation-card {
             background-color: var(--bg-color); border: 1px solid var(--border-color);
             border-radius: 8px; padding: 1.25rem;
             cursor: pointer; transition: all 0.2s ease;
+            display: flex; flex-direction: column;
         }
         .curation-card:hover {
             background-color: var(--border-color);
             border-color: var(--primary-color);
             transform: translateY(-4px);
         }
-        .curation-card h4 { margin: 0; font-size: 1.1rem; color: var(--text-color); }
-        .curation-card p { margin: 0.25rem 0 0 0; font-size: 0.9rem; color: var(--text-muted-color); }
+        .curation-card h4 { margin: 0 0 0.75rem 0; font-size: 1.1rem; color: var(--text-color); }
+        .curation-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            flex-grow: 1; /* 카드 높이 맞춤 */
+        }
+        /* .category-badge 스타일 재사용 */
+        .curation-card:hover .category-badge {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
         
         /* --- 필터 (탐험 설정) --- */
         .controls-header {
             background-color: var(--surface-color);
             backdrop-filter: var(--backdrop-blur);
-            padding: 1.5rem 2rem; border-radius: var(--border-radius-md); margin-bottom: 1rem;
+            padding: 1.5rem 2rem; border-radius: var(--border-radius-md);
             border: 1px solid var(--border-color); position: relative; z-index: 50;
         }
         .filters-container {
@@ -262,12 +278,13 @@
             100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); }
         }
 
-        /* --- 강의 목록 --- */
+        /* --- [수정] 강의 목록 (이제 탭과 독립) --- */
         .list-container {
             background-color: var(--surface-color);
             backdrop-filter: var(--backdrop-blur);
             padding: 1.5rem 2rem; border-radius: var(--border-radius-md);
-            margin-top: 1rem; border: 1px solid var(--border-color);
+            /* margin-top: 1rem; */ /* main-content와의 간격으로 대체 */
+            border: 1px solid var(--border-color);
         }
         .list-header { 
             display: flex; justify-content: space-between; align-items: baseline; 
@@ -441,12 +458,13 @@
         #toast-container {
             position: fixed;
             bottom: 2rem;
-            right: 2rem;
+            /* [수정] 스크롤탑 버튼과 겹치지 않게 left로 이동 */
+            left: 2rem;
             z-index: 2000;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            width: 300px;
+            width: 320px;
         }
         .toast {
             background-color: #2a2a4a;
@@ -481,7 +499,6 @@
 <div id="initial-screen">
     <h1>🚀 Udemy Business Course Explorer</h1>
     <p>회사 Udemy Business 주소를 입력하고 모든 강의를 만나보세요!</p>
-    
     <div class="gate-info">
         <h3>🤔 이 목록은 왜 필요한가요?</h3>
         <ul>
@@ -491,7 +508,6 @@
             <li>✨AI가 강의를 요약/추천해주고, 관심사에 맞는 강의를 발견해줘요.</li>
         </ul>
     </div>
-
     <div class="input-container">
         <div class="input-group">
             <input id="company-address" placeholder="회사 주소" type="text" />
@@ -504,7 +520,7 @@
 <div id="app-container">
     
     <header class="app-header">
-        <h1><span class="rocket">🚀</span> Udemy Business Course Explorer (v0.3)</h1>
+        <h1><span class="rocket">🚀</span> Udemy Business Course Explorer (v0.4)</h1>
         <h2 id="welcome-message"><strong></strong> 학습자님 어서오세요! Udemy와 즐겁게 성장해보세요.</h2>
         <div id="last-updated">데이터 업데이트: 2025-10-17</div>
     </header>
@@ -518,7 +534,6 @@
     <div class="main-content">
         
         <div id="tab-panel-explore" class="tab-panel active">
-            
             <div class="controls-header">
                 <div class="recommendation-header" id="filters-header">
                      <h2>🧭 탐험 설정</h2>
@@ -610,43 +625,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="list-container">
-                <div class="list-header">
-                    <h2>📖 탐험 목록</h2>
-                    <div class="badge-info">
-                        <span>🔥 HOT: 3개월간 수강신청 수 상위 5%</span> |
-                        <span>✨ NEW: 3개월 내 업데이트</span> |
-                        <span>📝 퀴즈 포함</span> |
-                        <span>🗣️ 롤플레이 포함</span>
-                    </div>
-                </div>
-                
-                <div id="active-filters-container"></div>
-                <div class="results-summary" id="results-summary"></div>
-                
-                <div class="table-wrapper">
-                    <div class="table-container">
-                        <table>
-                            <thead><tr>
-                                <th>🗂️ 카테고리</th>
-                                <th>💡 강의 주제</th>
-                                <th>📖 강의명</th>
-                                <th>ℹ️ 상세</th>
-                                <th>🌐 언어</th>
-                                <th>💬 자막</th>
-                                <th>📊 난이도</th>
-                                <th>⭐ 평점</th>
-                                <th>👩‍🏫 강사명</th>
-                                <th>🔥/✨</th>
-                                <th>📝/🗣️</th>
-                            </tr></thead>
-                            <tbody id="course-table-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="pagination" id="pagination"></div>
-            </div>
         </div>
 
         <div id="tab-panel-curation" class="tab-panel">
@@ -654,7 +632,7 @@
                 <div class="recommendation-header" style="margin-bottom: 1.5rem;">
                     <h2>🏢 직무별 추천 학습 과정</h2>
                 </div>
-                <p style="color: var(--text-muted-color); margin-top: -1rem; margin-bottom: 2rem;">관심 있는 직무를 클릭하면, '탐험하기' 탭에서 해당 직무에 맞는 강의 목록을 바로 확인할 수 있습니다.</p>
+                <p style="color: var(--text-muted-color); margin-top: -1rem; margin-bottom: 2rem;">관심 있는 직무를 클릭하면, 'AI 확장 검색'이 실행되어 관련 강의 목록을 바로 확인할 수 있습니다.</p>
                 <div id="curation-content">
                     </div>
             </div>
@@ -669,11 +647,44 @@
                     </div>
             </div>
         </div>
-
+    </div> <div class="list-container">
+        <div class="list-header">
+            <h2>📖 탐험 목록</h2>
+            <div class="badge-info">
+                <span>🔥 HOT: 3개월간 수강신청 수 상위 5%</span> |
+                <span>✨ NEW: 3개월 내 업데이트</span> |
+                <span>📝 퀴즈 포함</span> |
+                <span>🗣️ 롤플레이 포함</span>
+            </div>
+        </div>
+        
+        <div id="active-filters-container"></div>
+        <div class="results-summary" id="results-summary"></div>
+        
+        <div class="table-wrapper">
+            <div class="table-container">
+                <table>
+                    <thead><tr>
+                        <th>🗂️ 카테고리</th>
+                        <th>💡 강의 주제</th>
+                        <th>📖 강의명</th>
+                        <th>ℹ️ 상세</th>
+                        <th>🌐 언어</th>
+                        <th>💬 자막</th>
+                        <th>📊 난이도</th>
+                        <th>⭐ 평점</th>
+                        <th>👩‍🏫 강사명</th>
+                        <th>🔥/✨</th>
+                        <th>📝/🗣️</th>
+                    </tr></thead>
+                    <tbody id="course-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="pagination" id="pagination"></div>
     </div>
-</div>
 
-<div id="modal-overlay">
+</div> <div id="modal-overlay">
     <div id="modal-content">
         <div id="modal-header">
             <h2 id="modal-title"></h2>
@@ -688,69 +699,68 @@
 <div id="toast-container"></div>
 
 <footer class="app-footer">
-    <p>ver 0.30 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
+    <p>ver 0.40 &copy; 2025 Made by Hojun Jung, Woongjin Thinkbig</p>
     <p>아직 베타 테스트 중인 버전으로 오류가 있을 수 있습니다. 더 멋진 모습으로 업그레이드될 예정이니 기대해주세요.</p>
 </footer>
 
 <script>
-    // --- [신규] 직무별 큐레이션 데이터 ---
-    // 500인 IT 기업 기준
+    // --- [신규] 직무별 큐레이션 데이터 (AI 검색 프롬프트 + UI 키워드) ---
     const curationData = {
         "product": {
             "name": "🚀 제품 (Product)",
             "roles": [
-                { "id": "pm_po", "name": "PM / PO (제품 관리)", "filters": { "category": ["Business", "IT & Software"], "keywords": "product owner roadmap backlog user story", "difficulty": ["Intermediate", "Expert"] }},
-                { "id": "service_planning", "name": "서비스 기획", "filters": { "category": ["Business", "Design"], "keywords": "service planning wireframe storyboard user flow", "difficulty": ["Beginner", "Intermediate"] }}
+                { "id": "pm_po", "name": "PM / PO (제품 관리)", "prompt": "PM PO 제품 관리 로드맵 백로그 사용자 스토리", "display_keywords": ["Product Mgt", "Roadmap", "Backlog", "Agile"], "filters": { "category": ["Business", "IT & Software"], "difficulty": ["Intermediate", "Expert"] }},
+                { "id": "service_planning", "name": "서비스 기획", "prompt": "서비스 기획 와이어프레임 스토리보드 UI UX", "display_keywords": ["기획서", "Wireframe", "Storyboard", "UI/UX"], "filters": { "category": ["Business", "Design"], "difficulty": ["Beginner", "Intermediate"] }}
             ]
         },
         "development": {
             "name": "👨‍💻 IT / 개발",
             "roles": [
-                { "id": "backend", "name": "백엔드 / 서버 개발", "filters": { "category": ["Development"], "keywords": "backend spring node.js java python API", "difficulty": [] }},
-                { "id": "frontend", "name": "프론트엔드 개발", "filters": { "category": ["Development"], "keywords": "frontend react vue typescript javascript", "difficulty": [] }},
-                { "id": "devops_sre", "name": "DevOps / SRE", "filters": { "category": ["IT & Software", "Cloud", "Development"], "keywords": "devops ci/cd kubernetes docker aws", "difficulty": ["Intermediate", "Expert"] }},
-                { "id": "qa", "name": "QA (품질 보증)", "filters": { "category": ["IT & Software", "Development"], "keywords": "qa test case selenium", "difficulty": ["Beginner", "Intermediate"] }},
-                { "id": "infra_cloud", "name": "인프라 / 클라우드", "filters": { "category": ["IT & Software", "Cloud"], "keywords": "infrastructure aws azure network linux", "difficulty": [] }},
-                { "id": "security", "name": "정보 보안", "filters": { "category": ["IT & Software", "Security"], "keywords": "security cybersecurity firewall isms", "difficulty": ["Intermediate", "Expert"] }}
+                { "id": "backend", "name": "백엔드 / 서버 개발", "prompt": "백엔드 서버 개발 java spring python node.js API", "display_keywords": ["Spring", "Node.js", "Java", "Python", "API"], "filters": { "category": ["Development"], "difficulty": [] }},
+                { "id": "frontend", "name": "프론트엔드 개발", "prompt": "프론트엔드 개발 react vue typescript javascript", "display_keywords": ["React", "Vue.js", "TypeScript", "JavaScript"], "filters": { "category": ["Development"], "difficulty": [] }},
+                { "id": "devops_sre", "name": "DevOps / SRE", "prompt": "데브옵스 CI/CD 쿠버네티스 도커 aws", "display_keywords": ["DevOps", "CI/CD", "Kubernetes", "Docker", "AWS"], "filters": { "category": ["IT & Software", "Cloud", "Development"], "difficulty": ["Intermediate", "Expert"] }},
+                { "id": "qa", "name": "QA (품질 보증)", "prompt": "QA 테스트 케이스 자동화 selenium", "display_keywords": ["QA", "Test Case", "Selenium", "자동화"], "filters": { "category": ["IT & Software", "Development"], "difficulty": ["Beginner", "Intermediate"] }},
+                { "id": "infra_cloud", "name": "인프라 / 클라우드", "prompt": "인프라 aws azure gcp network linux", "display_keywords": ["AWS", "Azure", "GCP", "네트워크", "Linux"], "filters": { "category": ["IT & Software", "Cloud"], "difficulty": [] }},
+                { "id": "security", "name": "정보 보안", "prompt": "정보 보안 cybersecurity firewall isms 모의 해킹", "display_keywords": ["정보보안", "Cybersecurity", "ISMS", "모의 해킹"], "filters": { "category": ["IT & Software", "Security"], "difficulty": ["Intermediate", "Expert"] }}
             ]
         },
         "data": {
             "name": "📊 데이터",
             "roles": [
-                { "id": "data_engineer", "name": "데이터 엔지니어", "filters": { "category": ["IT & Software", "Development", "Cloud"], "keywords": "etl data pipeline airflow spark kafka", "difficulty": ["Intermediate", "Expert"] }},
-                { "id": "data_analyst", "name": "데이터 분석가 (DA)", "filters": { "category": ["IT & Software", "Business"], "keywords": "data analysis sql tableau power bi pandas", "difficulty": ["Beginner", "Intermediate"] }},
-                { "id": "data_scientist", "name": "데이터 사이언티스트 (DS)", "filters": { "category": ["AI", "Development"], "keywords": "machine learning deep learning tensorflow pytorch", "difficulty": ["Expert"] }}
+                { "id": "data_engineer", "name": "데이터 엔지니어", "prompt": "데이터 엔지니어링 etl data pipeline airflow spark kafka", "display_keywords": ["Data Engineering", "ETL", "Airflow", "Spark", "Kafka"], "filters": { "category": ["IT & Software", "Development", "Cloud"], "difficulty": ["Intermediate", "Expert"] }},
+                { "id": "data_analyst", "name": "데이터 분석가 (DA)", "prompt": "데이터 분석 sql tableau power bi pandas", "display_keywords": ["Data Analysis", "SQL", "Tableau", "Pandas"], "filters": { "category": ["IT & Software", "Business"], "difficulty": ["Beginner", "Intermediate"] }},
+                { "id": "data_scientist", "name": "데이터 사이언티스트 (DS)", "prompt": "머신러닝 딥러닝 tensorflow pytorch", "display_keywords": ["Machine Learning", "Deep Learning", "TensorFlow"], "filters": { "category": ["AI", "Development"], "difficulty": ["Expert"] }}
             ]
         },
         "design": {
             "name": "🎨 디자인",
             "roles": [
-                { "id": "ui_ux", "name": "UI/UX 디자이너", "filters": { "category": ["Design"], "keywords": "ui ux figma wireframe prototype design system", "difficulty": [] }},
-                { "id": "ux_research", "name": "UX 리서처", "filters": { "category": ["Design", "Business"], "keywords": "ux research persona journey map usability test", "difficulty": ["Intermediate"] }},
-                { "id": "visual_design", "name": "브랜드 / 비주얼 디자인", "filters": { "category": ["Design", "Marketing"], "keywords": "graphic design branding illustrator photoshop", "difficulty": [] }}
+                { "id": "ui_ux", "name": "UI/UX 디자이너", "prompt": "ui ux 디자인 figma 피그마 wireframe prototype", "display_keywords": ["UI/UX", "Figma", "프로토타이핑", "디자인 시스템"], "filters": { "category": ["Design"], "difficulty": [] }},
+                { "id": "ux_research", "name": "UX 리서처", "prompt": "ux 리서치 사용자 조사 usability test", "display_keywords": ["UX Research", "퍼소나", "UT"], "filters": { "category": ["Design", "Business"], "difficulty": ["Intermediate"] }},
+                { "id": "visual_design", "name": "브랜드 / 비주얼 디자인", "prompt": "브랜드 디자인 그래픽 디자인 포토샵 일러스트", "display_keywords": ["브랜딩", "포토샵", "일러스트"], "filters": { "category": ["Design", "Marketing"], "difficulty": [] }}
             ]
         },
         "marketing": {
             "name": "📣 마케팅",
             "roles": [
-                { "id": "performance_mkt", "name": "퍼포먼스 마케팅", "filters": { "category": ["Marketing", "Business"], "keywords": "performance ga4 seo roas", "difficulty": ["Intermediate"] }},
-                { "id": "content_mkt", "name": "콘텐츠 / 브랜드 마케팅", "filters": { "category": ["Marketing"], "keywords": "content marketing branding copywriting sns", "difficulty": [] }}
+                { "id": "performance_mkt", "name": "퍼포먼스 마케팅", "prompt": "퍼포먼스 마케팅 ga seo roas", "display_keywords": ["퍼포먼스 마케팅", "GA4", "SEO", "ROAS"], "filters": { "category": ["Marketing", "Business"], "difficulty": ["Intermediate"] }},
+                { "id": "content_mkt", "name": "콘텐츠 / 브랜드 마케팅", "prompt": "콘텐츠 마케팅 브랜딩 카피라이팅 sns", "display_keywords": ["콘텐츠 마케팅", "브랜딩", "카피라이팅"], "filters": { "category": ["Marketing"], "difficulty": [] }}
             ]
         },
         "sales_cs": {
             "name": "🤝 영업 / 고객 관리",
             "roles": [
-                { "id": "b2b_sales", "name": "B2B 영업", "filters": { "category": ["Business"], "keywords": "b2b sales negotiation proposal salesforce", "difficulty": [] }},
-                { "id": "customer_success", "name": "Customer Success (CSM)", "filters": { "category": ["Business", "Personal Development"], "keywords": "customer success onboarding churn", "difficulty": ["Beginner", "Intermediate"] }}
+                { "id": "b2b_sales", "name": "B2B 영업", "prompt": "b2b sales 세일즈 협상 negotiation", "display_keywords": ["B2B Sales", "협상", "CRM", "Salesforce"], "filters": { "category": ["Business"], "difficulty": [] }},
+                { "id": "customer_success", "name": "Customer Success (CSM)", "prompt": "customer success 고객 성공 csm", "display_keywords": ["Customer Success", "온보딩", "Churn"], "filters": { "category": ["Business", "Personal Development"], "difficulty": ["Beginner", "Intermediate"] }}
             ]
         },
         "management": {
             "name": "💼 경영지원",
             "roles": [
-                { "id": "hr", "name": "인사 (HRM/HRD)", "filters": { "category": ["Business", "Personal Development"], "keywords": "human resources hrm hrd recruiting payroll", "difficulty": [] }},
-                { "id": "finance", "name": "재무 / 회계", "filters": { "category": ["Finance & Accounting"], "keywords": "accounting financial analysis tax budgeting", "difficulty": [] }},
-                { "id": "strategy", "name": "전략 / 기획", "filters": { "category": ["Business"], "keywords": "business strategy market research okr", "difficulty": ["Intermediate", "Expert"] }},
-                { "id": "ga_legal", "name": "총무 / 법무", "filters": { "category": ["Business"], "keywords": "general affairs purchasing legal contract", "difficulty": [] }}
+                { "id": "hr", "name": "인사 (HRM/HRD)", "prompt": "인사 hrm hrd 채용 평가 보상 급여", "display_keywords": ["HRM", "HRD", "채용", "평가보상"], "filters": { "category": ["Business", "Personal Development"], "difficulty": [] }},
+                { "id": "finance", "name": "재무 / 회계", "prompt": "재무 회계 tax budgeting", "display_keywords": ["재무", "회계", "세무", "예산"], "filters": { "category": ["Finance & Accounting"], "difficulty": [] }},
+                { "id": "strategy", "name": "전략 / 기획", "prompt": "경영 전략 기획 market research okr", "display_keywords": ["전략기획", "시장조사", "OKR"], "filters": { "category": ["Business"], "difficulty": ["Intermediate", "Expert"] }},
+                { "id": "ga_legal", "name": "총무 / 법무", "prompt": "총무 구매 법무 계약서 검토", "display_keywords": ["총무", "구매", "법무", "계약 검토"], "filters": { "category": ["Business"], "difficulty": [] }}
             ]
         }
     };
@@ -830,7 +840,7 @@
     };
     const mapLanguageCode = (code) => languageMap[code] || code;
     
-    // --- [신규] 토스트 알림 함수 ---
+    // --- 토스트 알림 함수 ---
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
         toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
@@ -845,7 +855,7 @@
         }, 3000);
     }
 
-    // --- AI API 호출 (기존과 동일) ---
+    // --- AI API 호출 ---
     async function callGeminiAPI(payload) {
         const backendApiEndpoint = '/api/gemini';
         try {
@@ -872,7 +882,7 @@
         }
     }
 
-    // --- CSV 데이터 로드 (기존과 동일) ---
+    // --- CSV 데이터 로드 (수정: 한국어/영어 우선 정렬) ---
     async function loadCourseData() {
         return new Promise((resolve, reject) => {
             Papa.parse('courses_web.csv', {
@@ -904,9 +914,18 @@
                         return newRow;
                     }).filter(row => row.id && row.title);
                     
+                    // [신규] 한국어, English 우선 정렬 로직
+                    const customSort = (a, b) => {
+                        if (a === '한국어') return -1;
+                        if (b === '한국어') return 1;
+                        if (a === 'English') return -1;
+                        if (b === 'English') return 1;
+                        return a.localeCompare(b); // 나머지는 가나다순 정렬
+                    };
+                    
                     uniqueCategories = [...new Set(processedData.flatMap(c => c.category ? c.category.split(',').map(item => item.trim()) : []))].sort();
-                    uniqueLanguages = [...new Set(processedData.map(c => c.language).filter(Boolean))].sort();
-                    uniqueSubtitles = [...new Set(processedData.flatMap(c => c.subtitles && c.subtitles !== '없음' ? c.subtitles.split(',').map(item => item.trim()) : []))].sort();
+                    uniqueLanguages = [...new Set(processedData.map(c => c.language).filter(Boolean))].sort(customSort);
+                    uniqueSubtitles = [...new Set(processedData.flatMap(c => c.subtitles && c.subtitles !== '없음' ? c.subtitles.split(',').map(item => item.trim()) : []))].sort(customSort);
                     
                     const enrollments = processedData.map(c => c.enrollments).sort((a, b) => b - a);
                     if (enrollments.length > 0) {
@@ -927,20 +946,7 @@
         });
     }
 
-    // --- 추천 문구 생성 (기존과 동일) ---
-    function generateRecommendation(course) {
-        const templates = [
-            `{CATEGORY} 분야의 역량을 키우고 싶다면, 이 강의를 놓치지 마세요! 핵심을 빠르게 파악할 수 있습니다.`,
-            `실무에 바로 적용 가능한 기술을 찾으시나요? {CATEGORY} 전문가로 가는 가장 빠른 길입니다.`,
-            `많은 분들이 선택한 이유가 있습니다. {CATEGORY} 분야의 베스트셀러로 전문성을 한 단계 업그레이드하세요.`,
-            `탄탄한 기본기부터 고급 스킬까지, {CATEGORY} 분야의 모든 것을 이 강의 하나로 마스터할 수 있습니다.`
-        ];
-        const category = course.category.split(',')[0].trim();
-        const template = templates[Math.floor(Math.random() * templates.length)];
-        return template.replace(/{CATEGORY}/g, category);
-    }
-    
-    // --- TOP 10 강의 표시 (수정: 탭 패널 내부) ---
+    // --- [수정] TOP 10 강의 표시 (Headline 사용) ---
     function displayTopCourses() {
         const topCourses = [...originalData]
             .filter(course => course.subtitles && course.subtitles.includes('한국어'))
@@ -955,7 +961,7 @@
                         <span class="rank">🏆 TOP ${index + 1}</span>
                         <a href="${companyUrl}${course.id}" target="_blank">${course.title}</a>
                     </h3>
-                    <p>${generateRecommendation(course)}</p>
+                    <p class="line-clamp-2">${course.headline || '강의에 대한 자세한 설명을 확인해보세요.'}</p>
                 </div>
                 <div class="card-footer">
                     <span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span>
@@ -964,7 +970,7 @@
         `).join('');
     }
 
-    // --- [신규] 큐레이션 목록 렌더링 ---
+    // --- [수정] 큐레이션 목록 렌더링 (UI 개선) ---
     function renderCuration() {
         const container = document.getElementById('curation-content');
         container.innerHTML = Object.values(curationData).map(family => `
@@ -974,7 +980,9 @@
                     ${family.roles.map(role => `
                         <div class="curation-card" data-role-id="${role.id}">
                             <h4>${role.name}</h4>
-                            <p>${role.filters.keywords.split(' ')[0]}, ${role.filters.keywords.split(' ')[1] || role.filters.category[0] || ''}...</p>
+                            <div class="curation-keywords">
+                                ${role.display_keywords.map(k => `<span class="category-badge">${k}</span>`).join('')}
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -985,38 +993,40 @@
         container.querySelectorAll('.curation-card').forEach(card => {
             card.addEventListener('click', () => {
                 const roleId = card.dataset.roleId;
-                let filterToApply;
+                let roleToApply;
                 
                 // 데이터에서 필터 객체 찾기
                 for (const family of Object.values(curationData)) {
                     const foundRole = family.roles.find(r => r.id === roleId);
                     if (foundRole) {
-                        filterToApply = foundRole.filters;
+                        roleToApply = foundRole;
                         break;
                     }
                 }
                 
-                if (filterToApply) {
-                    applyCurationFilters(filterToApply);
+                if (roleToApply) {
+                    applyCurationFilters(roleToApply);
                 }
             });
         });
     }
 
-    // --- [신규] 큐레이션 필터 적용 및 탭 전환 ---
-    function applyCurationFilters(filters) {
+    // --- [수정] 큐레이션 필터 적용 (AI 검색 사용) ---
+    function applyCurationFilters(role) {
         // 1. 모든 필터 초기화
         resetAllFilters(false); // UI만 초기화, 테이블 렌더링은 안함
         
         // 2. 큐레이션 필터 적용
-        if (filters.keywords) {
-            document.getElementById('search').value = filters.keywords;
+        if (role.prompt) {
+            document.getElementById('search').value = role.prompt;
+            // [신규] AI 확장 검색 모드로 강제 변경
+            document.getElementById('search-mode').value = 'extended';
         }
-        if (filters.category && filters.category.length > 0) {
-            setMultiSelectValues('category-filter', filters.category);
+        if (role.filters.category && role.filters.category.length > 0) {
+            setMultiSelectValues('category-filter', role.filters.category);
         }
-        if (filters.difficulty && filters.difficulty.length > 0) {
-            setMultiSelectValues('difficulty-filter', filters.difficulty);
+        if (role.filters.difficulty && role.filters.difficulty.length > 0) {
+            setMultiSelectValues('difficulty-filter', role.filters.difficulty);
         }
         
         // 3. '탐험하기' 탭으로 전환
@@ -1026,10 +1036,10 @@
         handleFilters();
         
         // 5. 알림
-        showToast("🏢 직무별 큐레이션이 적용되었습니다.");
+        showToast(`🏢 "${role.name}" 큐레이션을 적용합니다 (AI 확장 검색).`);
     }
 
-    // --- 앱 초기화 ---
+    // --- 앱 초기화 (수정: 레이아웃 변경 대응) ---
     async function initializeApp() {
         companyName = companyAddressInput.value.trim();
         if (!companyName) { alert('회사 주소를 입력해주세요.'); return; }
@@ -1049,18 +1059,18 @@
             appContainer.style.display = 'block';
             setTimeout(() => appContainer.style.opacity = '1', 50);
 
-            // [수정] 각 탭에 맞는 콘텐츠 렌더링
+            // 각 탭에 맞는 콘텐츠 렌더링
             displayTopCourses();
             renderCuration();
             
-            // [신규] 탭 스위칭 이벤트 리스너
+            // 탭 스위칭 이벤트 리스너
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', () => {
                     switchTab(button.dataset.tab);
                 });
             });
 
-            // '탐험하기' 탭 내부의 이벤트 리스너
+            // '탐험하기' 탭 (필터) 내부의 이벤트 리스너
             const exploreTab = document.getElementById('tab-panel-explore');
             
             const filtersHeader = document.getElementById('filters-header');
@@ -1084,7 +1094,8 @@
             exploreTab.querySelector('#download-csv').addEventListener('click', downloadMainCSV);
             exploreTab.querySelector('#ai-recommend-btn').addEventListener('click', showAIRecommendationModal);
             
-            exploreTab.querySelector('#course-table-body').addEventListener('click', (e) => {
+            // [수정] 강의 목록 리스너 (탭 밖으로 이동)
+            document.getElementById('course-table-body').addEventListener('click', (e) => {
                 // 상세 버튼
                 const detailsButton = e.target.closest('.details-btn');
                 if (detailsButton) {
@@ -1092,18 +1103,15 @@
                     if (course) showCourseDetails(course);
                 }
                 
-                // [신규] 빈 상태 리셋 버튼
+                // 빈 상태 리셋 버튼
                 const emptyResetBtn = e.target.closest('#empty-state-reset');
                 if (emptyResetBtn) {
                     e.preventDefault();
                     resetAllFilters(true);
                 }
             });
-
-            initializeMultiSelectFilters();
-            handleFilters(); // 초기 테이블 로드
             
-            // [신규] 활성 필터 태그 제거 이벤트 (이벤트 위임)
+            // [수정] 활성 필터 태그 리스너 (탭 밖으로 이동)
             document.getElementById('active-filters-container').addEventListener('click', (e) => {
                 const removeBtn = e.target.closest('.filter-tag-remove');
                 if (!removeBtn) return;
@@ -1114,10 +1122,13 @@
                 removeActiveFilter(filterType, filterValue);
             });
 
+            initializeMultiSelectFilters();
+            handleFilters(); // 초기 테이블 로드
+            
         }, 500);
     }
     
-    // --- [신규] 탭 스위칭 함수 ---
+    // --- 탭 스위칭 함수 ---
     function switchTab(tabId) {
         document.querySelectorAll('.tab-panel').forEach(panel => {
             panel.classList.remove('active');
@@ -1130,7 +1141,7 @@
         document.querySelector(`.tab-button[data-tab="${tabId}"]`).classList.add('active');
     }
 
-    // --- 멀티 셀렉트 필터 초기화 (기존과 동일) ---
+    // --- 멀티 셀렉트 필터 초기화 ---
     function initializeMultiSelectFilters(container = document) {
         populateMultiSelect(container.querySelector('[data-filter-id="category-filter"]'), 'category', true, true, uniqueCategories);
         populateMultiSelect(container.querySelector('[data-filter-id="difficulty-filter"]'), 'difficulty', false, false, ['Beginner', 'Intermediate', 'Expert', 'All Levels']);
@@ -1145,7 +1156,6 @@
             { value: 'ROLEPLAY', label: '🗣️ 롤플레이' }
         ]);
         
-        // [수정] AI 모달용 필터 초기화 (버그 수정)
         populateMultiSelect(container.querySelector('[data-filter-id="ai-language-filter"]'), null, false, false, uniqueLanguages);
         populateMultiSelect(container.querySelector('[data-filter-id="ai-subtitles-filter"]'), 'subtitles', true, false, uniqueSubtitles);
 
@@ -1169,7 +1179,7 @@
         }
     }
 
-    // --- 멀티 셀렉트 DOM 생성 (기존과 동일) ---
+    // --- 멀티 셀렉트 DOM 생성 ---
     function populateMultiSelect(wrapper, dataKey, split, showEmoji, predefinedItems = null) {
         if (!wrapper) return;
         const panel = wrapper.querySelector('.custom-select-panel');
@@ -1181,9 +1191,11 @@
             items = Array.isArray(predefinedItems) && typeof predefinedItems[0] === 'object' ?
             predefinedItems.slice() : [...new Set(predefinedItems)];
         } else if (split) {
-            items = [...new Set(originalData.flatMap(c => c[dataKey] && c[dataKey] !== '없음' ? c[dataKey].split(',').map(item => item.trim()) : []))].sort();
+            items = [...new Set(originalData.flatMap(c => c[dataKey] && c[dataKey] !== '없음' ? c[dataKey].split(',').map(item => item.trim()) : []))];
+            // [수정] 정렬 로직은 이미 loadCourseData에서 처리됨
         } else {
-            items = [...new Set(originalData.map(c => c[dataKey]).filter(Boolean))].sort();
+            items = [...new Set(originalData.map(c => c[dataKey]).filter(Boolean))];
+            // [수정] 정렬 로직은 이미 loadCourseData에서 처리됨
         }
         
         panel.innerHTML = items.map(item => {
@@ -1209,7 +1221,7 @@
         wrapper.querySelector('.custom-select-panel').addEventListener('change', eventHandler);
     }
 
-    // --- 멀티 셀렉트 버튼 텍스트 업데이트 (기존과 동일) ---
+    // --- 멀티 셀렉트 버튼 텍스트 업데이트 ---
     function updateMultiSelectButton(filterId, container = document) {
         const wrapper = container.querySelector(`[data-filter-id="${filterId}"]`);
         if (!wrapper) return;
@@ -1234,7 +1246,7 @@
         }
     }
     
-    // --- [신규] 멀티 셀렉트 값 강제 설정 (큐레이션용) ---
+    // --- 멀티 셀렉트 값 강제 설정 (큐레이션용) ---
     function setMultiSelectValues(filterId, valuesToSet) {
         const wrapper = document.querySelector(`[data-filter-id="${filterId}"]`);
         if (!wrapper) return;
@@ -1246,7 +1258,7 @@
         updateMultiSelectButton(filterId);
     }
 
-    // --- 필터 초기화 (수정) ---
+    // --- 필터 초기화 ---
     function resetAllFilters(runHandleFilters = true) {
         document.getElementById('search').value = '';
         document.getElementById('search-mode').value = 'standard';
@@ -1264,7 +1276,7 @@
         }
     }
     
-    // --- [신규] 활성 필터 태그 제거 로직 ---
+    // --- 활성 필터 태그 제거 로직 ---
     function removeActiveFilter(type, value) {
         switch (type) {
             case 'search':
@@ -1290,7 +1302,7 @@
         handleFilters();
     }
 
-    // --- CSV 다운로드 (수정: 토스트 알림 추가) ---
+    // --- CSV 다운로드 ---
     function downloadCSV(data, filename) {
         if (!data || data.length === 0) {
             showToast("다운로드할 데이터가 없습니다.", "error");
@@ -1315,7 +1327,7 @@
         downloadCSV(aiRecommendedCourses, filename);
     }
 
-    // --- [신규] 활성 필터 태그 렌더링 ---
+    // --- 활성 필터 태그 렌더링 ---
     function renderActiveFilters(filters) {
         const container = document.getElementById('active-filters-container');
         container.innerHTML = '';
@@ -1340,7 +1352,7 @@
         container.innerHTML = tagsHtml;
     }
 
-    // --- [신규] 스켈레톤 로더 생성 ---
+    // --- 스켈레톤 로더 생성 ---
     function renderSkeletonLoader(rows) {
         const tableBody = document.getElementById('course-table-body');
         let skeletonHtml = '';
@@ -1364,9 +1376,8 @@
         tableBody.innerHTML = skeletonHtml;
     }
 
-    // --- 테이블 렌더링 (대폭 수정) ---
+    // --- 테이블 렌더링 ---
     async function renderTable() {
-        // [수정] 스켈레톤 로더 먼저 표시
         renderSkeletonLoader(rowsPerPage);
         
         const searchMode = document.getElementById('search-mode').value;
@@ -1378,7 +1389,6 @@
             sortOrderSelect.disabled = false;
         }
 
-        // [수정] 모든 필터 값 수집
         const filters = {
             searchTerm: document.getElementById('search').value.toLowerCase(),
             searchKeywords: document.getElementById('search').value.toLowerCase().split(' ').filter(Boolean),
@@ -1392,11 +1402,9 @@
             selectedPractices: Array.from(document.querySelectorAll('.filters-container [data-filter-id="practice-filter"] input:checked')).map(cb => cb.value)
         };
         
-        // [신규] 활성 필터 태그 렌더링
         renderActiveFilters(filters);
         
         let baseCourses = [...originalData];
-        // AI 확장 검색 로직
         if (searchMode === 'extended' && filters.searchTerm) {
             const keywords = await callGeminiAPI({ type: 'extended_search', prompt: filters.searchTerm });
             if (keywords && Array.isArray(keywords) && keywords.length > 0) {
@@ -1417,10 +1425,8 @@
             }
         }
 
-        // 필터링
         filteredCourses = baseCourses.filter(course => {
             const searchCorpus = Object.values(course).join(' ').toLowerCase();
-            // [수정] 검색 로직 (AND 검색)
             const matchesSearch = searchMode === 'extended' || filters.searchTerm === '' || 
                                   filters.searchKeywords.every(key => searchCorpus.includes(key));
             
@@ -1449,10 +1455,8 @@
             return matchesSearch && matchesRating && matchesCategory && matchesDifficulty && matchesLanguage && matchesSubtitle && matchesHotNew && matchesPractice;
         });
 
-        // [수정] 결과 요약
         document.getElementById('results-summary').innerHTML = `총 <b>${formatNumber(originalData.length)}</b>개 강의 중 <b>${formatNumber(filteredCourses.length)}</b>개 강의를 찾았어요.`;
         
-        // 정렬
         if (searchMode !== 'extended') {
             filteredCourses.sort((a, b) => {
                 switch (filters.sortOrder) {
@@ -1472,7 +1476,6 @@
                             const headline = course.headline?.toLowerCase() || '';
                             const objectives = course.objectives?.toLowerCase() || '';
                             
-                            // [수정] AND 검색 기반 관련도
                             if (filters.searchTerm) {
                                 if (filters.searchKeywords.every(key => title.includes(key))) score += 20;
                                 if (filters.searchKeywords.every(key => topic.includes(key))) score += 10;
@@ -1488,7 +1491,6 @@
             });
         }
         
-        // 페이지네이션
         rowsPerPage = parseInt(document.getElementById('rows-per-page').value, 10);
         const totalPages = Math.ceil(filteredCourses.length / rowsPerPage);
         if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
@@ -1496,10 +1498,8 @@
         const end = start + rowsPerPage;
         const paginatedCourses = filteredCourses.slice(start, end);
         
-        // 테이블 렌더링
         const tableBody = document.getElementById('course-table-body');
         if (paginatedCourses.length === 0) {
-            // [신규] 실행 가능한 빈 상태
             tableBody.innerHTML = `<tr class="empty-row"><td colspan="11">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <p>😥 일치하는 강의를 찾을 수 없습니다.</p>
@@ -1531,7 +1531,7 @@
         renderPagination(totalPages);
     }
 
-    // --- 모달: 강의 상세 (기존과 동일) ---
+    // --- 모달: 강의 상세 ---
     async function showCourseDetails(course) {
         const modalBody = document.getElementById('modal-body');
         document.getElementById('modal-title').textContent = course.title;
@@ -1554,7 +1554,7 @@
         }
     }
 
-    // --- 모달: AI 맞춤 추천 (기존과 동일) ---
+    // --- 모달: AI 맞춤 추천 ---
     function showAIRecommendationModal() {
         const modalBody = document.getElementById('modal-body');
         document.getElementById('modal-title').textContent = '🤖 AI 맞춤 강의 추천';
@@ -1606,7 +1606,7 @@
         document.getElementById('download-ai-csv').addEventListener('click', downloadAIRecommendationsCSV);
     }
 
-    // --- 모달: AI 추천 핸들러 (기존과 동일) ---
+    // --- 모달: AI 추천 핸들러 ---
     async function handleAIRecommendationRequest() {
         aiRecommendedCourses = [];
         const downloadBtn = document.getElementById('download-ai-csv');
@@ -1652,7 +1652,7 @@
             resultsContainer.innerHTML = aiRecommendedCourses.map(course => `
                 <div class="recommendation-card">
                     <h3><a href="${companyUrl}${course.id}" target="_blank">${course.title}</a></h3>
-                    <p>${generateRecommendation(course)}</p>
+                    <p class="line-clamp-2">${course.headline || '강의에 대한 자세한 설명을 확인해보세요.'}</p>
                      <div class="card-footer"><span class="category-badge">${getCategoryEmoji(course.category)} ${course.category.split(',')[0].trim()}</span></div>
                 </div>`).join('');
             
@@ -1662,19 +1662,18 @@
         }
     }
 
-    // --- 모달 닫기 (기존과 동일) ---
+    // --- 모달 닫기 ---
     function closeModal() { modalOverlay.style.display = 'none'; }
     
-    // --- 필터 핸들러 (수정: 비동기 호출) ---
+    // --- 필터 핸들러 ---
     function handleFilters() {
         currentPage = 1;
-        // 비동기 함수인 renderTable을 호출하기 위해 IIFE 사용
         (async () => {
             await renderTable();
         })();
     }
 
-    // --- 페이지네이션 렌더링 (수정: 비동기 호출) ---
+    // --- 페이지네이션 렌더링 ---
     function renderPagination(totalPages) {
         const paginationContainer = document.getElementById('pagination');
         paginationContainer.innerHTML = '';
